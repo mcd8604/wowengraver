@@ -1,0 +1,45 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="Engraver.lua"/>
+	<Button name="EngraverRuneButtonTemplate" inherits="ActionButtonTemplate,SecureActionButtonTemplate" virtual="true" mixin="EngraverRuneButtonMixin">
+		<Size>
+			<AbsDimension x="45" y="45" />
+		</Size>
+		<Scripts>
+			<OnClick method="OnClick"/>
+		</Scripts>
+		<Layers>
+			<Layer level="BORDER"/>
+		</Layers>
+	</Button>
+	<Frame name="EngraverCategoryFrameTemplate" virtual="true" mixin="EngraverCategoryFrameMixin">
+		<Size>
+			<AbsDimension x="128" y="45" />
+		</Size>
+		<Frames>
+			<Button name="$parent_RuneButton1" inherits="EngraverRuneButtonTemplate"/>
+			<Button name="$parent_RuneButton2" inherits="EngraverRuneButtonTemplate"/>
+			<Button name="$parent_RuneButton3" inherits="EngraverRuneButtonTemplate"/>
+			<Button name="$parent_RuneButton4" inherits="EngraverRuneButtonTemplate"/>
+		</Frames>
+	</Frame>
+	<Frame name="EngraverFrame" toplevel="true" frameStrata="HIGH" enableMouse="true" movable="true" parent="UIParent" hidden="false" clampedToScreen="true" mixin="EngraverFrameMixin">
+		<Size>
+			<AbsDimension x="128" y="96" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="UIParent" relativePoint="BOTTOMLEFT">
+				<Offset>
+					<AbsDimension x="400" y="400"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Frames>
+			<Frame name="$parent_Category1" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_Category2" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_Category3" inherits="EngraverCategoryFrameTemplate" />
+		</Frames>
+		<Scripts>
+			<OnLoad method="LoadCategories"/>
+		</Scripts>
+	</Frame>
+</Ui>
