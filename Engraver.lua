@@ -2,14 +2,28 @@ EngraverFrameMixin = {};
 EngraverCategoryFrameMixin = {};
 EngraverRuneButtonMixin = {};
 
-function EngraverFrameMixin:LoadCategories()
+function EngraverFrameMixin:OnLoad()
+	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterForDrag("RightButton")
+end
+
+function EngraverFrameMixin:OnEvent(event, ...)
+	if (event == "RUNE_UPDATED") then
+		if not self:IsShown() then
+			self:SetShown(true)
+			self:LoadCategories()
+		end
+	end
+end
+
+function EngraverFrameMixin:LoadCategories()
+	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(true, true);
 	for c, category in ipairs(categories) do
 		--local CategoryName = GetItemInventorySlotInfo(category)
-		local categoryFrame = _G[self:GetName().."_Category"..c]
+		local categoryFrame = _G[self:GetName().."_CategoryFrame"..c]
 		if categoryFrame then
-			categoryFrame:SetPoint("TOPLEFT", 0, c * 45)
+			categoryFrame:SetPoint("BOTTOMLEFT", 0, (c - 1) * 45)
 			categoryFrame:LoadCategoryRunes(category)
 		end
 	end
@@ -21,7 +35,7 @@ function EngraverCategoryFrameMixin:LoadCategoryRunes(category)
 		local runeButton = _G[self:GetName().."_RuneButton"..r]
 		if runeButton then
 			runeButton:SetRune(rune, category)
-			runeButton:SetPoint("TOPLEFT", r * 45, 0)
+			runeButton:SetPoint("TOPLEFT", (r - 1) * 45, 0)
 		end
 	end
 end

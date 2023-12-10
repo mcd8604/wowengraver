@@ -22,7 +22,7 @@
 			<Button name="$parent_RuneButton4" inherits="EngraverRuneButtonTemplate"/>
 		</Frames>
 	</Frame>
-	<Frame name="EngraverFrame" toplevel="true" frameStrata="HIGH" enableMouse="true" movable="true" parent="UIParent" hidden="false" clampedToScreen="true" mixin="EngraverFrameMixin">
+	<Frame name="EngraverFrame" toplevel="true" frameStrata="LOW" enableMouse="true" movable="true" parent="UIParent" hidden="true" mixin="EngraverFrameMixin">
 		<Size>
 			<AbsDimension x="128" y="96" />
 		</Size>
@@ -34,12 +34,13 @@
 			</Anchor>
 		</Anchors>
 		<Frames>
-			<Frame name="$parent_Category1" inherits="EngraverCategoryFrameTemplate" />
-			<Frame name="$parent_Category2" inherits="EngraverCategoryFrameTemplate" />
-			<Frame name="$parent_Category3" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_CategoryFrame1" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_CategoryFrame2" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_CategoryFrame3" inherits="EngraverCategoryFrameTemplate" />
 		</Frames>
 		<Scripts>
-			<OnLoad method="LoadCategories"/>
+			<OnLoad method="OnLoad"/>
+			<OnEvent method="OnEvent"/>
 		</Scripts>
 	</Frame>
 </Ui>
