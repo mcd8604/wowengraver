@@ -2,7 +2,7 @@
 ## Title: Engraver
 ## Notes: One-click rune engraving for Season of Discovery.
 ## Author: Nastiku
-## Version: 0.1
+## Version: @project-version@
 ## X-Curse-Project-ID: 947701
 
 Engraver.xml
