@@ -60,15 +60,25 @@ end
 
 function EngraverCategoryFrameMixin:LoadCategoryRunes(category)
 	local runes = C_Engraving.GetRunesForCategory(category, false);
+	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
 	if not self.runeFrames then
 		self.runeFrames = {}
 	end
 	for r, rune in ipairs(runes) do
 		local runeButton = _G[self:GetName().."_RuneButton"..r]
 		if runeButton then
-			runeButton:SetRune(rune, category)
+			local isKnown = self:IsRuneKnown(rune, knownRunes)
+			runeButton:SetRune(rune, category, isKnown)
 			runeButton:SetPoint("TOPLEFT", (r - 1) * 45, 0)
 			self.runeFrames[r] = runeButton
+		end
+	end
+end
+
+function EngraverCategoryFrameMixin:IsRuneKnown(runeToCheck, knownRunes)
+	for r, rune in ipairs(knownRunes) do
+		if rune.skillLineAbilityID == runeToCheck.skillLineAbilityID then
+			return true
 		end
 	end
 end
@@ -98,7 +108,7 @@ end
 -- RuneButton --
 ----------------
 
-function EngraverRuneButtonMixin:SetRune(rune, category)
+function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	self.category = category
 	self.icon:SetTexture(rune.iconTexture);
 	self.tooltipName = rune.name;
@@ -106,6 +116,13 @@ function EngraverRuneButtonMixin:SetRune(rune, category)
 	self:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
 	if self.icon then
 		self.icon:SetAllPoints()
+	end
+	if isKnown then
+		self.icon:SetVertexColor(1.0, 1.0, 1.0);
+		self.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
+	else
+		self.icon:SetVertexColor(0.2, 0.0, 0.0);
+		self.NormalTexture:SetVertexColor(0.2, 0.0, 0.0);
 	end
 	self:Show();
 end
