@@ -8,16 +8,23 @@ EngraverRuneButtonMixin = {};
 
 function EngraverFrameMixin:OnLoad()
 	self:RegisterEvent("RUNE_UPDATED");
+	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterForDrag("RightButton")
 end
 
 function EngraverFrameMixin:OnEvent(event, ...)
-	if (event == "RUNE_UPDATED") then
-		if not self:IsShown() then
-			self:SetShown(true)
-			self:LoadCategories()
-		end
+	if (event == "PLAYER_ENTERING_WORLD") then
+		self:CheckToLoad()
+	elseif (event == "RUNE_UPDATED") then
+		self:CheckToLoad()
 		self:UpdateCategory(...)
+	end
+end
+
+function EngraverFrameMixin:CheckToLoad()
+	if not self:IsShown() then
+		self:SetShown(true)
+		self:LoadCategories()
 	end
 end
 
