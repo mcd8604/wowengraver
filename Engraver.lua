@@ -31,8 +31,8 @@ end
 function EngraverFrameMixin:UpdateCategory(engravingData)
 	local categoryFrame = self:GetCategoryFrame(engravingData)
 	if categoryFrame then
-		categoryFrame:ResetRuneFrames()
-		categoryFrame:HighlightRuneFrame(engravingData)
+		categoryFrame:ResetruneButtons()
+		categoryFrame:HighlightruneButton(engravingData)
 	end
 end
 
@@ -68,16 +68,19 @@ end
 function EngraverCategoryFrameMixin:LoadCategoryRunes(category)
 	local runes = C_Engraving.GetRunesForCategory(category, false);
 	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
-	if not self.runeFrames then
-		self.runeFrames = {}
+	if not self.runeButtons then
+		self.runeButtons = {}
 	end
 	for r, rune in ipairs(runes) do
-		local runeButton = _G[self:GetName().."_RuneButton"..r]
+		local runeButton = self.runeButtons[r]
+		if not runeButton then
+			runeButton = CreateFrame("Button", nil, self, "EngraverRuneButtonTemplate")
+			self.runeButtons[r] = runeButton
+		end
 		if runeButton then
 			local isKnown = self:IsRuneKnown(rune, knownRunes)
 			runeButton:SetRune(rune, category, isKnown)
 			runeButton:SetPoint("TOPLEFT", (r - 1) * 45, 0)
-			self.runeFrames[r] = runeButton
 		end
 	end
 end
@@ -90,23 +93,23 @@ function EngraverCategoryFrameMixin:IsRuneKnown(runeToCheck, knownRunes)
 	end
 end
 
-function EngraverCategoryFrameMixin:ResetRuneFrames()
-	for r, runeFrame in ipairs(self.runeFrames) do
-		runeFrame:SetHighlighted(false)
+function EngraverCategoryFrameMixin:ResetruneButtons()
+	for r, runeButton in ipairs(self.runeButtons) do
+		runeButton:SetHighlighted(false)
 	end
 end
 
-function EngraverCategoryFrameMixin:HighlightRuneFrame(engravingData)
-	local runeFrame = self:GetRuneFrame(engravingData.skillLineAbilityID)
-	if runeFrame then
-		runeFrame:SetHighlighted(true)
+function EngraverCategoryFrameMixin:HighlightruneButton(engravingData)
+	local runeButton = self:GetruneButton(engravingData.skillLineAbilityID)
+	if runeButton then
+		runeButton:SetHighlighted(true)
 	end
 end
 
-function EngraverCategoryFrameMixin:GetRuneFrame(skillLineAbilityID)
-	for r, runeFrame in ipairs(self.runeFrames) do
-		if runeFrame.skillLineAbilityID == skillLineAbilityID then
-			return runeFrame
+function EngraverCategoryFrameMixin:GetruneButton(skillLineAbilityID)
+	for r, runeButton in ipairs(self.runeButtons) do
+		if runeButton.skillLineAbilityID == skillLineAbilityID then
+			return runeButton
 		end
 	end
 end

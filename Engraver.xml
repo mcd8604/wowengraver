@@ -15,12 +15,6 @@
 		<Size>
 			<AbsDimension x="128" y="45" />
 		</Size>
-		<Frames>
-			<Button name="$parent_RuneButton1" inherits="EngraverRuneButtonTemplate"/>
-			<Button name="$parent_RuneButton2" inherits="EngraverRuneButtonTemplate"/>
-			<Button name="$parent_RuneButton3" inherits="EngraverRuneButtonTemplate"/>
-			<Button name="$parent_RuneButton4" inherits="EngraverRuneButtonTemplate"/>
-		</Frames>
 	</Frame>
 	<Frame name="EngraverFrame" toplevel="true" frameStrata="LOW" enableMouse="true" movable="true" parent="UIParent" hidden="true" mixin="EngraverFrameMixin">
 		<Size>
