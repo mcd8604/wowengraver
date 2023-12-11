@@ -31,8 +31,8 @@ end
 function EngraverFrameMixin:UpdateCategory(engravingData)
 	local categoryFrame = self:GetCategoryFrame(engravingData)
 	if categoryFrame then
-		categoryFrame:ResetruneButtons()
-		categoryFrame:HighlightruneButton(engravingData)
+		categoryFrame:ResetRuneButtons()
+		categoryFrame:HighlightRuneButton(engravingData)
 	end
 end
 
@@ -93,20 +93,20 @@ function EngraverCategoryFrameMixin:IsRuneKnown(runeToCheck, knownRunes)
 	end
 end
 
-function EngraverCategoryFrameMixin:ResetruneButtons()
+function EngraverCategoryFrameMixin:ResetRuneButtons()
 	for r, runeButton in ipairs(self.runeButtons) do
 		runeButton:SetHighlighted(false)
 	end
 end
 
-function EngraverCategoryFrameMixin:HighlightruneButton(engravingData)
-	local runeButton = self:GetruneButton(engravingData.skillLineAbilityID)
+function EngraverCategoryFrameMixin:HighlightRuneButton(engravingData)
+	local runeButton = self:GetRuneButton(engravingData.skillLineAbilityID)
 	if runeButton then
 		runeButton:SetHighlighted(true)
 	end
 end
 
-function EngraverCategoryFrameMixin:GetruneButton(skillLineAbilityID)
+function EngraverCategoryFrameMixin:GetRuneButton(skillLineAbilityID)
 	for r, runeButton in ipairs(self.runeButtons) do
 		if runeButton.skillLineAbilityID == skillLineAbilityID then
 			return runeButton
