@@ -30,12 +30,14 @@ function EngraverFrameMixin:UpdateCategory(engravingData)
 end
 
 function EngraverFrameMixin:GetCategoryFrame(engravingData)
-	if engravingData.equipmentSlot == 5 then
-		return _G[self:GetName().."_CategoryFrame1"]
-	elseif engravingData.equipmentSlot == 7 then
-		return _G[self:GetName().."_CategoryFrame2"]
-	elseif engravingData.equipmentSlot == 10 then
-		return _G[self:GetName().."_CategoryFrame3"]
+	if engravingData then
+		if engravingData.equipmentSlot == 5 then
+			return _G[self:GetName().."_CategoryFrame1"]
+		elseif engravingData.equipmentSlot == 7 then
+			return _G[self:GetName().."_CategoryFrame2"]
+		elseif engravingData.equipmentSlot == 10 then
+			return _G[self:GetName().."_CategoryFrame3"]
+		end
 	end
 end
 
