@@ -2,6 +2,10 @@ EngraverFrameMixin = {};
 EngraverCategoryFrameMixin = {};
 EngraverRuneButtonMixin = {};
 
+-------------------
+-- EngraverFrame --
+-------------------
+
 function EngraverFrameMixin:OnLoad()
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterForDrag("RightButton")
@@ -13,6 +17,25 @@ function EngraverFrameMixin:OnEvent(event, ...)
 			self:SetShown(true)
 			self:LoadCategories()
 		end
+		self:UpdateCategory(...)
+	end
+end
+
+function EngraverFrameMixin:UpdateCategory(engravingData)
+	local categoryFrame = self:GetCategoryFrame(engravingData)
+	if categoryFrame then
+		categoryFrame:ResetRuneFrames()
+		categoryFrame:HighlightRuneFrame(engravingData)
+	end
+end
+
+function EngraverFrameMixin:GetCategoryFrame(engravingData)
+	if engravingData.equipmentSlot == 5 then
+		return _G[self:GetName().."_CategoryFrame1"]
+	elseif engravingData.equipmentSlot == 7 then
+		return _G[self:GetName().."_CategoryFrame2"]
+	elseif engravingData.equipmentSlot == 10 then
+		return _G[self:GetName().."_CategoryFrame3"]
 	end
 end
 
@@ -29,16 +52,49 @@ function EngraverFrameMixin:LoadCategories()
 	end
 end
 
+-------------------
+-- CategoryFrame --
+-------------------
+
 function EngraverCategoryFrameMixin:LoadCategoryRunes(category)
-	local runes = C_Engraving.GetRunesForCategory(category, true);
+	local runes = C_Engraving.GetRunesForCategory(category, false);
+	if not self.runeFrames then
+		self.runeFrames = {}
+	end
 	for r, rune in ipairs(runes) do
 		local runeButton = _G[self:GetName().."_RuneButton"..r]
 		if runeButton then
 			runeButton:SetRune(rune, category)
 			runeButton:SetPoint("TOPLEFT", (r - 1) * 45, 0)
+			self.runeFrames[r] = runeButton
 		end
 	end
 end
+
+function EngraverCategoryFrameMixin:ResetRuneFrames()
+	for r, runeFrame in ipairs(self.runeFrames) do
+		runeFrame:SetHighlighted(false)
+	end
+end
+
+function EngraverCategoryFrameMixin:HighlightRuneFrame(engravingData)
+	local runeFrame = self:GetRuneFrame(engravingData.skillLineAbilityID)
+	if runeFrame then
+		runeFrame:SetHighlighted(true)
+	end
+end
+
+function EngraverCategoryFrameMixin:GetRuneFrame(skillLineAbilityID)
+	for r, runeFrame in ipairs(self.runeFrames) do
+		if runeFrame.skillLineAbilityID == skillLineAbilityID then
+			return runeFrame
+		end
+	end
+end
+
+----------------
+-- RuneButton --
+----------------
 
 function EngraverRuneButtonMixin:SetRune(rune, category)
 	self.category = category
@@ -77,4 +133,10 @@ function EngraverRuneButtonMixin:TryEngrave()
 		end
 		StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
 	end
+end
+
+function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
+	self.FlyoutBorder:SetShown(isHighlighted)
+	self.FlyoutBorderShadow:SetShown(isHighlighted)
+	self.SpellHighlightTexture:SetShown(isHighlighted)
 end
