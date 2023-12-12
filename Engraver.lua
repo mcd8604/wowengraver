@@ -152,6 +152,7 @@ end
 
 function EngraverRuneButtonMixin:TryEngrave()
 	if self.category and self.skillLineAbilityID then
+		ClearCursor()
 		C_Engraving.CastRune(self.skillLineAbilityID);
 		if self.category == 5 then
 			CharacterChestSlot:Click(); 
@@ -161,6 +162,7 @@ function EngraverRuneButtonMixin:TryEngrave()
 			CharacterHandsSlot:Click(); 
 		end
 		StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
+		ClearCursor()
 	end
 end
 
