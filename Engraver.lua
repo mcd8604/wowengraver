@@ -134,6 +134,9 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 		self.icon:SetVertexColor(0.2, 0.0, 0.0);
 		self.NormalTexture:SetVertexColor(0.2, 0.0, 0.0);
 	end
+	if C_Engraving.IsRuneEquipped(self.skillLineAbilityID) then
+		self:SetHighlighted(true)
+	end
 	self:Show();
 end
 
