@@ -1,6 +1,7 @@
 EngraverFrameMixin = {};
 EngraverCategoryFrameMixin = {};
 EngraverRuneButtonMixin = {};
+EngraverNoRunesFrameMixin = {};
 
 -------------------
 -- EngraverFrame --
@@ -39,11 +40,11 @@ end
 function EngraverFrameMixin:GetCategoryFrame(engravingData)
 	if engravingData then
 		if engravingData.equipmentSlot == 5 then
-			return _G[self:GetName().."_CategoryFrame1"]
+			return self.categoryFrame1;
 		elseif engravingData.equipmentSlot == 7 then
-			return _G[self:GetName().."_CategoryFrame2"]
+			return self.categoryFrame2;
 		elseif engravingData.equipmentSlot == 10 then
-			return _G[self:GetName().."_CategoryFrame3"]
+			return self.categoryFrame3;
 		end
 	end
 end
@@ -51,13 +52,18 @@ end
 function EngraverFrameMixin:LoadCategories()
 	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(true, true);
-	for c, category in ipairs(categories) do
-		--local CategoryName = GetItemInventorySlotInfo(category)
-		local categoryFrame = _G[self:GetName().."_CategoryFrame"..c]
-		if categoryFrame then
-			categoryFrame:SetPoint("BOTTOMLEFT", 0, (c - 1) * 45)
-			categoryFrame:LoadCategoryRunes(category)
+	if #categories > 0 then
+		for c, category in ipairs(categories) do
+			--local CategoryName = GetItemInventorySlotInfo(category)
+			local categoryFrame = self["categoryFrame"..c]
+			if categoryFrame then
+				categoryFrame:SetPoint("BOTTOMLEFT", 0, - (c - 1) * 45)
+				categoryFrame:LoadCategoryRunes(category)
+			end
 		end
+		self.noRunesFrame:Hide();
+	else
+		self.noRunesFrame:Show();
 	end
 end
 
@@ -177,4 +183,27 @@ function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
 	self.FlyoutBorder:SetShown(isHighlighted)
 	self.FlyoutBorderShadow:SetShown(isHighlighted)
 	self.SpellHighlightTexture:SetShown(isHighlighted)
+end
+
+
+-------------------------------
+-- EngraverNoRunesFrameMixin --
+-------------------------------
+
+function EngraverNoRunesFrameMixin:OnMouseDown(button)
+	if button == "RightButton" then
+		local parent = self:GetParent()
+		if parent and parent.StartMoving then
+			parent:StartMoving();
+		end
+	end
+end
+
+function EngraverNoRunesFrameMixin:OnMouseUp(button)
+	if button == "RightButton" then
+		local parent = self:GetParent()
+		if parent and parent.StopMovingOrSizing then
+			parent:StopMovingOrSizing();
+		end
+	end
 end

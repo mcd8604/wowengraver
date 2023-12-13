@@ -13,12 +13,12 @@
 	</Button>
 	<Frame name="EngraverCategoryFrameTemplate" virtual="true" mixin="EngraverCategoryFrameMixin">
 		<Size>
-			<AbsDimension x="128" y="45" />
+			<AbsDimension x="45" y="45" />
 		</Size>
 	</Frame>
-	<Frame name="EngraverFrame" toplevel="true" frameStrata="LOW" enableMouse="true" movable="true" parent="UIParent" hidden="true" mixin="EngraverFrameMixin">
+	<Frame name="EngraverFrame" toplevel="true" frameStrata="LOW" enableMouse="true" movable="true" parent="UIParent" hidden="true" inherits="BackdropTemplate" mixin="EngraverFrameMixin">
 		<Size>
-			<AbsDimension x="128" y="96" />
+			<AbsDimension x="45" y="45" />
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="UIParent" relativePoint="BOTTOMLEFT">
@@ -28,9 +28,47 @@
 			</Anchor>
 		</Anchors>
 		<Frames>
-			<Frame name="$parent_CategoryFrame1" inherits="EngraverCategoryFrameTemplate" />
-			<Frame name="$parent_CategoryFrame2" inherits="EngraverCategoryFrameTemplate" />
-			<Frame name="$parent_CategoryFrame3" inherits="EngraverCategoryFrameTemplate" />
+			<Frame parentKey="noRunesFrame" mixin="EngraverNoRunesFrameMixin">
+				<Size x="135" y="135"/>
+				<Anchors>
+					<Anchor />
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture name="$parentBackground" parentKey="background">
+							<Color r="0" g="0.694" b="0.941" a="0.125"/>
+						</Texture>
+						<FontString name="$parent_EngraverLabel" inherits="GameFontNormal" justifyH="CENTER" text="Engraver" outline="THICK" parentKey="engraverLabel">
+							<Size x="135" y="45"/>
+							<Anchors>
+								<Anchor point="TOP"/>
+							</Anchors>
+							<Color r="1" g="1" b="0"/>
+						</FontString>
+						<FontString name="$parent_NoRunesLabel" inherits="GameFontNormal" justifyH="CENTER" text="NO_RUNES" parentKey="noRunesLabel">
+							<Size x="135" y="45"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r="1" g="1" b="1"/>
+						</FontString>
+						<FontString name="$parent_DragLabel" inherits="GameFontNormal" justifyH="CENTER" text="Right click to drag." parentKey="dragLabel">
+							<Size x="135" y="45"/>
+							<Anchors>
+								<Anchor point="BOTTOM"/>
+							</Anchors>
+							<Color r="0" g="1" b="1"/>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnMouseDown method="OnMouseDown"/>
+					<OnMouseUp method="OnMouseUp"/>
+				</Scripts>
+			</Frame>
+			<Frame name="$parent_CategoryFrame1" parentKey="categoryFrame1" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_CategoryFrame2" parentKey="categoryFrame2" inherits="EngraverCategoryFrameTemplate" />
+			<Frame name="$parent_CategoryFrame3" parentKey="categoryFrame3" inherits="EngraverCategoryFrameTemplate" />
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
