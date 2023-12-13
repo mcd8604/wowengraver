@@ -94,8 +94,10 @@ function EngraverCategoryFrameMixin:IsRuneKnown(runeToCheck, knownRunes)
 end
 
 function EngraverCategoryFrameMixin:ResetRuneButtons()
-	for r, runeButton in ipairs(self.runeButtons) do
-		runeButton:SetHighlighted(false)
+	if self.runeButtons then
+		for r, runeButton in ipairs(self.runeButtons) do
+			runeButton:SetHighlighted(false)
+		end
 	end
 end
 
@@ -107,9 +109,11 @@ function EngraverCategoryFrameMixin:HighlightRuneButton(engravingData)
 end
 
 function EngraverCategoryFrameMixin:GetRuneButton(skillLineAbilityID)
-	for r, runeButton in ipairs(self.runeButtons) do
-		if runeButton.skillLineAbilityID == skillLineAbilityID then
-			return runeButton
+	if self.runeButtons then
+		for r, runeButton in ipairs(self.runeButtons) do
+			if runeButton.skillLineAbilityID == skillLineAbilityID then
+				return runeButton
+			end
 		end
 	end
 end
