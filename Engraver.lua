@@ -8,8 +8,16 @@ EngraverNoRunesFrameMixin = {};
 -------------------
 
 function EngraverFrameMixin:OnLoad()
+	if not self.categoryFrames then
+		self.categoryFrames = {
+			[5] =  self.categoryFrame1,
+			[7] =  self.categoryFrame2,
+			[10] =  self.categoryFrame3
+		}
+	end
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
+	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
 	self:RegisterForDrag("RightButton")
 end
 
@@ -19,6 +27,8 @@ function EngraverFrameMixin:OnEvent(event, ...)
 	elseif (event == "RUNE_UPDATED") then
 		self:CheckToLoad()
 		self:UpdateCategory(...)
+	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
+		self:HandleEquipmentChanged(...)
 	end
 end
 
@@ -30,22 +40,20 @@ function EngraverFrameMixin:CheckToLoad()
 end
 
 function EngraverFrameMixin:UpdateCategory(engravingData)
-	local categoryFrame = self:GetCategoryFrame(engravingData)
-	if categoryFrame then
-		categoryFrame:ResetRuneButtons()
-		categoryFrame:HighlightRuneButton(engravingData)
+	if engravingData then
+		local categoryFrame = self.categoryFrames[engravingData.equipmentSlot]
+		if categoryFrame then
+			categoryFrame:ResetRuneButtons()
+			categoryFrame:HighlightRuneButton(engravingData)
+		end
 	end
 end
 
-function EngraverFrameMixin:GetCategoryFrame(engravingData)
-	if engravingData then
-		if engravingData.equipmentSlot == 5 then
-			return self.categoryFrame1;
-		elseif engravingData.equipmentSlot == 7 then
-			return self.categoryFrame2;
-		elseif engravingData.equipmentSlot == 10 then
-			return self.categoryFrame3;
-		end
+function EngraverFrameMixin:HandleEquipmentChanged(equipmentSlot, hasCurrent)
+	local categoryFrame = self.categoryFrames[equipmentSlot]
+	if categoryFrame then
+		categoryFrame:ResetRuneButtons()
+		self:UpdateCategory(C_Engraving.GetRuneForEquipmentSlot(equipmentSlot))
 	end
 end
 
@@ -108,9 +116,11 @@ function EngraverCategoryFrameMixin:ResetRuneButtons()
 end
 
 function EngraverCategoryFrameMixin:HighlightRuneButton(engravingData)
-	local runeButton = self:GetRuneButton(engravingData.skillLineAbilityID)
-	if runeButton then
-		runeButton:SetHighlighted(true)
+	if engravingData then
+		local runeButton = self:GetRuneButton(engravingData.skillLineAbilityID)
+		if runeButton then
+			runeButton:SetHighlighted(true)
+		end
 	end
 end
 
