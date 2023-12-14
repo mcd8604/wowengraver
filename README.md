@@ -11,7 +11,6 @@
 - Highlights currently engraved runes.
 
 ## Future scope features
-- Update when equipment changes
 - Configurable size
 - Configurable layout
 - Popup menus for each category (similar to TrinketMenu)
