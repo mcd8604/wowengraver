@@ -8,13 +8,6 @@ EngraverNoRunesFrameMixin = {};
 -------------------
 
 function EngraverFrameMixin:OnLoad()
-	if not self.categoryFrames then
-		self.categoryFrames = {
-			[5] =  self.categoryFrame1,
-			[7] =  self.categoryFrame2,
-			[10] =  self.categoryFrame3
-		}
-	end
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
@@ -41,7 +34,7 @@ end
 
 function EngraverFrameMixin:UpdateCategory(engravingData)
 	if engravingData then
-		local categoryFrame = self.categoryFrames[engravingData.equipmentSlot]
+		local categoryFrame = self.equipmentSlotFrameMap[engravingData.equipmentSlot]
 		if categoryFrame then
 			categoryFrame:ResetRuneButtons()
 			categoryFrame:HighlightRuneButton(engravingData)
@@ -58,14 +51,20 @@ function EngraverFrameMixin:HandleEquipmentChanged(equipmentSlot, hasCurrent)
 end
 
 function EngraverFrameMixin:LoadCategories()
+	self.categoryFrames = { self.categoryFrame1, self.categoryFrame2, self.categoryFrame3 }
+	self.equipmentSlotFrameMap = { [5] = self.categoryFrame1, [7] = self.categoryFrame2, [10] = self.categoryFrame3 }
 	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(true, true);
 	if #categories > 0 then
 		for c, category in ipairs(categories) do
 			--local CategoryName = GetItemInventorySlotInfo(category)
-			local categoryFrame = self["categoryFrame"..c]
+			local categoryFrame = self.categoryFrames[c]
 			if categoryFrame then
-				categoryFrame:SetPoint("BOTTOMLEFT", 0, - (c - 1) * 45)
+				if c == 1 then
+					categoryFrame:SetPoint("TOPLEFT")
+				elseif c > 1 then
+					categoryFrame:SetPoint("TOPLEFT", self.categoryFrames[c-1], "BOTTOMLEFT")
+				end
 				categoryFrame:LoadCategoryRunes(category)
 			end
 		end
@@ -94,7 +93,11 @@ function EngraverCategoryFrameMixin:LoadCategoryRunes(category)
 		if runeButton then
 			local isKnown = self:IsRuneKnown(rune, knownRunes)
 			runeButton:SetRune(rune, category, isKnown)
-			runeButton:SetPoint("TOPLEFT", (r - 1) * 45, 0)
+			if r == 1 then
+				runeButton:SetAllPoints()
+			else
+				runeButton:SetPoint("TOPLEFT", self.runeButtons[r-1], "TOPRIGHT")
+			end
 		end
 	end
 end
@@ -190,11 +193,10 @@ function EngraverRuneButtonMixin:TryEngrave()
 end
 
 function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
-	self.FlyoutBorder:SetShown(isHighlighted)
-	self.FlyoutBorderShadow:SetShown(isHighlighted)
+	--self.FlyoutBorder:SetShown(isHighlighted)
+	--self.FlyoutBorderShadow:SetShown(isHighlighted)
 	self.SpellHighlightTexture:SetShown(isHighlighted)
 end
-
 
 -------------------------------
 -- EngraverNoRunesFrameMixin --

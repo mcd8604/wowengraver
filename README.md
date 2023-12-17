@@ -3,6 +3,7 @@
 ## To Use
 - Left Click to engrave
 - Right Click to drag
+- Configure Options under: Main Menu -> Options Button -> AddOns Tab -> Engraver
  
 ## Current features
 - Provides minimalistic UI for quickly engraving runes on the fly. 
@@ -11,7 +12,6 @@
 - Highlights currently engraved runes.
 
 ## Future scope features
-- Configurable size
 - Configurable layout
 - Popup menus for each category (similar to TrinketMenu)
 - Slash commands for easy use in macros

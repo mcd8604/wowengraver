@@ -4,5 +4,6 @@
 ## Author: Nastiku
 ## Version: @project-version@
 ## X-Curse-Project-ID: 947701
+## SavedVariablesPerCharacter: EngraverOptions
 
 Engraver.xml
