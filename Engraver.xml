@@ -7,6 +7,8 @@
 		</Size>
 		<Scripts>
 			<OnClick method="OnClick"/>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
 		</Scripts>
 		<Layers>
 			<Layer level="BORDER"/>

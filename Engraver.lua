@@ -198,6 +198,18 @@ function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
 	self.SpellHighlightTexture:SetShown(isHighlighted)
 end
 
+function EngraverRuneButtonMixin:OnEnter()
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	GameTooltip:SetEngravingRune(self.skillLineAbilityID);
+	self.showingTooltip = true;
+	GameTooltip:Show();
+end
+
+function EngraverRuneButtonMixin:OnLeave()
+	GameTooltip_Hide();
+	self.showingTooltip = false;
+end
+
 -------------------------------
 -- EngraverNoRunesFrameMixin --
 -------------------------------
