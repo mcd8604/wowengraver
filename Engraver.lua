@@ -125,7 +125,6 @@ end
 -----------------------
 
 function EngraverCategoryFrameBaseMixin:LoadCategoryRunes(category)
-	self:LoadEmptyRuneButton(category)
 	local runes = C_Engraving.GetRunesForCategory(category, false);
 	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
 	if not self.runeButtons then
@@ -135,9 +134,6 @@ function EngraverCategoryFrameBaseMixin:LoadCategoryRunes(category)
 		local runeButton = self.runeButtons[r]
 		if not runeButton then
 			runeButton = CreateFrame("Button", nil, self, "EngraverRuneButtonTemplate")
-			Mixin(runeButton, CallbackRegistryMixin);
-			runeButton:SetUndefinedEventsAllowed(true)
-			runeButton:OnLoad()
 			self.runeButtons[r] = runeButton
 		end
 		if runeButton then
@@ -149,9 +145,6 @@ end
 
 function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
 	if self.emptyRuneButton then
-		Mixin(self.emptyRuneButton, CallbackRegistryMixin);
-		self.emptyRuneButton:SetUndefinedEventsAllowed(true)
-		self.emptyRuneButton:OnLoad()
 		-- TODO figure out how to get slotName from slotId using API or maybe a constant somewhere
 		local tempSlotsMap = {
 			[5] = "CHESTSLOT",
@@ -324,6 +317,12 @@ end
 ----------------
 -- RuneButton --
 ----------------
+
+function EngraverRuneButtonMixin:OnLoad()
+	Mixin(self, CallbackRegistryMixin);
+	self:SetUndefinedEventsAllowed(true)
+	self:OnLoad()
+end
 
 function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	self.category = category

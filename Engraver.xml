@@ -9,6 +9,7 @@
 			<OnClick method="OnClick"/>
 			<OnEnter method="OnEnter"/>
 			<OnLeave method="OnLeave"/>
+			<OnLoad method="OnLoad"/>
 		</Scripts>
 		<Layers>
 			<Layer level="BORDER"/>
