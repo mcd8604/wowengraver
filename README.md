@@ -10,8 +10,8 @@
 - Eliminates the need to open the character frame to change runes.
 - Clicking on a rune will immediately engrave it on the appropriate equipped armor piece.
 - Highlights currently engraved runes.
+- 2 display modes: 'PopUp Menu' or 'Show All'
 
 ## Future scope features
-- Configurable layout
-- Popup menus for each category (similar to TrinketMenu)
+- Configurable layout and tooltip
 - Slash commands for easy use in macros
