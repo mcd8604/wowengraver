@@ -279,7 +279,6 @@ function EngraverCategoryFramePopUpMenuMixin:SetUpDisplayMode()
 	end
 end
 
--- current problem: all three categories are firing PostEnter/Leave instead of just the one
 function EngraverCategoryFramePopUpMenuMixin:TearDownDisplayMode()
 	if self.emptyRuneButton_PostOnEnterHandle then
 		self.emptyRuneButton:UnregisterCallback("PostOnEnter", self)
