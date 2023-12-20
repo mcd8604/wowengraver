@@ -321,7 +321,7 @@ end
 function EngraverRuneButtonMixin:OnLoad()
 	Mixin(self, CallbackRegistryMixin);
 	self:SetUndefinedEventsAllowed(true)
-	self:OnLoad()
+	self:OnLoad() -- NOTE not an infinite loop because mixing in CallbackRegistryMixin redefines OnLoad
 end
 
 function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
