@@ -28,6 +28,7 @@ function EngraverFrameMixin:OnLoad()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
+	self:RegisterEvent("PLAYER_REGEN_ENABLED");
 	self:RegisterForDrag("RightButton")
 end
 
@@ -41,6 +42,10 @@ function EngraverFrameMixin:OnEvent(event, ...)
 		end
 	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
 		self:UpdateCategory(...)
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		-- Update after leaving combat lockdown in case settings changed during combat
+		self:InitFromOptions()
+		self:UpdateLayout()
 	end
 end
 
@@ -69,21 +74,24 @@ function EngraverFrameMixin:LoadCategories()
 end
 
 function EngraverFrameMixin:InitFromOptions()
+	function registerOptionChangedCallback(optionName, callback)
+		EngraverOptions:RegisterCallback(optionName, function(_, newValue) if not InCombatLockdown() then callback(newValue) end end, self)
+	end
 	-- UIScale
 	self:UpdateScale(EngraverOptions.UIScale)
-	EngraverOptions:RegisterCallback("UIScale", function (_, newValue) 
-		self:UpdateScale(newValue) 
-	end, self)
+	registerOptionChangedCallback("UIScale", function (newValue)
+		self:UpdateScale(newValue)
+	end)
 	-- DisplayMode
 	self:SetDisplayMode(EngraverDisplayModes[EngraverOptions.DisplayMode+1].mixin)
-	EngraverOptions:RegisterCallback("DisplayMode", function (_, newValue) 
+	registerOptionChangedCallback("DisplayMode", function (newValue) 
 		self:SetDisplayMode(EngraverDisplayModes[newValue+1].mixin) 
 		self:UpdateLayout()
-	end, self)
+	end)
 	-- LayoutDirection
-	EngraverOptions:RegisterCallback("LayoutDirection", function (_, newValue)  
+	registerOptionChangedCallback("LayoutDirection", function (newValue)  
 		self:UpdateLayout()
-	end, self)
+	end)
 end
 
 function EngraverFrameMixin:UpdateCategory(equipmentSlot)
