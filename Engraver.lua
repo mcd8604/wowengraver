@@ -274,7 +274,7 @@ function EngraverCategoryFramePopUpMenuMixin:SetUpDisplayMode()
 end
 
 function EngraverCategoryFramePopUpMenuMixin:TearDownDisplayMode()
-	if self.emptyRuneButton_PostOnEnterHandle then
+	if self.emptyRuneButton then
 		self.emptyRuneButton:UnregisterCallback("PostOnEnter", self)
 		self.emptyRuneButton:UnregisterCallback("PostOnLeave", self)
 		self.emptyRuneButton:Hide()
