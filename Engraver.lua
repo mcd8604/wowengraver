@@ -311,8 +311,10 @@ function EngraverCategoryFramePopUpMenuMixin:IsMouseOverAnyButtons()
 end
 
 function EngraverCategoryFramePopUpMenuMixin:SetInactiveButtonsShown(isShown)
-	for r, runeButton in ipairs(self.inactiveButtons) do
-		runeButton:SetShown(isShown)
+	if not InCombatLockdown() then
+		for r, runeButton in ipairs(self.inactiveButtons) do
+			runeButton:SetShown(isShown)
+		end
 	end
 end
 
@@ -358,7 +360,7 @@ function EngraverRuneButtonMixin:OnClick()
 end
 
 function EngraverRuneButtonMixin:TryEngrave()
-	if self.category and self.skillLineAbilityID then
+	if self.category and self.skillLineAbilityID and not InCombatLockdown() then
 		ClearCursor()
 		C_Engraving.CastRune(self.skillLineAbilityID);
 		if self.category == 5 then
