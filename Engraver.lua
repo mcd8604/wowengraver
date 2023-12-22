@@ -142,6 +142,7 @@ function EngraverCategoryFrameBaseMixin:LoadCategoryRunes(category)
 			runeButton:SetRune(rune, category, isKnown)
 		end
 	end
+	self:LoadEmptyRuneButton(category)
 end
 
 function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
