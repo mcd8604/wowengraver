@@ -6,6 +6,7 @@
 - 2 display modes
   - 'PopUp Menu'
   - 'Show All' (highlights currently engraved runes)
+- Configurable layout and tooltip
 
 ## To Use
 - Left Click to engrave
@@ -15,5 +16,4 @@
   - or Main Menu -> Options Button -> AddOns Tab -> Engraver
  
 ## Future scope features
-- Configurable layout and tooltip
 - Slash commands for easy use in macros

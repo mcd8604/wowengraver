@@ -12,6 +12,13 @@ local EngraverDisplayModes = {
 	{ text = "Pop-up Menu", mixin = EngraverCategoryFramePopUpMenuMixin }
 }
 Addon.EngraverDisplayModes = EngraverDisplayModes
+local EngraverLayoutDirections = {
+	{ text = "Left to Right", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT", runePoint = "LEFT", runeRelativePoint = "RIGHT" },
+	{ text = "Top to Bottom", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT", runePoint = "TOP", runeRelativePoint = "BOTTOM" },
+	{ text = "Right to Left", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT", runePoint = "RIGHT", runeRelativePoint = "LEFT" },
+	{ text = "Bottom to Top", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT", runePoint = "BOTTOM", runeRelativePoint = "TOP" }
+}
+Addon.EngraverLayoutDirections = EngraverLayoutDirections
 
 -------------------
 -- EngraverFrame --
@@ -64,13 +71,17 @@ end
 function EngraverFrameMixin:InitFromOptions()
 	-- UIScale
 	self:UpdateScale(EngraverOptions.UIScale)
-	Settings.SetOnValueChangedCallback("UIScale", function (_, _, newValue, ...) 
+	EngraverOptions:RegisterCallback("UIScale", function (_, newValue) 
 		self:UpdateScale(newValue) 
 	end, self)
 	-- DisplayMode
 	self:SetDisplayMode(EngraverDisplayModes[EngraverOptions.DisplayMode+1].mixin)
-	Settings.SetOnValueChangedCallback("DisplayMode", function (_, _, newValue, ...) 
+	EngraverOptions:RegisterCallback("DisplayMode", function (_, newValue) 
 		self:SetDisplayMode(EngraverDisplayModes[newValue+1].mixin) 
+		self:UpdateLayout()
+	end, self)
+	-- LayoutDirection
+	EngraverOptions:RegisterCallback("LayoutDirection", function (_, newValue)  
 		self:UpdateLayout()
 	end, self)
 end
@@ -108,10 +119,11 @@ function EngraverFrameMixin:UpdateLayout()
 	if self.categoryFrames then
 		for c, categoryFrame in ipairs(self.categoryFrames) do
 			if categoryFrame then
+				local LayoutDirection = EngraverLayoutDirections[EngraverOptions.LayoutDirection+1]
 				if c == 1 then
-					categoryFrame:SetPoint("TOPLEFT")
+					categoryFrame:SetPoint(LayoutDirection.categoryPoint)
 				elseif c > 1 then
-					categoryFrame:SetPoint("TOPLEFT", self.categoryFrames[c-1], "BOTTOMLEFT")
+					categoryFrame:SetPoint(LayoutDirection.categoryPoint, self.categoryFrames[c-1], LayoutDirection.categoryRelativePoint)
 				end
 				if categoryFrame.UpdateCategoryLayout then
 					categoryFrame:UpdateCategoryLayout()
@@ -213,7 +225,8 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
 					runeButton:SetAllPoints()
 				else
 					runeButton:ClearAllPoints()
-					runeButton:SetPoint("TOPLEFT", self.runeButtons[r-1], "TOPRIGHT")
+					local LayoutDirection = EngraverLayoutDirections[EngraverOptions.LayoutDirection+1]
+					runeButton:SetPoint(LayoutDirection.runePoint, self.runeButtons[r-1], LayoutDirection.runeRelativePoint)
 				end
 				runeButton:SetHighlighted(C_Engraving.IsRuneEquipped(runeButton.skillLineAbilityID))
 			end
@@ -253,7 +266,8 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl()
 				for r, runeButton in ipairs(self.inactiveButtons) do
 					runeButton:SetShown(showInactives)
 					runeButton:ClearAllPoints()
-					runeButton:SetPoint("TOPLEFT", prevButton, "TOPRIGHT")
+					local LayoutDirection = EngraverLayoutDirections[EngraverOptions.LayoutDirection+1]
+					runeButton:SetPoint(LayoutDirection.runePoint, prevButton, LayoutDirection.runeRelativePoint)
 					prevButton = runeButton
 				end
 			end
@@ -382,7 +396,7 @@ function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
 end
 
 function EngraverRuneButtonMixin:OnEnter()
-	if self.skillLineAbilityID then
+	if self.skillLineAbilityID and EngraverOptions.HideTooltip ~= true then
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 		GameTooltip:SetEngravingRune(self.skillLineAbilityID);
 		self.showingTooltip = true;
