@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="EngraverOptions.lua"/>
+	<Frame name="EngraverOptionsFrame" mixin="EngraverOptionsFrameMixin">
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+			<OnEvent method="OnEvent"/>
+		</Scripts>
+		<Frames>
+			<Frame parentKey="settingsList" inherits="SettingsListTemplate" setAllPoints="true"/>
+		</Frames>
+	</Frame>
+</Ui>

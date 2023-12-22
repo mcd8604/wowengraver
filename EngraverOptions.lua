@@ -1,51 +1,113 @@
-local _, Addon = ...
+local localAddonName, Addon = ...
 local EngraverDisplayModes = Addon.EngraverDisplayModes 
 
-EngraverOptions = {}
+-- Slash Commands
+SLASH_ENGRAVER1, SLASH_ENGRAVER2, SLASH_ENGRAVER3, SLASH_ENGRAVER4, SLASH_ENGRAVER5 = "/en", "/eng", "/engrave", "/engraver", "/engraving"
+SlashCmdList.ENGRAVER = function(msg, editBox)
+	Settings.OpenToCategory(localAddonName);
+end
 
-EventRegistry:RegisterFrameEventAndCallback("ADDON_LOADED", function(ownerID, addonName, ...)
-	if addonName == "Engraver" then
-		local EngraverAddOnCategory, layout = Settings.RegisterVerticalLayoutCategory("Engraver");
-		Settings.RegisterAddOnCategory(EngraverAddOnCategory);
-		if EngraverOptions == nil then
-			EngraverOptions = {}
-		end
+EngraverOptions = {} -- SavedVariable
+EngraverOptionsFrameMixin = {}
 
-		-- DisplayMode
-		local DefaultDisplayMode = 1
-		if not EngraverOptions.DisplayMode then
-			EngraverOptions.DisplayMode = DefaultDisplayMode
-		end
-		do 
-			local variable, name, tooltip = "EngraverDisplayMode", "Rune Display Mode", "Rune Display Mode";
-			local function GetOptions()
-				local container = Settings.CreateControlTextContainer();
-				for i, displayMode in ipairs(EngraverDisplayModes) do
-					container:Add(i-1, displayMode.text);
-				end
-				return container:GetData();
-			end
-			local setting = Settings.RegisterAddOnSetting(EngraverAddOnCategory, name, variable, Settings.VarType.Number, DefaultDisplayMode);
-			setting:SetValue(EngraverOptions.DisplayMode)
-			Settings.CreateDropDown(EngraverAddOnCategory, setting, GetOptions, tooltip);
-			Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...) EngraverOptions.DisplayMode = newValue; end)
-		end
-		-- DisplayMode
+function EngraverOptionsFrameMixin:OnLoad()
+	self:RegisterEvent("ADDON_LOADED")
+	self.name = localAddonName
+	self.category, self.layout = Settings.RegisterCanvasLayoutCategory(self, localAddonName, localAddonName);
+	self.category.ID = localAddonName
+	Settings.RegisterAddOnCategory(self.category);
+	self:InitSettingsList()
+	self:CreateSettingsInitializers()
+	self.settingsList:Display(self.initializers);
+	-- well, the initializers are being iterated and send to the dataprovider which is being sent to the view just fine
+	-- so why isn't the scroll target being populated from the view? it was, the anchor was empty though - adding setAllPoints to the settingsList fixed it LOL
+end
 
-		-- UIScale
-		local DefaultUIScale = 1.0
-		if not EngraverOptions.UIScale then
-			EngraverOptions.UIScale = DefaultUIScale
+function EngraverOptionsFrameMixin:InitSettingsList()
+	self.settingsList.Header.Title:SetText(localAddonName);	
+	self.settingsList.Header.DefaultsButton.Text:SetText(SETTINGS_DEFAULTS);
+	self.settingsList.Header.DefaultsButton:SetScript("OnClick", function(button, buttonName, down)
+		ShowAppropriateDialog("GAME_SETTINGS_APPLY_DEFAULTS");
+	end);
+	self.settingsList.ScrollBox:SetScript("OnMouseWheel", function(scrollBox, delta)
+		if not KeybindListener:OnForwardMouseWheel(delta) then
+			ScrollControllerMixin.OnMouseWheel(scrollBox, delta);
 		end
-		do 
-			local variable, name, tooltip = "UIScale", "UI Scale", "Adjusts the scale of the Engraver's user interface frame.";
-			local options = Settings.CreateSliderOptions(0.01, 2.5, 0.00) -- minValue, maxValue, step 
-			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
-			local setting = Settings.RegisterAddOnSetting(EngraverAddOnCategory, name, variable, Settings.VarType.Number, DefaultUIScale);
-			setting:SetValue(EngraverOptions.UIScale)
-			Settings.CreateSlider(EngraverAddOnCategory, setting, options, tooltip);
-			Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...) EngraverOptions.UIScale = newValue; end, EngraverOptions)
+	end);
+	self.settingsList:Show();
+end
+
+local DefaultEngraverOptions = {
+	DisplayMode = 1,
+	UIScale = 1.0
+}
+
+function EngraverOptionsFrameMixin:CreateSettingsInitializers()
+	self.settings = {}
+	self.initializers = {}
+	local function addInitializer(initializer)
+		if initializer then	
+			table.insert(self.initializers, initializer);
+			initializer:AddSearchTags(initializer:GetName():gmatch("%S+"))
 		end
-		-- UIScale
 	end
-end)
+	do -- DisplayMode
+		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "Rune Display Mode";
+		self.settings.DisplayMode = Settings.RegisterAddOnSetting(self.category, name, variable, Settings.VarType.Number, DefaultEngraverOptions.DisplayMode);
+		local options = function()
+			local container = Settings.CreateControlTextContainer();
+			for i, displayMode in ipairs(EngraverDisplayModes) do
+				container:Add(i-1, displayMode.text);
+			end
+			return container:GetData();
+		end
+		addInitializer(Settings.CreateDropDownInitializer(self.settings.DisplayMode, options, tooltip))
+		Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...) EngraverOptions.DisplayMode = newValue; end, self)
+	end -- DisplayMode	
+	do -- UIScale
+		local variable, name, tooltip = "UIScale", "UI Scale", "Adjusts the scale of the Engraver's user interface frame.";
+		local options = Settings.CreateSliderOptions(0.01, 2.5, 0.00) -- minValue, maxValue, step 
+		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
+		self.settings.UIScale = Settings.RegisterAddOnSetting(self.category, name, variable, Settings.VarType.Number, DefaultEngraverOptions.UIScale);
+		addInitializer(Settings.CreateSliderInitializer(self.settings.UIScale, options, tooltip))
+		Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...) EngraverOptions.UIScale = newValue; end, self)
+	end	-- UIScale
+end
+
+function EngraverOptionsFrameMixin:OnEvent(event, ...)
+	if event == "ADDON_LOADED" then
+		self:HandleAddonLoaded(...)
+	end
+end
+
+function EngraverOptionsFrameMixin:HandleAddonLoaded(addonName)
+	if addonName == localAddonName then
+		if EngraverOptions == nil then
+			self:OnDefault()
+		end
+	end
+end
+
+function EngraverOptionsFrameMixin:OnDefault()
+	EngraverOptions = EngraverOptions or {}
+	for k, v in pairs(DefaultEngraverOptions) do
+		if EngraverOptions[k] == nil then
+			if type(v) == "table" then 
+				-- TODO recursive deep copy?
+			end
+			EngraverOptions[k] = v
+		end
+	end
+end
+
+function EngraverOptionsFrameMixin:OnRefresh()
+	if self.settings then
+		for variable, setting in pairs(self.settings) do
+			setting:SetValue(EngraverOptions[variable])
+		end
+	end
+end
+
+--function EngraverOptionsFrameMixin:OnCommit()
+--	print("OnCommit")
+--end

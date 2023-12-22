@@ -62,13 +62,14 @@ function EngraverFrameMixin:LoadCategories()
 end
 
 function EngraverFrameMixin:InitFromOptions()
+	-- UIScale
 	self:UpdateScale(EngraverOptions.UIScale)
 	Settings.SetOnValueChangedCallback("UIScale", function (_, _, newValue, ...) 
 		self:UpdateScale(newValue) 
 	end, self)
-
+	-- DisplayMode
 	self:SetDisplayMode(EngraverDisplayModes[EngraverOptions.DisplayMode+1].mixin)
-	Settings.SetOnValueChangedCallback("EngraverDisplayMode", function (_, _, newValue, ...) 
+	Settings.SetOnValueChangedCallback("DisplayMode", function (_, _, newValue, ...) 
 		self:SetDisplayMode(EngraverDisplayModes[newValue+1].mixin) 
 		self:UpdateLayout()
 	end, self)
