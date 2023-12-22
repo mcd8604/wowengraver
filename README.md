@@ -1,16 +1,18 @@
 # Engraver
 
 ## Current features
-- Provides minimalistic UI for quickly engraving runes on the fly. 
-- Eliminates the need to open the character frame to change runes.
+- Provides minimal UI for quickly engraving runes on the fly - no need to open the character frame.
 - Clicking on a rune will immediately engrave it on the appropriate equipped armor piece.
-- Highlights currently engraved runes.
-- 2 display modes: 'PopUp Menu' or 'Show All'
+- 2 display modes
+  - 'PopUp Menu'
+  - 'Show All' (highlights currently engraved runes)
 
 ## To Use
 - Left Click to engrave
 - Right Click to drag
-- Configure Options under: Main Menu -> Options Button -> AddOns Tab -> Engraver
+- Navigate to Options Menu
+  - Chat Command: /engraver or /en
+  - or Main Menu -> Options Button -> AddOns Tab -> Engraver
  
 ## Future scope features
 - Configurable layout and tooltip
