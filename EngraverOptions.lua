@@ -19,8 +19,6 @@ function EngraverOptionsFrameMixin:OnLoad()
 	self:InitSettingsList()
 	self:CreateSettingsInitializers()
 	self.settingsList:Display(self.initializers);
-	-- well, the initializers are being iterated and send to the dataprovider which is being sent to the view just fine
-	-- so why isn't the scroll target being populated from the view? it was, the anchor was empty though - adding setAllPoints to the settingsList fixed it LOL
 end
 
 function EngraverOptionsFrameMixin:InitSettingsList()
