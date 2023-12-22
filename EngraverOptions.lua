@@ -80,16 +80,19 @@ end
 
 function EngraverOptionsFrameMixin:HandleAddonLoaded(addonName)
 	if addonName == localAddonName then
-		if EngraverOptions == nil then
-			self:OnDefault()
-		end
+		self:SetOptionsToDefault(false)
 	end
 end
 
 function EngraverOptionsFrameMixin:OnDefault()
+	EngraverOptions = {}
+	self:SetOptionsToDefault(true)
+end
+
+function EngraverOptionsFrameMixin:SetOptionsToDefault(force)
 	EngraverOptions = EngraverOptions or {}
 	for k, v in pairs(DefaultEngraverOptions) do
-		if EngraverOptions[k] == nil then
+		if force or EngraverOptions[k] == nil then
 			if type(v) == "table" then 
 				-- TODO recursive deep copy?
 			end

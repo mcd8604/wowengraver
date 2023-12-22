@@ -28,7 +28,7 @@
 			<AbsDimension x="40" y="40" />
 		</Size>
 		<Anchors>
-			<Anchor point="TOPLEFT" relativeTo="UIParent" relativePoint="TOPLEFT">
+			<Anchor point="CENTER" relativeTo="UIParent" relativePoint="CENTER">
 				<Offset>
 					<AbsDimension x="0" y="0"/>
 				</Offset>
