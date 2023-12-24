@@ -35,8 +35,41 @@
 			</Anchor>
 		</Anchors>
 		<Frames>
-			<Frame parentKey="noRunesFrame" mixin="EngraverNoRunesFrameMixin">
-				<Size x="120" y="120"/>
+			<Button name="EngraverDragTab" parentKey="dragTab" inherits="ChatTabArtTemplate" mixin="EngraverDragTabMixin" alpha="1">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+				</Anchors>
+				<Scripts>
+					<OnShow>
+						-- selected textures are not hidden by default, so hide them
+						self.leftSelectedTexture:Hide()
+						self.rightSelectedTexture:Hide()
+						self.middleSelectedTexture:Hide()
+					</OnShow>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+						GameTooltip:AddLine("Drag this tab to move Engraver.");
+						GameTooltip:AddLine("Right click to open options.");
+						GameTooltip:AddLine("(This tab can be hidden in options)");
+						GameTooltip:Show();
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+					<OnMouseDown method="OnMouseDown"/>
+					<OnMouseUp method="OnMouseUp"/>
+				</Scripts>
+				<ButtonText name="$parentText" parentKey="Text" text="Engraver">
+					<Size x="50" y="8"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parentMiddle" relativePoint="CENTER" x="0" y="-5"/>
+					</Anchors>
+				</ButtonText>
+				<NormalFont style="GameFontNormalSmall"/>
+				<!--<PushedTextOffset x="0" y="0" />-->
+			</Button>
+			<Frame parentKey="noRunesFrame">
+				<Size x="120" y="40"/>
 				<Anchors>
 					<Anchor />
 				</Anchors>
@@ -45,13 +78,6 @@
 						<Texture name="$parentBackground" parentKey="background">
 							<Color r="0" g="0.694" b="0.941" a="0.125"/>
 						</Texture>
-						<FontString name="$parent_EngraverLabel" inherits="GameFontNormal" justifyH="CENTER" text="Engraver" outline="THICK" parentKey="engraverLabel">
-							<Size x="120" y="40"/>
-							<Anchors>
-								<Anchor point="TOP"/>
-							</Anchors>
-							<Color r="1" g="1" b="0"/>
-						</FontString>
 						<FontString name="$parent_NoRunesLabel" inherits="GameFontNormal" justifyH="CENTER" text="NO_RUNES" parentKey="noRunesLabel">
 							<Size x="120" y="40"/>
 							<Anchors>
@@ -59,19 +85,8 @@
 							</Anchors>
 							<Color r="1" g="1" b="1"/>
 						</FontString>
-						<FontString name="$parent_DragLabel" inherits="GameFontNormal" justifyH="CENTER" text="Right click to drag." parentKey="dragLabel">
-							<Size x="120" y="40"/>
-							<Anchors>
-								<Anchor point="BOTTOM"/>
-							</Anchors>
-							<Color r="0" g="1" b="1"/>
-						</FontString>
 					</Layer>
 				</Layers>
-				<Scripts>
-					<OnMouseDown method="OnMouseDown"/>
-					<OnMouseUp method="OnMouseUp"/>
-				</Scripts>
 			</Frame>
 			<Frame name="$parent_CategoryFrame1" parentKey="categoryFrame1" inherits="EngraverCategoryFrameTemplate" />
 			<Frame name="$parent_CategoryFrame2" parentKey="categoryFrame2" inherits="EngraverCategoryFrameTemplate" />

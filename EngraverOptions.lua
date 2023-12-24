@@ -38,7 +38,9 @@ end
 local DefaultEngraverOptions = {
 	DisplayMode = 1,
 	LayoutDirection = 0,
-	HideTooltip,
+	HideTooltip = false,
+	HideDragTab = false,
+	EnableRightClickDrag = true,
 	UIScale = 1.0
 }
 
@@ -87,6 +89,12 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	do -- HideTooltip
 		addInitializer(Settings.CreateCheckBoxInitializer(addSetting("HideTooltip", "Hide Tooltip", Settings.VarType.Boolean), nil, "Hides the tooltip when hovering over a rune button."))
 	end -- HideTooltip
+	do -- HideDragTab
+		addInitializer(Settings.CreateCheckBoxInitializer(addSetting("HideDragTab", "Hide Drag Tab", Settings.VarType.Boolean), nil, "Hides the drag tab of the Engraver frame."))
+	end -- HideDragTab
+	do -- EnableRightClickDrag
+		addInitializer(Settings.CreateCheckBoxInitializer(addSetting("EnableRightClickDrag", "Enable Right Click Drag", Settings.VarType.Boolean), nil, "Enables dragging the frame by right-clicking and holding any rune button."))
+	end -- EnableRightClickDrag
 	do -- UIScale
 		local variable, name, tooltip = "UIScale", "UI Scale", "Adjusts the scale of the Engraver's user interface frame.";
 		local setting = addSetting(variable, name, Settings.VarType.Number)

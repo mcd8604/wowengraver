@@ -92,6 +92,10 @@ function EngraverFrameMixin:InitFromOptions()
 	registerOptionChangedCallback("LayoutDirection", function (newValue)  
 		self:UpdateLayout()
 	end)
+	-- HideDragTab
+	registerOptionChangedCallback("HideDragTab", function (newValue)  
+		self:UpdateLayout()
+	end)
 end
 
 function EngraverFrameMixin:UpdateCategory(equipmentSlot)
@@ -138,6 +142,9 @@ function EngraverFrameMixin:UpdateLayout()
 				end
 			end
 		end
+	end
+	if self.dragTab then
+		self.dragTab:SetShown(not EngraverOptions.HideDragTab);
 	end
 end
 
@@ -372,7 +379,7 @@ function EngraverRuneButtonMixin:OnClick()
 	local buttonClicked = GetMouseButtonClicked();
 	if buttonClicked == "LeftButton" then
 		self:TryEngrave()
-	elseif buttonClicked  == "RightButton" then
+	elseif buttonClicked  == "RightButton" and EngraverOptions.EnableRightClickDrag then
 		if IsKeyDown(buttonClicked) then
 			EngraverFrame:StartMoving()
 		else
@@ -419,12 +426,16 @@ function EngraverRuneButtonMixin:OnLeave()
 	self:TriggerEvent("PostOnLeave")
 end
 
--------------------------------
--- EngraverNoRunesFrameMixin --
--------------------------------
+-------------
+-- DragTab --
+-------------
 
-function EngraverNoRunesFrameMixin:OnMouseDown(button)
+EngraverDragTabMixin = {}
+
+function EngraverDragTabMixin:OnMouseDown(button)
 	if button == "RightButton" then
+		Settings.OpenToCategory(addonName);
+	elseif button == "LeftButton" then
 		local parent = self:GetParent()
 		if parent and parent.StartMoving then
 			parent:StartMoving();
@@ -432,11 +443,9 @@ function EngraverNoRunesFrameMixin:OnMouseDown(button)
 	end
 end
 
-function EngraverNoRunesFrameMixin:OnMouseUp(button)
-	if button == "RightButton" then
-		local parent = self:GetParent()
-		if parent and parent.StopMovingOrSizing then
-			parent:StopMovingOrSizing();
-		end
+function EngraverDragTabMixin:OnMouseUp(button)
+	local parent = self:GetParent()
+	if parent and parent.StopMovingOrSizing then
+		parent:StopMovingOrSizing();
 	end
 end
