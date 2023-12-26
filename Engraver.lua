@@ -28,6 +28,9 @@ Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[Eng
 -------------------
 
 function EngraverFrameMixin:OnLoad()
+	self.categoryFramePool = CreateFramePool("Frame", self, "EngraverCategoryFrameTemplate",  function(framePool, frame)
+		FramePool_HideAndClearAnchors(framePool, frame);
+	end);
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
@@ -45,7 +48,6 @@ function EngraverFrameMixin:OnEvent(event, ...)
 			self:UpdateCategory(engravingData.equipmentSlot)
 		end
 	elseif (event == "NEW_RECIPE_LEARNED") then
-		self:ResetCategories()
 		self:LoadCategories()
 		self:UpdateLayout()
 	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
@@ -58,9 +60,6 @@ end
 
 function EngraverFrameMixin:Initialize()
 	self.equipmentSlotFrameMap = {}
-	self.categoryFramePool = CreateFramePool("Frame", self, "EngraverCategoryFrameTemplate",  function(framePool, frame)
-		FramePool_HideAndClearAnchors(framePool, frame);
-	end);
 	self:RegisterOptionChangedCallbacks()
 	self:LoadCategories()
 	self:UpdateLayout()
@@ -77,6 +76,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 end
 	
 function EngraverFrameMixin:LoadCategories()
+	self:ResetCategories()
 	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(true, true);
 	if #categories > 0 then
@@ -235,13 +235,16 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
 		end
 		for r, runeButton in ipairs(self.runeButtons) do
 			runeButton:SetShown(true)
+			runeButton:SetHighlighted(false)
 			if r == 1 then
 				runeButton:SetAllPoints()
 			else
 				local LayoutDirection = Addon.GetCurrentLayoutDirection()
 				runeButton:SetPoint(LayoutDirection.runePoint, self.runeButtons[r-1], LayoutDirection.runeRelativePoint)
 			end
-			runeButton:SetHighlighted(C_Engraving.IsRuneEquipped(runeButton.skillLineAbilityID))
+		end
+		if self.activeButton then
+			self.activeButton:SetHighlighted(true)
 		end
 	end
 end
