@@ -20,7 +20,15 @@
 			<AbsDimension x="40" y="40" />
 		</Size>
 		<Frames>
-			<Button parentKey="emptyRuneButton" inherits="EngraverRuneButtonTemplate" setAllPoints="true" hidden="true"/>
+			<Button parentKey="emptyRuneButton" inherits="EngraverRuneButtonTemplate" setAllPoints="true" hidden="true">
+				<Scripts>
+					<OnLoad>
+						EngraverRuneButtonMixin.OnLoad(self)
+						self.SpellHighlightTexture:Show();
+						self.SpellHighlightAnim:Play()
+					</OnLoad>
+				</Scripts>
+			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
