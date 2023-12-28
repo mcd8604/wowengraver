@@ -163,9 +163,9 @@ function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
 	if self.emptyRuneButton then
 		-- TODO figure out how to get slotName from slotId using API or maybe a constant somewhere
 		local tempSlotsMap = {
-			[5] = "CHESTSLOT",
-			[7] = "LEGSSLOT",
-			[10] = "HANDSSLOT"
+			[INVSLOT_CHEST] = "CHESTSLOT",
+			[INVSLOT_LEGS] = "LEGSSLOT",
+			[INVSLOT_HAND] = "HANDSSLOT"
 		}
 		local slotName = tempSlotsMap[slotId]
 		local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
@@ -242,8 +242,10 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
 				local LayoutDirection = Addon.GetCurrentLayoutDirection()
 				runeButton:SetPoint(LayoutDirection.runePoint, self.runeButtons[r-1], LayoutDirection.runeRelativePoint)
 			end
+			runeButton:SetBlinking(self.activeButton == nil and runeButton.isKnown)
 		end
 		if self.activeButton then
+			self.activeButton:SetBlinking(false)
 			self.activeButton:SetHighlighted(true)
 		end
 	end
@@ -365,6 +367,7 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	self.icon:SetTexture(rune.iconTexture);
 	self.tooltipName = rune.name;
 	self.skillLineAbilityID = rune.skillLineAbilityID;
+	self.isKnown = isKnown;
 	self:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
 	if self.icon then
 		self.icon:SetAllPoints()
@@ -391,19 +394,26 @@ function EngraverRuneButtonMixin:OnClick()
 	end
 end
 
+-- TODO find this mapping a different way
+local CharacterSlotButtons = {}
+CharacterSlotButtons[INVSLOT_CHEST] = CharacterChestSlot
+CharacterSlotButtons[INVSLOT_LEGS] = CharacterLegsSlot
+CharacterSlotButtons[INVSLOT_HAND] = CharacterHandsSlot
+
 function EngraverRuneButtonMixin:TryEngrave()
 	if self.category and self.skillLineAbilityID and not InCombatLockdown() then
-		ClearCursor()
-		C_Engraving.CastRune(self.skillLineAbilityID);
-		if self.category == 5 then
-			CharacterChestSlot:Click(); 
-		elseif self.category == 7 then
-			CharacterLegsSlot:Click(); 
-		elseif self.category == 10 then
-			CharacterHandsSlot:Click(); 
+		local characterSlotButton = CharacterSlotButtons[self.category]
+		if characterSlotButton then
+			if characterSlotButton.hasItem then
+				ClearCursor()
+				C_Engraving.CastRune(self.skillLineAbilityID);
+				characterSlotButton:Click(); 
+				StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
+				ClearCursor()
+			else
+				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
+			end
 		end
-		StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
-		ClearCursor()
 	end
 end
 
@@ -411,6 +421,19 @@ function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
 	--self.FlyoutBorder:SetShown(isHighlighted)
 	--self.FlyoutBorderShadow:SetShown(isHighlighted)
 	self.SpellHighlightTexture:SetShown(isHighlighted)
+	if isHighlighted and GetInventoryItemBroken("player", self.category) then
+		-- TODO change highlight texture to be red
+	end
+end
+
+function EngraverRuneButtonMixin:SetBlinking(isBlinking)
+	if isBlinking then
+		self.SpellHighlightTexture:Show();
+		self.SpellHighlightAnim:Play()
+	else
+		self.SpellHighlightTexture:Hide();
+		self.SpellHighlightAnim:Stop()
+	end
 end
 
 function EngraverRuneButtonMixin:OnEnter()
