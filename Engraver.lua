@@ -404,7 +404,8 @@ function EngraverRuneButtonMixin:TryEngrave()
 	if self.category and self.skillLineAbilityID and not InCombatLockdown() then
 		local characterSlotButton = CharacterSlotButtons[self.category]
 		if characterSlotButton then
-			if characterSlotButton.hasItem then
+			local itemId, unknown = GetInventoryItemID("player", self.category)
+			if itemId then
 				ClearCursor()
 				C_Engraving.CastRune(self.skillLineAbilityID);
 				characterSlotButton:Click(); 
