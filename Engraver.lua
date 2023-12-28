@@ -112,28 +112,30 @@ function EngraverFrameMixin:UpdateCategory(equipmentSlot)
 end
 
 function EngraverFrameMixin:UpdateLayout(...)
-	self:SetScale(EngraverOptions.UIScale or 1.0)
-	if self.equipmentSlotFrameMap then
-		local layoutDirection = Addon.GetCurrentLayoutDirection()
-		local displayMode = Addon.GetCurrentDisplayMode()
-		local prevCategoryFrame = nil
-		for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
-			if categoryFrame then
-				categoryFrame:SetDisplayMode(displayMode.mixin)
-				if prevCategoryFrame == nil then
-					categoryFrame:SetPoint(layoutDirection.categoryPoint)
-				else
-					categoryFrame:SetPoint(layoutDirection.categoryPoint, prevCategoryFrame, layoutDirection.categoryRelativePoint)
+	if not InCombatLockdown() then
+		self:SetScale(EngraverOptions.UIScale or 1.0)
+		if self.equipmentSlotFrameMap then
+			local layoutDirection = Addon.GetCurrentLayoutDirection()
+			local displayMode = Addon.GetCurrentDisplayMode()
+			local prevCategoryFrame = nil
+			for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
+				if categoryFrame then
+					categoryFrame:SetDisplayMode(displayMode.mixin)
+					if prevCategoryFrame == nil then
+						categoryFrame:SetPoint(layoutDirection.categoryPoint)
+					else
+						categoryFrame:SetPoint(layoutDirection.categoryPoint, prevCategoryFrame, layoutDirection.categoryRelativePoint)
+					end
+					if categoryFrame.UpdateCategoryLayout then
+						categoryFrame:UpdateCategoryLayout()
+					end
+					prevCategoryFrame = categoryFrame
 				end
-				if categoryFrame.UpdateCategoryLayout then
-					categoryFrame:UpdateCategoryLayout()
-				end
-				prevCategoryFrame = categoryFrame
 			end
 		end
-	end
-	if self.dragTab then
-		self.dragTab:SetShown(not EngraverOptions.HideDragTab);
+		if self.dragTab then
+			self.dragTab:SetShown(not EngraverOptions.HideDragTab);
+		end
 	end
 end
 
