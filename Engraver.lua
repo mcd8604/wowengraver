@@ -34,6 +34,7 @@ function EngraverFrameMixin:OnLoad()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
+	self:RegisterEvent("UPDATE_INVENTORY_ALERTS");
 	self:RegisterEvent("NEW_RECIPE_LEARNED");
 	self:RegisterEvent("PLAYER_REGEN_ENABLED");
 	self:RegisterForDrag("RightButton")
@@ -52,6 +53,8 @@ function EngraverFrameMixin:OnEvent(event, ...)
 		self:UpdateLayout()
 	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
 		self:UpdateCategory(...)
+	elseif (event == "UPDATE_INVENTORY_ALERTS") then
+		self:UpdateLayout()
 	elseif (event == "PLAYER_REGEN_ENABLED") then
 		-- Update after leaving combat lockdown in case settings changed during combat
 		self:UpdateLayout()
@@ -84,7 +87,7 @@ function EngraverFrameMixin:LoadCategories()
 			local categoryFrame = self.categoryFramePool:Acquire()
 			categoryFrame:Show()
 			self.equipmentSlotFrameMap[category] = categoryFrame
-			categoryFrame:LoadCategoryRunes(category)
+			categoryFrame:SetCategory(category)
 			categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
 		end
 		self.noRunesFrame:Hide();
@@ -148,7 +151,8 @@ function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtons = {}
 end
 
-function EngraverCategoryFrameBaseMixin:LoadCategoryRunes(category)
+function EngraverCategoryFrameBaseMixin:SetCategory(category)
+	self.category = category
 	local runes = C_Engraving.GetRunesForCategory(category, false);
 	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
 	self.runeButtonPool:ReleaseAll()
@@ -196,6 +200,10 @@ end
 
 function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout()
 	self:DetermineActiveAndInactiveButtons()
+	if self.activeButton then
+		local isBroken = GetInventoryItemBroken("player", self.category)
+		self.activeButton:SetBlinking(isBroken, 1.0, 0.0, 0.0)
+	end
 	if self.UpdateCategoryLayoutImpl then
 		self:UpdateCategoryLayoutImpl() -- implemented by "subclasses"/mixins
 	end
@@ -244,10 +252,11 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
 				local LayoutDirection = Addon.GetCurrentLayoutDirection()
 				runeButton:SetPoint(LayoutDirection.runePoint, self.runeButtons[r-1], LayoutDirection.runeRelativePoint)
 			end
-			runeButton:SetBlinking(self.activeButton == nil and runeButton.isKnown)
+			if self.activeButton == nil then
+				runeButton:SetBlinking(runeButton.isKnown)
+			end
 		end
-		if self.activeButton then
-			self.activeButton:SetBlinking(false)
+		if self.activeButton and not self.activeButton.isBlinking then
 			self.activeButton:SetHighlighted(true)
 		end
 	end
@@ -261,6 +270,8 @@ function EngraverCategoryFrameShowAllMixin:TearDownDisplayMode()
 	if self.runeButtons then
 		for r, runeButton in ipairs(self.runeButtons) do
 			runeButton:SetHighlighted(false)
+			runeButton:ResetColors();
+			runeButton:SetBlinking(false)
 		end
 	end
 end
@@ -359,6 +370,7 @@ end
 ----------------
 
 function EngraverRuneButtonMixin:OnLoad()
+	self.Border:SetVertexColor(0.0, 1.0, 0.0);
 	Mixin(self, CallbackRegistryMixin);
 	self:SetUndefinedEventsAllowed(true)
 	self:OnLoad() -- NOTE not an infinite loop because mixing in CallbackRegistryMixin redefines OnLoad
@@ -374,7 +386,12 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	if self.icon then
 		self.icon:SetAllPoints()
 	end
-	if isKnown then
+	self:ResetColors()
+end
+
+function EngraverRuneButtonMixin:ResetColors()
+	self.SpellHighlightTexture:SetVertexColor(1.0, 1.0, 1.0);
+	if self.isKnown then
 		self.icon:SetVertexColor(1.0, 1.0, 1.0);
 		self.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
 	else
@@ -421,22 +438,23 @@ function EngraverRuneButtonMixin:TryEngrave()
 end
 
 function EngraverRuneButtonMixin:SetHighlighted(isHighlighted)
-	--self.FlyoutBorder:SetShown(isHighlighted)
-	--self.FlyoutBorderShadow:SetShown(isHighlighted)
-	self.SpellHighlightTexture:SetShown(isHighlighted)
-	if isHighlighted and GetInventoryItemBroken("player", self.category) then
-		-- TODO change highlight texture to be red
+	if self.isKnown then
+		if ( isHighlighted ) then
+			self.Border:SetShown(true)
+			self.icon:SetVertexColor(1.0, 1.0, 1.0)
+			self.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
+		else
+			self.Border:SetShown(false)
+			self.icon:SetVertexColor(0.5, 0.5, 0.5)
+			self.NormalTexture:SetVertexColor(0.5, 0.5, 0.5);
+		end
 	end
 end
 
-function EngraverRuneButtonMixin:SetBlinking(isBlinking)
-	if isBlinking then
-		self.SpellHighlightTexture:Show();
-		self.SpellHighlightAnim:Play()
-	else
-		self.SpellHighlightTexture:Hide();
-		self.SpellHighlightAnim:Stop()
-	end
+function EngraverRuneButtonMixin:SetBlinking(isBlinking, r, g, b)
+	self.isBlinking = isBlinking
+	self.SpellHighlightTexture:SetVertexColor(r or 1.0, g or 1.0, b or 1.0)
+	SharedActionButton_RefreshSpellHighlight(self, isBlinking)
 end
 
 function EngraverRuneButtonMixin:OnEnter()
