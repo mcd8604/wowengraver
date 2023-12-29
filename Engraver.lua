@@ -80,6 +80,7 @@ end
 	
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
+	C_Engraving.ClearAllCategoryFilters();
 	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(true, true);
 	if #categories > 0 then
