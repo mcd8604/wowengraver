@@ -44,15 +44,12 @@ function EngraverFrameMixin:OnEvent(event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:Initialize()
 	elseif (event == "RUNE_UPDATED") then
-		local engravingData = select(1, ...)
-		if engravingData then
-			self:UpdateCategory(engravingData.equipmentSlot)
-		end
+		self:UpdateLayout()
 	elseif (event == "NEW_RECIPE_LEARNED") then
 		self:LoadCategories()
 		self:UpdateLayout()
 	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
-		self:UpdateCategory(...)
+		self:UpdateLayout()
 	elseif (event == "UPDATE_INVENTORY_ALERTS") then
 		self:UpdateLayout()
 	elseif (event == "PLAYER_REGEN_ENABLED") then
