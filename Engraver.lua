@@ -154,6 +154,7 @@ function EngraverCategoryFrameBaseMixin:SetCategory(category)
 	local runes = C_Engraving.GetRunesForCategory(category, false);
 	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
 	self.runeButtonPool:ReleaseAll()
+	self.runeButtons = {}
 	for r, rune in ipairs(runes) do
 		local runeButton = self.runeButtonPool:Acquire()
 		self.runeButtons[r] = runeButton
