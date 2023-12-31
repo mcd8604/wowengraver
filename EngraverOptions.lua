@@ -2,7 +2,7 @@ local localAddonName, Addon = ...
 local EngraverDisplayModes = Addon.EngraverDisplayModes 
 
 -- Slash Commands
-SLASH_ENGRAVER1, SLASH_ENGRAVER2, SLASH_ENGRAVER3, SLASH_ENGRAVER4, SLASH_ENGRAVER5 = "/en", "/eng", "/engrave", "/engraver", "/engraving"
+SLASH_ENGRAVER1, SLASH_ENGRAVER2, SLASH_ENGRAVER3, SLASH_ENGRAVER4, SLASH_ENGRAVER5, SLASH_ENGRAVER6, SLASH_ENGRAVER7 = "/en", "/eng", "/eg", "/re", "/engrave", "/engraver", "/engraving"
 SlashCmdList.ENGRAVER = function(msg, editBox)
 	Settings.OpenToCategory(localAddonName);
 end
