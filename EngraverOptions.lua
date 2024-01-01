@@ -8,6 +8,10 @@ SlashCmdList.ENGRAVER = function(msg, editBox)
 end
 
 EngraverOptions = {} -- SavedVariable
+EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
+EngraverOptionsCallbackRegistry:OnLoad()
+EngraverOptionsCallbackRegistry:SetUndefinedEventsAllowed(true)
+
 EngraverOptionsFrameMixin = {}
 
 function EngraverOptionsFrameMixin:OnLoad()
@@ -52,7 +56,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		self.settings[variable] = setting
 		Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...)
 			EngraverOptions[variable] = newValue;
-			EngraverOptions:TriggerEvent(variable, newValue)
+			EngraverOptionsCallbackRegistry:TriggerEvent(variable, newValue)
 		end, self)
 		return setting
 	end
@@ -122,9 +126,7 @@ function EngraverOptionsFrameMixin:OnDefault()
 end
 
 function EngraverOptionsFrameMixin:SetOptionsToDefault(force)
-	EngraverOptions = CreateFromMixins(EngraverOptions or {}, CallbackRegistryMixin)
-	EngraverOptions:OnLoad()
-	EngraverOptions:SetUndefinedEventsAllowed(true)
+	EngraverOptions = EngraverOptions or {}
 	for k, v in pairs(DefaultEngraverOptions) do
 		if force or EngraverOptions[k] == nil then
 			if type(v) == "table" then 

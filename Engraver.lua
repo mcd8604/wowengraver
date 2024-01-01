@@ -67,7 +67,7 @@ end
 
 function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	function register(optionName, callback)
-		EngraverOptions:RegisterCallback(optionName, function(_, newValue) if not InCombatLockdown() then callback(self, newValue) end end, self)
+		EngraverOptionsCallbackRegistry:RegisterCallback(optionName, function(_, newValue) if not InCombatLockdown() then callback(self, newValue) end end, self)
 	end
 	register("UIScale", self.SetScale)
 	register("DisplayMode", self.UpdateLayout)
