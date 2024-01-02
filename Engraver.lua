@@ -76,9 +76,7 @@ end
 	
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
-	C_Engraving.ClearAllCategoryFilters();
-	C_Engraving.RefreshRunesList();
-	local categories = C_Engraving.GetRuneCategories(true, true);
+	local categories = C_Engraving.GetRuneCategories(false, false);
 	if #categories > 0 then
 		for c, category in ipairs(categories) do
 			local runes = Addon.Filters:GetFilteredRunesForCategory(category, false)
@@ -91,9 +89,6 @@ function EngraverFrameMixin:LoadCategories()
 				categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
 			end
 		end
-		self.noRunesFrame:Hide();
-	else
-		self.noRunesFrame:Show();
 	end
 	self:UpdateLayout()
 end
@@ -288,6 +283,15 @@ end
 -- CategoryFramePopUpMenu --
 ----------------------------
 
+function EngraverCategoryFramePopUpMenuMixin:AreAnyRunesKnown()
+	for r, runeButton in ipairs(self.runeButtons) do
+		if runeButton.isKnown then
+			return true
+		end
+	end
+	return false
+end
+
 function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDirection)
 	-- update visibility and position of each button
 	if self.emptyRuneButton then
@@ -310,6 +314,9 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDire
 					runeButton:SetPoint(layoutDirection.runePoint, prevButton, layoutDirection.runeRelativePoint)
 					prevButton = runeButton
 				end
+			end
+			if self.activeButton == self.emptyRuneButton then
+				self.emptyRuneButton:SetBlinking(self:AreAnyRunesKnown())
 			end
 		end
 	end
