@@ -5,6 +5,8 @@
 ## Version: @project-version@
 ## X-Curse-Project-ID: 947701
 ## SavedVariablesPerCharacter: EngraverOptions
+## SavedVariables: EngraverFilters
 
 Engraver.xml
 EngraverOptions.xml
+Filters.lua

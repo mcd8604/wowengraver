@@ -106,6 +106,12 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
 		addInitializer(Settings.CreateSliderInitializer(setting, options, tooltip))
 	end	-- UIScale
+	do -- filters
+		local variable, name, tooltip = "filters", "Filters", "Selected runes are shown. Deselected runes are hidden.";
+		local setting = Settings.RegisterAddOnSetting(self.category, name, variable, varType, DefaultEngraverOptions[variable]);
+		self.settings[variable] = setting
+		addInitializer(Settings.CreateControlInitializer("EngraverOptionsFilterControlTemplate", setting, options, tooltip));
+	end -- filters
 end
 
 function EngraverOptionsFrameMixin:OnEvent(event, ...)

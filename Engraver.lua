@@ -47,7 +47,6 @@ function EngraverFrameMixin:OnEvent(event, ...)
 		self:UpdateLayout()
 	elseif (event == "NEW_RECIPE_LEARNED") then
 		self:LoadCategories()
-		self:UpdateLayout()
 	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
 		self:UpdateLayout()
 	elseif (event == "UPDATE_INVENTORY_ALERTS") then
@@ -62,7 +61,6 @@ function EngraverFrameMixin:Initialize()
 	self.equipmentSlotFrameMap = {}
 	self:RegisterOptionChangedCallbacks()
 	self:LoadCategories()
-	self:UpdateLayout()
 end
 
 function EngraverFrameMixin:RegisterOptionChangedCallbacks()
@@ -73,6 +71,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("DisplayMode", self.UpdateLayout)
 	register("LayoutDirection", self.UpdateLayout)
 	register("HideDragTab", self.UpdateLayout)
+	register("FilterChanged", self.LoadCategories)
 end
 	
 function EngraverFrameMixin:LoadCategories()
@@ -82,16 +81,21 @@ function EngraverFrameMixin:LoadCategories()
 	local categories = C_Engraving.GetRuneCategories(true, true);
 	if #categories > 0 then
 		for c, category in ipairs(categories) do
-			local categoryFrame = self.categoryFramePool:Acquire()
-			categoryFrame:Show()
-			self.equipmentSlotFrameMap[category] = categoryFrame
-			categoryFrame:SetCategory(category)
-			categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+			local runes = Addon.Filters:GetFilteredRunesForCategory(category, false)
+			if #runes > 0 then
+				local categoryFrame = self.categoryFramePool:Acquire()
+				categoryFrame:Show()
+				self.equipmentSlotFrameMap[category] = categoryFrame
+				local knownRunes = C_Engraving.GetRunesForCategory(category, true);	
+				categoryFrame:SetCategory(category, runes, knownRunes)
+				categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+			end
 		end
 		self.noRunesFrame:Hide();
 	else
 		self.noRunesFrame:Show();
 	end
+	self:UpdateLayout()
 end
 
 function EngraverFrameMixin:ResetCategories()
@@ -128,7 +132,7 @@ function EngraverFrameMixin:UpdateLayout(...)
 						categoryFrame:SetPoint(layoutDirection.categoryPoint, prevCategoryFrame, layoutDirection.categoryRelativePoint)
 					end
 					if categoryFrame.UpdateCategoryLayout then
-						categoryFrame:UpdateCategoryLayout()
+						categoryFrame:UpdateCategoryLayout(layoutDirection)
 					end
 					prevCategoryFrame = categoryFrame
 				end
@@ -149,22 +153,24 @@ function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtons = {}
 end
 
-function EngraverCategoryFrameBaseMixin:SetCategory(category)
+function EngraverCategoryFrameBaseMixin:SetCategory(category, runes, knownRunes)
 	self.category = category
-	local runes = C_Engraving.GetRunesForCategory(category, false);
-	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
+	self:SetRunes(runes, knownRunes)
+	self:LoadEmptyRuneButton()
+end
+
+function EngraverCategoryFrameBaseMixin:SetRunes(runes, knownRunes)
 	self.runeButtonPool:ReleaseAll()
 	self.runeButtons = {}
 	for r, rune in ipairs(runes) do
 		local runeButton = self.runeButtonPool:Acquire()
 		self.runeButtons[r] = runeButton
 		local isKnown = self:IsRuneKnown(rune, knownRunes)
-		runeButton:SetRune(rune, category, isKnown)
+		runeButton:SetRune(rune, self.category, isKnown)
 	end
-	self:LoadEmptyRuneButton(category)
 end
 
-function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
+function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton()
 	if self.emptyRuneButton then
 		-- TODO figure out how to get slotName from slotId using API or maybe a constant somewhere
 		local tempSlotsMap = {
@@ -172,10 +178,14 @@ function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
 			[INVSLOT_LEGS] = "LEGSSLOT",
 			[INVSLOT_HAND] = "HANDSSLOT"
 		}
-		local slotName = tempSlotsMap[slotId]
-		local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
-		self:SetID(id);
-		self.emptyRuneButton.icon:SetTexture(textureName);
+		if self.category then
+			local slotName = tempSlotsMap[self.category]
+			if slotName then
+				local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
+				self:SetID(id);
+				self.emptyRuneButton.icon:SetTexture(textureName);
+			end
+		end
 	end
 end
 
@@ -197,14 +207,14 @@ function EngraverCategoryFrameBaseMixin:GetRuneButton(skillLineAbilityID)
 	end
 end
 
-function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout()
+function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout(layoutDirection)
 	self:DetermineActiveAndInactiveButtons()
 	if self.activeButton then
 		local isBroken = GetInventoryItemBroken("player", self.category)
 		self.activeButton:SetBlinking(isBroken, 1.0, 0.0, 0.0)
 	end
 	if self.UpdateCategoryLayoutImpl then
-		self:UpdateCategoryLayoutImpl() -- implemented by "subclasses"/mixins
+		self:UpdateCategoryLayoutImpl(layoutDirection) -- implemented by "subclasses"/mixins
 	end
 end
 
@@ -236,7 +246,7 @@ end
 -- CategoryFrameShowAll --
 --------------------------
 
-function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
+function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl(layoutDirection)
 	-- update position of each button and highlight the active one
 	if self.runeButtons then
 		for r, runeButton in ipairs(self.runeButtons) do
@@ -248,8 +258,7 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
 			if r == 1 then
 				runeButton:SetAllPoints()
 			else
-				local LayoutDirection = Addon.GetCurrentLayoutDirection()
-				runeButton:SetPoint(LayoutDirection.runePoint, self.runeButtons[r-1], LayoutDirection.runeRelativePoint)
+				runeButton:SetPoint(layoutDirection.runePoint, self.runeButtons[r-1], layoutDirection.runeRelativePoint)
 			end
 			if self.activeButton == nil then
 				runeButton:SetBlinking(runeButton.isKnown)
@@ -279,7 +288,7 @@ end
 -- CategoryFramePopUpMenu --
 ----------------------------
 
-function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl()
+function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDirection)
 	-- update visibility and position of each button
 	if self.emptyRuneButton then
 		self.emptyRuneButton:Hide()
@@ -298,8 +307,7 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl()
 				for r, runeButton in ipairs(self.inactiveButtons) do
 					runeButton:SetShown(showInactives)
 					runeButton:ClearAllPoints()
-					local LayoutDirection = Addon.GetCurrentLayoutDirection()
-					runeButton:SetPoint(LayoutDirection.runePoint, prevButton, LayoutDirection.runeRelativePoint)
+					runeButton:SetPoint(layoutDirection.runePoint, prevButton, layoutDirection.runeRelativePoint)
 					prevButton = runeButton
 				end
 			end
