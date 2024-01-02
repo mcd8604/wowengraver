@@ -21,13 +21,6 @@
 		</Size>
 		<Frames>
 			<Button parentKey="emptyRuneButton" inherits="EngraverRuneButtonTemplate" setAllPoints="true" hidden="true">
-				<Scripts>
-					<OnLoad>
-						EngraverRuneButtonMixin.OnLoad(self)
-						self.SpellHighlightTexture:Show();
-						self.SpellHighlightAnim:Play()
-					</OnLoad>
-				</Scripts>
 			</Button>
 		</Frames>
 		<Scripts>
@@ -79,26 +72,6 @@
 				<NormalFont style="GameFontNormalSmall"/>
 				<!--<PushedTextOffset x="0" y="0" />-->
 			</Button>
-			<Frame parentKey="noRunesFrame">
-				<Size x="120" y="40"/>
-				<Anchors>
-					<Anchor />
-				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<Texture name="$parentBackground" parentKey="background">
-							<Color r="0" g="0.694" b="0.941" a="0.125"/>
-						</Texture>
-						<FontString name="$parent_NoRunesLabel" inherits="GameFontNormal" justifyH="CENTER" text="NO_RUNES" parentKey="noRunesLabel">
-							<Size x="120" y="40"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-							<Color r="1" g="1" b="1"/>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
