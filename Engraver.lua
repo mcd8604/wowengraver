@@ -77,6 +77,7 @@ end
 	
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
+	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(false, false);
 	if #categories > 0 then
 		for c, category in ipairs(categories) do
