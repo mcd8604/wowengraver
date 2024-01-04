@@ -67,7 +67,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	function register(optionName, callback)
 		EngraverOptionsCallbackRegistry:RegisterCallback(optionName, function(_, newValue) if not InCombatLockdown() then callback(self, newValue) end end, self)
 	end
-	register("UIScale", self.SetScale)
+	register("UIScale", self.SetScaleAdjustLocation)
 	register("DisplayMode", self.UpdateLayout)
 	register("LayoutDirection", self.UpdateLayout)
 	register("HideDragTab", self.UpdateLayout)
@@ -76,6 +76,7 @@ end
 	
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
+	C_Engraving.RefreshRunesList();
 	local categories = C_Engraving.GetRuneCategories(false, false);
 	if #categories > 0 then
 		for c, category in ipairs(categories) do
@@ -137,6 +138,14 @@ function EngraverFrameMixin:UpdateLayout(...)
 			self.dragTab:SetShown(not EngraverOptions.HideDragTab);
 		end
 	end
+end
+
+function EngraverFrameMixin:SetScaleAdjustLocation(scale)
+	local div = self:GetScale() / scale
+	local x, y = self:GetLeft() * div, self:GetTop() * div
+	self:ClearAllPoints()
+	self:SetScale(scale)
+	self:SetPoint("TopLeft", self:GetParent(), "BottomLeft", x, y)
 end
 
 -----------------------
