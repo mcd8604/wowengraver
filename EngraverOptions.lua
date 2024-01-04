@@ -44,7 +44,7 @@ local DefaultEngraverOptions = {
 	LayoutDirection = 0,
 	HideTooltip = false,
 	HideDragTab = false,
-	EnableRightClickDrag = true,
+	EnableRightClickDrag = false,
 	UIScale = 1.0
 }
 
