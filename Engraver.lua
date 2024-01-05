@@ -15,10 +15,16 @@ Addon.EngraverDisplayModes = EngraverDisplayModes
 Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[EngraverOptions.DisplayMode+1] end
 
 local EngraverLayoutDirections = {
-	{ text = "Left to Right", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT", runePoint = "LEFT", runeRelativePoint = "RIGHT" },
-	{ text = "Top to Bottom", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT", runePoint = "TOP", runeRelativePoint = "BOTTOM" },
-	{ text = "Right to Left", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT", runePoint = "RIGHT", runeRelativePoint = "LEFT" },
-	{ text = "Bottom to Top", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT", runePoint = "BOTTOM", runeRelativePoint = "TOP" }
+	{ text = "Left to Right", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT",	runePoint = "LEFT",		runeRelativePoint = "RIGHT"		},
+	{ text = "Top to Bottom", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT",	runePoint = "TOP",		runeRelativePoint = "BOTTOM"	},
+	{ text = "Right to Left", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT",	runePoint = "RIGHT",	runeRelativePoint = "LEFT"		},
+	{ text = "Bottom to Top", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT",	runePoint = "BOTTOM",	runeRelativePoint = "TOP"		}
+}
+local EngraverLayout = {
+	LeftToRight = 0,
+	TopToBottom = 1,
+	RightToLeft = 2,
+	BottomToTop = 3,
 }
 Addon.EngraverLayoutDirections = EngraverLayoutDirections
 Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[EngraverOptions.LayoutDirection+1] end
@@ -78,9 +84,9 @@ end
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
 	C_Engraving.RefreshRunesList();
-	local categories = C_Engraving.GetRuneCategories(false, false);
-	if #categories > 0 then
-		for c, category in ipairs(categories) do
+	self.categories = C_Engraving.GetRuneCategories(false, false);
+	if #self.categories > 0 then
+		for c, category in ipairs(self.categories) do
 			local categoryFrame = self.categoryFramePool:Acquire()
 			categoryFrame:Show()
 			self.equipmentSlotFrameMap[category] = categoryFrame
@@ -91,6 +97,7 @@ function EngraverFrameMixin:LoadCategories()
 end
 
 function EngraverFrameMixin:ResetCategories()
+	self.categories = nil
 	for categoryFrame in self.categoryFramePool:EnumerateActive() do
 		if categoryFrame.TearDownDisplayMode then
 			categoryFrame:TearDownDisplayMode()
@@ -110,9 +117,14 @@ end
 
 function EngraverFrameMixin:UpdateLayout(...)
 	if not InCombatLockdown() then
+		if EngraverOptions.LayoutDirection == EngraverLayout.LeftToRight or EngraverOptions.LayoutDirection == EngraverLayout.RightToLeft then
+			self:SetSize(40, 40 * #self.categories)
+		else
+			self:SetSize(40 * #self.categories, 40)
+		end
 		self:SetScale(EngraverOptions.UIScale or 1.0)
+		local layoutDirection = Addon.GetCurrentLayoutDirection()
 		if self.equipmentSlotFrameMap then
-			local layoutDirection = Addon.GetCurrentLayoutDirection()
 			local displayMode = Addon.GetCurrentDisplayMode()
 			local prevCategoryFrame = nil
 			for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
@@ -130,9 +142,62 @@ function EngraverFrameMixin:UpdateLayout(...)
 				end
 			end
 		end
-		if self.dragTab then
-			self.dragTab:SetShown(not EngraverOptions.HideDragTab);
+		self:UpdateDragTabLayout()
+	end
+end
+
+local DragTabLayoutData = {
+	{-- Left to Right
+		textRotation		= 90,
+		textOffset			= CreateVector2D(-7, -5),
+		offset				= CreateVector2D(10, 0),
+		point				= "RIGHT", 
+		relativePoint		= "LEFT",
+		swapTabDimensions	= true
+	},
+	{-- Top to Bottom
+		textRotation		= 0,
+		textOffset			= CreateVector2D(0, 2),
+		offset				= CreateVector2D(0, -10),
+		point				= "BOTTOM", 
+		relativePoint		= "TOP",
+		swapTabDimensions	= false
+	},		
+	{-- Right to Left
+		textRotation		= 270,
+		textOffset			= CreateVector2D(7, -5),
+		offset				= CreateVector2D(-10, 0),
+		point				= "LEFT", 
+		relativePoint		= "RIGHT",
+		swapTabDimensions	= true
+	},	
+	{-- Bottom to Top
+		textRotation		= 0,
+		textOffset			= CreateVector2D(0, -2),
+		offset				= CreateVector2D(0, 10),
+		point				= "TOP", 
+		relativePoint		= "BOTTOM",
+		swapTabDimensions	= false
+	}	
+}
+
+function EngraverFrameMixin:UpdateDragTabLayout()
+	if self.dragTab then
+		local layoutIndex = EngraverOptions.LayoutDirection+1
+		local layoutData = DragTabLayoutData[layoutIndex]
+		-- dragTab
+		self.dragTab:SetShown(not EngraverOptions.HideDragTab);
+		self.dragTab:ClearAllPoints()
+		self.dragTab:SetPoint(layoutData.point, self, layoutData.relativePoint, layoutData.offset:GetXY())
+		local x, y =  76, 32 -- TODO getsize onload and cache in class var
+		if layoutData.swapTabDimensions then
+			self.dragTab:SetSize(y, x)
+		else
+			self.dragTab:SetSize(x, y)
 		end
+		-- text
+		self.dragTab.Text:SetRotation(rad(layoutData.textRotation))
+		self.dragTab.Text:SetPoint("CENTER", self.dragTab, "CENTER", layoutData.textOffset:GetXY())
 	end
 end
 

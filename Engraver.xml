@@ -39,17 +39,17 @@
 			</Anchor>
 		</Anchors>
 		<Frames>
-			<Button name="EngraverDragTab" parentKey="dragTab" inherits="ChatTabArtTemplate" mixin="EngraverDragTabMixin" alpha="1">
+			<Button name="EngraverDragTab" parentKey="dragTab" inherits="TooltipBackdropTemplate" mixin="EngraverDragTabMixin">
+				<KeyValues>
+					<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+					<KeyValue key="backdropColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+					<KeyValue key="backdropColorAlpha" value="0.5" type="global"/>
+				</KeyValues>
+				<Size x="76" y="32"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
 				</Anchors>
 				<Scripts>
-					<OnShow>
-						-- selected textures are not hidden by default, so hide them
-						self.leftSelectedTexture:Hide()
-						self.rightSelectedTexture:Hide()
-						self.middleSelectedTexture:Hide()
-					</OnShow>
 					<OnEnter>
 						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 						GameTooltip:AddLine("Drag this tab to move Engraver.");
@@ -64,9 +64,9 @@
 					<OnMouseUp method="OnMouseUp"/>
 				</Scripts>
 				<ButtonText name="$parentText" parentKey="Text" text="Engraver">
-					<Size x="50" y="8"/>
+					<Size x="76" y="76"/>
 					<Anchors>
-						<Anchor point="CENTER" relativeTo="$parentMiddle" relativePoint="CENTER" x="0" y="-5"/>
+						<Anchor point="CENTER" relativePoint="CENTER"/>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="GameFontNormalSmall"/>
