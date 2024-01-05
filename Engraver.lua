@@ -116,7 +116,7 @@ function EngraverFrameMixin:UpdateCategory(equipmentSlot)
 end
 
 function EngraverFrameMixin:UpdateLayout(...)
-	if not InCombatLockdown() then
+	if not InCombatLockdown() and self.categories ~= nil then
 		if EngraverOptions.LayoutDirection == EngraverLayout.LeftToRight or EngraverOptions.LayoutDirection == EngraverLayout.RightToLeft then
 			self:SetSize(40, 40 * #self.categories)
 		else
