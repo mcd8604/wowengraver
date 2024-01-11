@@ -9,4 +9,3 @@
 
 Engraver.xml
 EngraverOptions.xml
-Filters.lua

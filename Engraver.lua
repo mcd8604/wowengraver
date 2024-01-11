@@ -77,6 +77,8 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("DisplayMode", self.UpdateLayout)
 	register("LayoutDirection", self.UpdateLayout)
 	register("HideDragTab", self.UpdateLayout)
+	register("ShowFilterSelector", self.UpdateLayout)
+	register("CurrentFilter", self.LoadCategories)--function() print('current filter changed') end)
 	register("FilterChanged", self.LoadCategories)
 end
 	
@@ -154,6 +156,7 @@ local DragTabLayoutData = {
 	{-- Left to Right
 		textRotation		= 90,
 		textOffset			= CreateVector2D(-7, -5),
+		filterButtonOffset	= CreateVector2D(-3, 0),
 		offset				= CreateVector2D(10, 0),
 		point				= "RIGHT", 
 		relativePoint		= "LEFT",
@@ -162,6 +165,7 @@ local DragTabLayoutData = {
 	{-- Top to Bottom
 		textRotation		= 0,
 		textOffset			= CreateVector2D(0, 2),
+		filterButtonOffset	= CreateVector2D(0, 2),
 		offset				= CreateVector2D(0, -10),
 		point				= "BOTTOM", 
 		relativePoint		= "TOP",
@@ -170,6 +174,7 @@ local DragTabLayoutData = {
 	{-- Right to Left
 		textRotation		= 270,
 		textOffset			= CreateVector2D(7, -5),
+		filterButtonOffset	= CreateVector2D(2, 0),
 		offset				= CreateVector2D(-10, 0),
 		point				= "LEFT", 
 		relativePoint		= "RIGHT",
@@ -178,6 +183,7 @@ local DragTabLayoutData = {
 	{-- Bottom to Top
 		textRotation		= 0,
 		textOffset			= CreateVector2D(0, -2),
+		filterButtonOffset	= CreateVector2D(0, -3),
 		offset				= CreateVector2D(0, 10),
 		point				= "TOP", 
 		relativePoint		= "BOTTOM",
@@ -196,12 +202,47 @@ function EngraverFrameMixin:UpdateDragTabLayout()
 		local x, y =  76, 32 -- TODO getsize onload and cache in class var
 		if layoutData.swapTabDimensions then
 			self.dragTab:SetSize(y, x)
+			self.filterRightButton:SetShown(false)
+			self.filterLeftButton:SetShown(false)
+			self.filterUpButton:SetShown(EngraverOptions.ShowFilterSelector)
+			self.filterDownButton:SetShown(EngraverOptions.ShowFilterSelector)
 		else
 			self.dragTab:SetSize(x, y)
+			self.filterUpButton:SetShown(false)
+			self.filterDownButton:SetShown(false)
+			self.filterRightButton:SetShown(EngraverOptions.ShowFilterSelector)
+			self.filterLeftButton:SetShown(EngraverOptions.ShowFilterSelector)
 		end
-		-- text
-		self.dragTab.Text:SetRotation(rad(layoutData.textRotation))
+		self:UpdateDragTabText(layoutData)
+		-- anchors
+		local filterButtonOffsetX, filterButtonOffsetY = layoutData.filterButtonOffset:GetXY()		
+		function updatefilterButtonOffset(filterButton)
+			local point, relativeTo, relativePoint, filterX, filterY = filterButton:GetPoint()
+			filterButton:SetPoint(point, relativeTo, relativePoint, filterButtonOffsetX, filterButtonOffsetY)
+		end
+		updatefilterButtonOffset(self.filterUpButton)
+		updatefilterButtonOffset(self.filterDownButton)
+		updatefilterButtonOffset(self.filterRightButton)
+		updatefilterButtonOffset(self.filterLeftButton)
+	end
+end
+
+function EngraverFrameMixin:UpdateDragTabText(layoutData)
+	if self.dragTab and self.dragTab.Text then
+		self.dragTab.Text:ClearAllPoints()
+		local rotation = rad(layoutData.textRotation)
+		self.dragTab.Text:SetRotation(rotation)
+		local tabText = "Engraver"
+		if EngraverOptions.ShowFilterSelector then
+			local filter = Addon.Filters:GetCurrentFilter()
+			if filter then
+				tabText = filter.Name
+			else 
+				tabText = Addon.Filters.NO_FILTER_DISPLAY_STRING
+			end	
+		end
 		self.dragTab.Text:SetPoint("CENTER", self.dragTab, "CENTER", layoutData.textOffset:GetXY())
+		self.dragTab.Text:SetText(tabText)
 	end
 end
 
@@ -582,5 +623,26 @@ function EngraverDragTabMixin:OnMouseUp(button)
 	local parent = self:GetParent()
 	if parent and parent.StopMovingOrSizing then
 		parent:StopMovingOrSizing();
+	end
+end
+
+------------------
+-- FilterButton --
+------------------
+
+EngraverFilterButtonMixin = CreateFromMixins(MinimalScrollBarStepperScriptsMixin)
+
+function EngraverFilterButtonMixin:OnButtonStateChanged()
+	MinimalScrollBarStepperScriptsMixin.OnButtonStateChanged(self)
+	if self.HighlightTexture then
+		self.HighlightTexture:SetShown(self.over)
+	end
+end
+
+function EngraverFilterButtonMixin:OnClick()
+	if self.direction > 0 then
+		Addon.Filters:SetCurrentFilterNext()
+	else
+		Addon.Filters:SetCurrentFilterPrev()
 	end
 end

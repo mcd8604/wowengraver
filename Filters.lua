@@ -11,24 +11,69 @@ function FiltersMixin:GetFiltersForPlayerClass()
 	if EngraverFilters[playerClassName] == nil then
 		EngraverFilters[playerClassName] = {}
 	end
-	if #EngraverFilters[playerClassName] == 0 then
-		EngraverFilters[playerClassName][1] = { Name = "Default", RuneIDs = {} }
-	end
 	return EngraverFilters[playerClassName]
 end
 
+function FiltersMixin:CreateFilter(filterName)
+	local filters = self:GetFiltersForPlayerClass()	
+	table.insert(filters, { Name = filterName, RuneIDs = {} })
+	return #filters
+end
+
 function FiltersMixin:GetFilter(index)
-	local filter = self:GetFiltersForPlayerClass()[index]
-	if filter then
-		filter.Name = filter.Name or "Default"
-		filter.RuneIDs = filter.RuneIDs or {}
+	if index then
+		return self:GetFiltersForPlayerClass()[index]
 	end
-	return filter
 end
 
 function FiltersMixin:GetCurrentFilter()
-	local index = 1 -- TODO refactor for multiple filters, save current filter index in EngraverOptions
-	return self:GetFilter(index)
+	if EngraverOptions.CurrentFilter > 0 then
+		return self:GetFilter(EngraverOptions.CurrentFilter)
+	end
+end
+
+function FiltersMixin:GetCurrentFilterName()
+	local filter = self:GetCurrentFilter()
+	if filter ~= nil then
+		return filter.Name
+	end
+end
+
+function FiltersMixin:IsCurrentFilterValid()
+	return EngraverOptions.CurrentFilter ~= nil and EngraverOptions.CurrentFilter > 0
+end
+
+function FiltersMixin:SetCurrentFilter(index)
+	if EngraverOptions.CurrentFilter ~= index then
+		local filter = self:GetFilter(index)
+		if index == 0 or filter ~= nil then
+			EngraverOptions.CurrentFilter = index
+			EngraverOptionsCallbackRegistry:TriggerEvent("CurrentFilter", index)
+		end
+	end
+end
+
+function FiltersMixin:SetCurrentFilterNext()
+	self:SetCurrentFilter((EngraverOptions.CurrentFilter+1) % (#self:GetFiltersForPlayerClass()+1))
+end
+
+function FiltersMixin:SetCurrentFilterPrev()
+	self:SetCurrentFilter((EngraverOptions.CurrentFilter-1) % (#self:GetFiltersForPlayerClass()+1))
+end
+
+function FiltersMixin:DeleteCurrentFilter()
+	return self:DeleteFilter(EngraverOptions.CurrentFilter)
+end
+
+function FiltersMixin:DeleteFilter(index)
+	if index then
+		local filters = self:GetFiltersForPlayerClass()
+		if filters[index] then
+			local filter =  table.remove(filters, index)
+			EngraverOptionsCallbackRegistry:TriggerEvent("CurrentFilter", index)
+			return filter
+		end
+	end
 end
 
 function FiltersMixin:AnyRunePassesFilter(runes, optionalFilter)
@@ -88,5 +133,4 @@ function FiltersMixin:ToggleRune(filterIndex, runeID, toggleState)
 end
 
 Addon.Filters = CreateFromMixins(FiltersMixin)
-
-EngraverFilter = Addon.Filters
+Addon.Filters.NO_FILTER_DISPLAY_STRING = "(No Filter)"

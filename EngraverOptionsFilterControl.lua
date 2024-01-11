@@ -8,8 +8,7 @@ EngraverOptionsFilterRuneButtonMixin = CreateFromMixins(EngraverRuneButtonMixin)
 
 function EngraverOptionsFilterRuneButtonMixin:OnClick(button, down)
 	if self.skillLineAbilityID then
-		local index = 1 -- TODO refactor for multiple filters
-		Addon.Filters:ToggleRune(index, self.skillLineAbilityID, self:GetChecked())
+		Addon.Filters:ToggleRune(EngraverOptions.CurrentFilter, self.skillLineAbilityID, self:GetChecked())
 	end
 end
 
@@ -47,6 +46,8 @@ function EngraverOptionsFilterControlMixin:OnLoad()
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
 	self:RegisterEvent("NEW_RECIPE_LEARNED");
 	self:RegisterEvent("UPDATE_INVENTORY_ALERTS");
+	
+	--EngraverOptionsCallbackRegistry:RegisterCallback("CurrentFilter", function(_, newValue) if not InCombatLockdown() then callback(self, newValue) end end, self)
 end
 
 function EngraverOptionsFilterControlMixin:SetupCategoryFrame(category, frame)
@@ -57,9 +58,7 @@ function EngraverOptionsFilterControlMixin:SetupCategoryFrame(category, frame)
 		frame:SetDisplayMode(EngraverCategoryFrameShowAllMixin)
 		frame:UpdateCategoryLayout(Addon.EngraverLayoutDirections[1])
 		for r, runeButton in ipairs(frame.runeButtons) do
-			local index = 1 -- TODO refactor for multiple filters
-			local filter = Addon.Filters:GetFilter(index)
-			local passes = Addon.Filters:RunePassesFilter(runeButton, filter)
+			local passes = Addon.Filters:RunePassesFilter(runeButton)
 			runeButton:SetChecked(passes)
 			runeButton:SetBlinking(false)
 		end
