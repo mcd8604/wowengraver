@@ -571,17 +571,19 @@ CharacterSlotButtons[INVSLOT_HAND] = CharacterHandsSlot
 
 function EngraverRuneButtonMixin:TryEngrave()
 	if self.category and self.skillLineAbilityID and not InCombatLockdown() then
-		local characterSlotButton = CharacterSlotButtons[self.category]
-		if characterSlotButton then
-			local itemId, unknown = GetInventoryItemID("player", self.category)
-			if itemId then
-				ClearCursor()
-				C_Engraving.CastRune(self.skillLineAbilityID);
-				characterSlotButton:Click(); 
-				StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
-				ClearCursor()
-			else
-				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
+		if not C_Engraving.IsRuneEquipped(self.skillLineAbilityID) then
+			local characterSlotButton = CharacterSlotButtons[self.category]
+			if characterSlotButton then
+				local itemId, unknown = GetInventoryItemID("player", self.category)
+				if itemId then
+					ClearCursor()
+					C_Engraving.CastRune(self.skillLineAbilityID);
+					characterSlotButton:Click(); 
+					StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
+					ClearCursor()
+				else
+					UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
+				end
 			end
 		end
 	end
