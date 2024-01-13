@@ -43,22 +43,23 @@ function FiltersMixin:IsCurrentFilterValid()
 	return EngraverOptions.CurrentFilter ~= nil and EngraverOptions.CurrentFilter > 0
 end
 
-function FiltersMixin:SetCurrentFilter(index)
-	if EngraverOptions.CurrentFilter ~= index then
-		local filter = self:GetFilter(index)
-		if index == 0 or filter ~= nil then
-			EngraverOptions.CurrentFilter = index
-			EngraverOptionsCallbackRegistry:TriggerEvent("CurrentFilter", index)
+function FiltersMixin:SetCurrentFilter(index, force)
+	if EngraverOptions.CurrentFilter ~= index or force == true then
+		local safeIndex = index % (#self:GetFiltersForPlayerClass()+1)
+		local filter = self:GetFilter(safeIndex)
+		if safeIndex == 0 or filter ~= nil then
+			EngraverOptions.CurrentFilter = safeIndex 
+			EngraverOptionsCallbackRegistry:TriggerEvent("CurrentFilter", EngraverOptions.CurrentFilter)
 		end
 	end
 end
 
 function FiltersMixin:SetCurrentFilterNext()
-	self:SetCurrentFilter((EngraverOptions.CurrentFilter+1) % (#self:GetFiltersForPlayerClass()+1))
+	self:SetCurrentFilter((EngraverOptions.CurrentFilter+1), false)
 end
 
 function FiltersMixin:SetCurrentFilterPrev()
-	self:SetCurrentFilter((EngraverOptions.CurrentFilter-1) % (#self:GetFiltersForPlayerClass()+1))
+	self:SetCurrentFilter((EngraverOptions.CurrentFilter-1), false)
 end
 
 function FiltersMixin:DeleteCurrentFilter()
@@ -70,7 +71,7 @@ function FiltersMixin:DeleteFilter(index)
 		local filters = self:GetFiltersForPlayerClass()
 		if filters[index] then
 			local filter =  table.remove(filters, index)
-			EngraverOptionsCallbackRegistry:TriggerEvent("CurrentFilter", index)
+			self:SetCurrentFilter(index, true)
 			return filter
 		end
 	end

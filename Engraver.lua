@@ -78,7 +78,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("LayoutDirection", self.UpdateLayout)
 	register("HideDragTab", self.UpdateLayout)
 	register("ShowFilterSelector", self.UpdateLayout)
-	register("CurrentFilter", self.LoadCategories)--function() print('current filter changed') end)
+	register("CurrentFilter", self.LoadCategories)
 	register("FilterChanged", self.LoadCategories)
 end
 	
@@ -202,29 +202,49 @@ function EngraverFrameMixin:UpdateDragTabLayout()
 		local x, y =  76, 32 -- TODO getsize onload and cache in class var
 		if layoutData.swapTabDimensions then
 			self.dragTab:SetSize(y, x)
-			self.filterRightButton:SetShown(false)
-			self.filterLeftButton:SetShown(false)
-			self.filterUpButton:SetShown(EngraverOptions.ShowFilterSelector)
-			self.filterDownButton:SetShown(EngraverOptions.ShowFilterSelector)
 		else
 			self.dragTab:SetSize(x, y)
-			self.filterUpButton:SetShown(false)
-			self.filterDownButton:SetShown(false)
-			self.filterRightButton:SetShown(EngraverOptions.ShowFilterSelector)
-			self.filterLeftButton:SetShown(EngraverOptions.ShowFilterSelector)
 		end
 		self:UpdateDragTabText(layoutData)
-		-- anchors
-		local filterButtonOffsetX, filterButtonOffsetY = layoutData.filterButtonOffset:GetXY()		
-		function updatefilterButtonOffset(filterButton)
-			local point, relativeTo, relativePoint, filterX, filterY = filterButton:GetPoint()
-			filterButton:SetPoint(point, relativeTo, relativePoint, filterButtonOffsetX, filterButtonOffsetY)
-		end
-		updatefilterButtonOffset(self.filterUpButton)
-		updatefilterButtonOffset(self.filterDownButton)
-		updatefilterButtonOffset(self.filterRightButton)
-		updatefilterButtonOffset(self.filterLeftButton)
+		self:UpdateFilterButtonsLayout(layoutData)
 	end
+end
+
+function EngraverFrameMixin:UpdateFilterButtonsLayout(layoutData)
+	-- visibility
+	UnregisterStateDriver(self.filterRightButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterLeftButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterUpButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterDownButton, "visibility", "[combat]hide;show")
+	if layoutData.swapTabDimensions then
+		self.filterRightButton:SetShown(false)
+		self.filterLeftButton:SetShown(false)
+		self.filterUpButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterDownButton:SetShown(EngraverOptions.ShowFilterSelector)
+		if EngraverOptions.ShowFilterSelector then
+			RegisterStateDriver(self.filterUpButton, "visibility", "[combat]hide;show")
+			RegisterStateDriver(self.filterDownButton, "visibility", "[combat]hide;show")
+		end
+	else
+		self.filterRightButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterLeftButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterUpButton:SetShown(false)
+		self.filterDownButton:SetShown(false)
+		if EngraverOptions.ShowFilterSelector then
+			RegisterStateDriver(self.filterRightButton, "visibility", "[combat]hide;show")
+			RegisterStateDriver(self.filterLeftButton, "visibility", "[combat]hide;show")
+		end
+	end
+	-- anchors
+	local filterButtonOffsetX, filterButtonOffsetY = layoutData.filterButtonOffset:GetXY()
+	function updatefilterButtonOffset(filterButton)
+		local point, relativeTo, relativePoint, filterX, filterY = filterButton:GetPoint()
+		filterButton:SetPoint(point, relativeTo, relativePoint, filterButtonOffsetX, filterButtonOffsetY)
+	end
+	updatefilterButtonOffset(self.filterRightButton)
+	updatefilterButtonOffset(self.filterLeftButton)
+	updatefilterButtonOffset(self.filterUpButton)
+	updatefilterButtonOffset(self.filterDownButton)
 end
 
 function EngraverFrameMixin:UpdateDragTabText(layoutData)
@@ -609,12 +629,14 @@ end
 EngraverDragTabMixin = {}
 
 function EngraverDragTabMixin:OnMouseDown(button)
-	if button == "RightButton" then
-		Settings.OpenToCategory(addonName);
-	elseif button == "LeftButton" then
-		local parent = self:GetParent()
-		if parent and parent.StartMoving then
-			parent:StartMoving();
+	if not InCombatLockdown() then
+		if button == "RightButton" then
+			Settings.OpenToCategory(addonName);
+		elseif button == "LeftButton" then
+			local parent = self:GetParent()
+			if parent and parent.StartMoving then
+				parent:StartMoving();
+			end
 		end
 	end
 end
@@ -640,9 +662,11 @@ function EngraverFilterButtonMixin:OnButtonStateChanged()
 end
 
 function EngraverFilterButtonMixin:OnClick()
-	if self.direction > 0 then
-		Addon.Filters:SetCurrentFilterNext()
-	else
-		Addon.Filters:SetCurrentFilterPrev()
+	if not InCombatLockdown() then
+		if self.direction > 0 then
+			Addon.Filters:SetCurrentFilterNext()
+		else
+			Addon.Filters:SetCurrentFilterPrev()
+		end
 	end
 end

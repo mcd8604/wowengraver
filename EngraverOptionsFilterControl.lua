@@ -39,15 +39,23 @@ function EngraverOptionsFilterControlMixin:OnLoad()
 		[INVSLOT_LEGS]	=	self.legsFrame,
 		[INVSLOT_HAND]	=	self.handsFrame
 	}
-	for category, frame in pairs(self.categoryFrames) do
-		self:SetupCategoryFrame(category, frame)
-	end
+	self:SetupCategoryFrames()
 	self:RegisterEvent("RUNE_UPDATED");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
 	self:RegisterEvent("NEW_RECIPE_LEARNED");
 	self:RegisterEvent("UPDATE_INVENTORY_ALERTS");
-	
-	--EngraverOptionsCallbackRegistry:RegisterCallback("CurrentFilter", function(_, newValue) if not InCombatLockdown() then callback(self, newValue) end end, self)
+	-- Update selected runes when EngraverOptions.CurrentFilter changes
+	EngraverOptionsCallbackRegistry:RegisterCallback("CurrentFilter", function() 
+		if not InCombatLockdown() then 
+			self:SetupCategoryFrames()
+		end
+	end, self)
+end
+
+function EngraverOptionsFilterControlMixin:SetupCategoryFrames()
+	for category, frame in pairs(self.categoryFrames) do
+		self:SetupCategoryFrame(category, frame)
+	end
 end
 
 function EngraverOptionsFilterControlMixin:SetupCategoryFrame(category, frame)

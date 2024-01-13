@@ -55,7 +55,6 @@ local function AddEngraverOptionsSetting(self, variable, name, varType)
 	local setting = Settings.RegisterAddOnSetting(self.category, name, variable, varType, DefaultEngraverOptions[variable]);
 	self.engraverOptionsSettings[variable] = setting
 	Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...)
-		print(variable, newValue)
 		EngraverOptions[variable] = newValue;
 		EngraverOptionsCallbackRegistry:TriggerEvent(variable, newValue)
 	end, self)
@@ -182,9 +181,10 @@ end
 --end
 
 function EngraverOptionsFrameMixin:OnCurrentFilterChanged(_, newValue)
-	--if not InCombatLockdown() then -- TODO test combat - is this check necessary or are we safe to update in combat?
+	if not InCombatLockdown() then
+		-- RepairDisplay will help remove the FilterControl when there is no current filter and add it when there is
 		self.settingsList:RepairDisplay(self.initializers)	
-	--end
+	end
 end
 
 --------------------
@@ -223,15 +223,20 @@ function EngraverOptionsFilterDropDownMixin:Init(initializer)
 
 	self:RefreshSelected();
 	self:EvaluateButtonState();
+	-- Update selected value when EngraverOption.CurrentFilter changes
+	EngraverOptionsCallbackRegistry:RegisterCallback("CurrentFilter", function(_, newIndex)
+		if not InCombatLockdown() then 
+			self:SetValue(newIndex)
+			self:EvaluateButtonState()
+		end
+	end, self)
 end
 
 do
 	local function OnCreateNewFilter(dialog)
 		local newFilterName = strtrim(dialog.editBox:GetText());
 		local index = Addon.Filters:CreateFilter(newFilterName)
-		dialog.data.filterDropDown:InitDropDown();
-		dialog.data.filterDropDown:SetValue(index);
-		dialog.data.filterDropDown:EvaluateButtonState();
+		dialog.data.filterDropDown:RefreshFilterList(index);
 		dialog:Hide();
 	end
 
@@ -268,7 +273,9 @@ StaticPopupDialogs["ENGRAVER_FILTER_DELETION"] = {
 	OnAccept = function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 		Addon.Filters:DeleteCurrentFilter()
-		--self.data.filterDropDown:RefreshList();
+		-- NOTE if deleting is desired from multiple places in the future, then:
+		--      define/trigger a FilterDeleted event somewhere, register in the dropdown, and call RefreshFilterList from the handler instead
+		self.data.filterDropDown:RefreshFilterList(EngraverOptions.CurrentFilter)
 	end,
 	exclusive = 1,
 	whileDead = 1,
@@ -276,14 +283,18 @@ StaticPopupDialogs["ENGRAVER_FILTER_DELETION"] = {
 	hideOnEscape = 1
 };
 
+function EngraverOptionsFilterDropDownMixin:RefreshFilterList(selectedIndex)
+	self:InitDropDown();
+	self:SetValue(selectedIndex);
+	self:EvaluateButtonState();
+end
+
 function EngraverOptionsFilterDropDownMixin:RefreshSelected()
 	self:SetValue(EngraverOptions.CurrentFilter or 0)
 end
 
 -- OnSettingValueChanged fires when the setting bound to control changes value (not EngraverOptions.CurrentFilter)
 function EngraverOptionsFilterDropDownMixin:OnSettingValueChanged(setting, value)
-	-- TODO changing current filter needs to properly update delete/rename buttons
-	print('OSVC')
 	SettingsDropDownControlMixin.OnSettingValueChanged(self, setting, value);
 	self:EvaluateButtonState()
 end

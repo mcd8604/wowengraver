@@ -52,14 +52,6 @@
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
 				</Anchors>
-				<!--<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentCurrentFilterText" parentKey="currentFilterText" inherits="GameFontNormalSmall" text="test" >
-							<Color r="0" g="0.8" b="0.8" a="1.0" />
-							<Size x="76" y="76"/>
-						</FontString>
-					</Layer>
-				</Layers>-->
 				<Scripts>
 					<OnEnter>
 						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -81,21 +73,6 @@
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="GameFontNormalSmall"/>
-				<!--<PushedTextOffset x="0" y="0" />-->
-				<!--<Frames>
-					<Button name="$parentCurrentFilter" parentKey="currentFilter">
-						<Anchors>
-							<Anchor point="CENTER" relativePoint="CENTER"/>
-						</Anchors>
-						<Size x="76" y="76"/>
-						<ButtonText name="$parentText" parentKey="Text" text="[Current Filter]">
-							<Anchors>
-								<Anchor point="CENTER" relativePoint="CENTER"/>
-							</Anchors>
-						</ButtonText>
-						<NormalFont style="GameFontNormalSmall"/>
-					</Button>
-				</Frames>-->
 			</Button>
 			<EventButton name="EngraverFilterUpButton" parentKey="filterUpButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
 				<KeyValues>
