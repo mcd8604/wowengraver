@@ -1,5 +1,60 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="EngraverOptionsFilterControl.lua"/>
 	<Script file="EngraverOptions.lua"/>
+	<CheckButton name="EngraverOptionsFilterRuneButtonTemplate" mixin="EngraverOptionsFilterRuneButtonMixin" inherits="EngraverRuneButtonTemplate" virtual="true">
+		<Scripts>
+			<OnClick method="OnClick"/>
+		</Scripts>
+	</CheckButton>
+	<Frame name="EngraverOptionsFilterCategoryFrameTemplate" mixin="EngraverOptionsFilterCategoryFrameMixin" inherits="EngraverCategoryFrameTemplate" virtual="true">
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
+	<Frame name="EngraverOptionsFilterDropDownTemplate" inherits="SettingsDropDownControlTemplate" mixin="EngraverOptionsFilterDropDownMixin" virtual="true">
+		<KeyValues>
+			<KeyValue key="dropDownType" value="Frame" type="string"/>
+			<KeyValue key="dropDownTemplate" value="SettingsSelectionPopoutWithButtonsTemplate" type="string"/>
+		</KeyValues>
+		<Size y="54"/>
+		<Frames>
+			<Button parentKey="NewButton" inherits="UIPanelButtonTemplate">
+				<Size x="100" y="21"/>
+			</Button>
+			<Button parentKey="DeleteButton" inherits="UIPanelButtonTemplate">
+				<Size x="100" y="21"/>
+			</Button>
+		</Frames>
+		<!--<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>-->
+	</Frame>
+	<Frame name="EngraverOptionsFilterControlTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterControlMixin" virtual="true">
+		<Size x="280" y="140"/>
+		<Frames>
+			<Frame name="$parentChestFrame" parentKey="chestFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+				<Size x="40" y="40"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOP" x="-80" y="-10"></Anchor>
+				</Anchors>
+			</Frame>
+			<Frame name="$parentHandsFrame" parentKey="handsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentChestFrame" relativePoint="BOTTOMLEFT">
+					</Anchor>
+				</Anchors>
+			</Frame>
+			<Frame name="$parentLegsFrame" parentKey="legsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentHandsFrame" relativePoint="BOTTOMLEFT">
+					</Anchor>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
 	<Frame name="EngraverOptionsFrame" mixin="EngraverOptionsFrameMixin">
 		<Scripts>
 			<OnLoad method="OnLoad"/>

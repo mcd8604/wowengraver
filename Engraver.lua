@@ -53,7 +53,6 @@ function EngraverFrameMixin:OnEvent(event, ...)
 		self:UpdateLayout()
 	elseif (event == "NEW_RECIPE_LEARNED") then
 		self:LoadCategories()
-		self:UpdateLayout()
 	elseif (event == "PLAYER_EQUIPMENT_CHANGED") then
 		self:UpdateLayout()
 	elseif (event == "UPDATE_INVENTORY_ALERTS") then
@@ -68,7 +67,6 @@ function EngraverFrameMixin:Initialize()
 	self.equipmentSlotFrameMap = {}
 	self:RegisterOptionChangedCallbacks()
 	self:LoadCategories()
-	self:UpdateLayout()
 end
 
 function EngraverFrameMixin:RegisterOptionChangedCallbacks()
@@ -79,6 +77,9 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("DisplayMode", self.UpdateLayout)
 	register("LayoutDirection", self.UpdateLayout)
 	register("HideDragTab", self.UpdateLayout)
+	register("ShowFilterSelector", self.UpdateLayout)
+	register("CurrentFilter", self.LoadCategories)
+	register("FilterChanged", self.LoadCategories)
 end
 	
 function EngraverFrameMixin:LoadCategories()
@@ -87,17 +88,23 @@ function EngraverFrameMixin:LoadCategories()
 	self.categories = C_Engraving.GetRuneCategories(false, false);
 	if #self.categories > 0 then
 		for c, category in ipairs(self.categories) do
-			local categoryFrame = self.categoryFramePool:Acquire()
-			categoryFrame:Show()
-			self.equipmentSlotFrameMap[category] = categoryFrame
-			categoryFrame:SetCategory(category)
-			categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+			local runes = Addon.Filters:GetFilteredRunesForCategory(category, false)
+			if #runes > 0 then
+				local categoryFrame = self.categoryFramePool:Acquire()
+				categoryFrame:Show()
+				self.equipmentSlotFrameMap[category] = categoryFrame
+				local knownRunes = C_Engraving.GetRunesForCategory(category, true);	
+				categoryFrame:SetCategory(category, runes, knownRunes)
+				categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+			end
 		end
 	end
+	self:UpdateLayout()
 end
 
 function EngraverFrameMixin:ResetCategories()
 	self.categories = nil
+	self.equipmentSlotFrameMap = {}
 	for categoryFrame in self.categoryFramePool:EnumerateActive() do
 		if categoryFrame.TearDownDisplayMode then
 			categoryFrame:TearDownDisplayMode()
@@ -136,7 +143,7 @@ function EngraverFrameMixin:UpdateLayout(...)
 						categoryFrame:SetPoint(layoutDirection.categoryPoint, prevCategoryFrame, layoutDirection.categoryRelativePoint)
 					end
 					if categoryFrame.UpdateCategoryLayout then
-						categoryFrame:UpdateCategoryLayout()
+						categoryFrame:UpdateCategoryLayout(layoutDirection)
 					end
 					prevCategoryFrame = categoryFrame
 				end
@@ -150,6 +157,7 @@ local DragTabLayoutData = {
 	{-- Left to Right
 		textRotation		= 90,
 		textOffset			= CreateVector2D(-7, -5),
+		filterButtonOffset	= CreateVector2D(-3, 0),
 		offset				= CreateVector2D(10, 0),
 		point				= "RIGHT", 
 		relativePoint		= "LEFT",
@@ -158,6 +166,7 @@ local DragTabLayoutData = {
 	{-- Top to Bottom
 		textRotation		= 0,
 		textOffset			= CreateVector2D(0, 2),
+		filterButtonOffset	= CreateVector2D(0, 2),
 		offset				= CreateVector2D(0, -10),
 		point				= "BOTTOM", 
 		relativePoint		= "TOP",
@@ -166,6 +175,7 @@ local DragTabLayoutData = {
 	{-- Right to Left
 		textRotation		= 270,
 		textOffset			= CreateVector2D(7, -5),
+		filterButtonOffset	= CreateVector2D(2, 0),
 		offset				= CreateVector2D(-10, 0),
 		point				= "LEFT", 
 		relativePoint		= "RIGHT",
@@ -174,6 +184,7 @@ local DragTabLayoutData = {
 	{-- Bottom to Top
 		textRotation		= 0,
 		textOffset			= CreateVector2D(0, -2),
+		filterButtonOffset	= CreateVector2D(0, -3),
 		offset				= CreateVector2D(0, 10),
 		point				= "TOP", 
 		relativePoint		= "BOTTOM",
@@ -195,9 +206,64 @@ function EngraverFrameMixin:UpdateDragTabLayout()
 		else
 			self.dragTab:SetSize(x, y)
 		end
-		-- text
-		self.dragTab.Text:SetRotation(rad(layoutData.textRotation))
+		self:UpdateDragTabText(layoutData)
+		self:UpdateFilterButtonsLayout(layoutData)
+	end
+end
+
+function EngraverFrameMixin:UpdateFilterButtonsLayout(layoutData)
+	-- visibility
+	UnregisterStateDriver(self.filterRightButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterLeftButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterUpButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterDownButton, "visibility", "[combat]hide;show")
+	if layoutData.swapTabDimensions then
+		self.filterRightButton:SetShown(false)
+		self.filterLeftButton:SetShown(false)
+		self.filterUpButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterDownButton:SetShown(EngraverOptions.ShowFilterSelector)
+		if EngraverOptions.ShowFilterSelector then
+			RegisterStateDriver(self.filterUpButton, "visibility", "[combat]hide;show")
+			RegisterStateDriver(self.filterDownButton, "visibility", "[combat]hide;show")
+		end
+	else
+		self.filterRightButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterLeftButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterUpButton:SetShown(false)
+		self.filterDownButton:SetShown(false)
+		if EngraverOptions.ShowFilterSelector then
+			RegisterStateDriver(self.filterRightButton, "visibility", "[combat]hide;show")
+			RegisterStateDriver(self.filterLeftButton, "visibility", "[combat]hide;show")
+		end
+	end
+	-- anchors
+	local filterButtonOffsetX, filterButtonOffsetY = layoutData.filterButtonOffset:GetXY()
+	function updatefilterButtonOffset(filterButton)
+		local point, relativeTo, relativePoint, filterX, filterY = filterButton:GetPoint()
+		filterButton:SetPoint(point, relativeTo, relativePoint, filterButtonOffsetX, filterButtonOffsetY)
+	end
+	updatefilterButtonOffset(self.filterRightButton)
+	updatefilterButtonOffset(self.filterLeftButton)
+	updatefilterButtonOffset(self.filterUpButton)
+	updatefilterButtonOffset(self.filterDownButton)
+end
+
+function EngraverFrameMixin:UpdateDragTabText(layoutData)
+	if self.dragTab and self.dragTab.Text then
+		self.dragTab.Text:ClearAllPoints()
+		local rotation = rad(layoutData.textRotation)
+		self.dragTab.Text:SetRotation(rotation)
+		local tabText = "Engraver"
+		if EngraverOptions.ShowFilterSelector then
+			local filter = Addon.Filters:GetCurrentFilter()
+			if filter then
+				tabText = filter.Name
+			else 
+				tabText = Addon.Filters.NO_FILTER_DISPLAY_STRING
+			end	
+		end
 		self.dragTab.Text:SetPoint("CENTER", self.dragTab, "CENTER", layoutData.textOffset:GetXY())
+		self.dragTab.Text:SetText(tabText)
 	end
 end
 
@@ -218,22 +284,24 @@ function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtons = {}
 end
 
-function EngraverCategoryFrameBaseMixin:SetCategory(category)
+function EngraverCategoryFrameBaseMixin:SetCategory(category, runes, knownRunes)
 	self.category = category
-	local runes = C_Engraving.GetRunesForCategory(category, false);
-	local knownRunes = C_Engraving.GetRunesForCategory(category, true);
+	self:SetRunes(runes, knownRunes)
+	self:LoadEmptyRuneButton()
+end
+
+function EngraverCategoryFrameBaseMixin:SetRunes(runes, knownRunes)
 	self.runeButtonPool:ReleaseAll()
 	self.runeButtons = {}
 	for r, rune in ipairs(runes) do
 		local runeButton = self.runeButtonPool:Acquire()
 		self.runeButtons[r] = runeButton
 		local isKnown = self:IsRuneKnown(rune, knownRunes)
-		runeButton:SetRune(rune, category, isKnown)
+		runeButton:SetRune(rune, self.category, isKnown)
 	end
-	self:LoadEmptyRuneButton(category)
 end
 
-function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
+function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton()
 	if self.emptyRuneButton then
 		-- TODO figure out how to get slotName from slotId using API or maybe a constant somewhere
 		local tempSlotsMap = {
@@ -241,10 +309,14 @@ function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton(slotId)
 			[INVSLOT_LEGS] = "LEGSSLOT",
 			[INVSLOT_HAND] = "HANDSSLOT"
 		}
-		local slotName = tempSlotsMap[slotId]
-		local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
-		self:SetID(id);
-		self.emptyRuneButton.icon:SetTexture(textureName);
+		if self.category then
+			local slotName = tempSlotsMap[self.category]
+			if slotName then
+				local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
+				self:SetID(id);
+				self.emptyRuneButton.icon:SetTexture(textureName);
+			end
+		end
 	end
 end
 
@@ -266,14 +338,14 @@ function EngraverCategoryFrameBaseMixin:GetRuneButton(skillLineAbilityID)
 	end
 end
 
-function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout()
+function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout(layoutDirection)
 	self:DetermineActiveAndInactiveButtons()
 	if self.activeButton then
 		local isBroken = GetInventoryItemBroken("player", self.category)
 		self.activeButton:SetBlinking(isBroken, 1.0, 0.0, 0.0)
 	end
 	if self.UpdateCategoryLayoutImpl then
-		self:UpdateCategoryLayoutImpl() -- implemented by "subclasses"/mixins
+		self:UpdateCategoryLayoutImpl(layoutDirection) -- implemented by "subclasses"/mixins
 	end
 end
 
@@ -305,7 +377,7 @@ end
 -- CategoryFrameShowAll --
 --------------------------
 
-function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
+function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl(layoutDirection)
 	-- update position of each button and highlight the active one
 	if self.runeButtons then
 		for r, runeButton in ipairs(self.runeButtons) do
@@ -317,8 +389,7 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl()
 			if r == 1 then
 				runeButton:SetAllPoints()
 			else
-				local LayoutDirection = Addon.GetCurrentLayoutDirection()
-				runeButton:SetPoint(LayoutDirection.runePoint, self.runeButtons[r-1], LayoutDirection.runeRelativePoint)
+				runeButton:SetPoint(layoutDirection.runePoint, self.runeButtons[r-1], layoutDirection.runeRelativePoint)
 			end
 			if self.activeButton == nil then
 				runeButton:SetBlinking(runeButton.isKnown)
@@ -357,7 +428,7 @@ function EngraverCategoryFramePopUpMenuMixin:AreAnyRunesKnown()
 	return false
 end
 
-function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl()
+function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDirection)
 	-- update visibility and position of each button
 	if self.emptyRuneButton then
 		self.emptyRuneButton:Hide()
@@ -376,8 +447,7 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl()
 				for r, runeButton in ipairs(self.inactiveButtons) do
 					runeButton:SetShown(showInactives)
 					runeButton:ClearAllPoints()
-					local LayoutDirection = Addon.GetCurrentLayoutDirection()
-					runeButton:SetPoint(LayoutDirection.runePoint, prevButton, LayoutDirection.runeRelativePoint)
+					runeButton:SetPoint(layoutDirection.runePoint, prevButton, layoutDirection.runeRelativePoint)
 					prevButton = runeButton
 				end
 			end
@@ -560,12 +630,14 @@ end
 EngraverDragTabMixin = {}
 
 function EngraverDragTabMixin:OnMouseDown(button)
-	if button == "RightButton" then
-		Settings.OpenToCategory(addonName);
-	elseif button == "LeftButton" then
-		local parent = self:GetParent()
-		if parent and parent.StartMoving then
-			parent:StartMoving();
+	if not InCombatLockdown() then
+		if button == "RightButton" then
+			Settings.OpenToCategory(addonName);
+		elseif button == "LeftButton" then
+			local parent = self:GetParent()
+			if parent and parent.StartMoving then
+				parent:StartMoving();
+			end
 		end
 	end
 end
@@ -574,5 +646,28 @@ function EngraverDragTabMixin:OnMouseUp(button)
 	local parent = self:GetParent()
 	if parent and parent.StopMovingOrSizing then
 		parent:StopMovingOrSizing();
+	end
+end
+
+------------------
+-- FilterButton --
+------------------
+
+EngraverFilterButtonMixin = CreateFromMixins(MinimalScrollBarStepperScriptsMixin)
+
+function EngraverFilterButtonMixin:OnButtonStateChanged()
+	MinimalScrollBarStepperScriptsMixin.OnButtonStateChanged(self)
+	if self.HighlightTexture then
+		self.HighlightTexture:SetShown(self.over)
+	end
+end
+
+function EngraverFilterButtonMixin:OnClick()
+	if not InCombatLockdown() then
+		if self.direction > 0 then
+			Addon.Filters:SetCurrentFilterNext()
+		else
+			Addon.Filters:SetCurrentFilterPrev()
+		end
 	end
 end

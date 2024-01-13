@@ -1,4 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="Filters.lua"/>
 	<Script file="Engraver.lua"/>
 	<Script file="EngraverOptions.lua"/>
 	<CheckButton name="EngraverRuneButtonTemplate" inherits="ActionButtonTemplate,SecureActionButtonTemplate" virtual="true" mixin="EngraverRuneButtonMixin">
@@ -27,6 +28,13 @@
 			<OnLoad method="OnLoad"/>
 		</Scripts>
 	</Frame>
+	<Button name="EngraverBackdropTemplate" virtual="true" inherits="TooltipBackdropTemplate">
+		<KeyValues>
+			<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+			<KeyValue key="backdropColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+			<KeyValue key="backdropColorAlpha" value="0.5" type="global"/>
+		</KeyValues>
+	</Button>
 	<Frame name="EngraverFrame" toplevel="true" frameStrata="LOW" enableMouse="true" movable="true" parent="UIParent" hidden="false" inherits="BackdropTemplate" mixin="EngraverFrameMixin">
 		<Size>
 			<AbsDimension x="40" y="40" />
@@ -39,12 +47,7 @@
 			</Anchor>
 		</Anchors>
 		<Frames>
-			<Button name="EngraverDragTab" parentKey="dragTab" inherits="TooltipBackdropTemplate" mixin="EngraverDragTabMixin">
-				<KeyValues>
-					<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
-					<KeyValue key="backdropColor" value="FRIENDS_GRAY_COLOR" type="global"/>
-					<KeyValue key="backdropColorAlpha" value="0.5" type="global"/>
-				</KeyValues>
+			<Button name="EngraverDragTab" parentKey="dragTab" inherits="EngraverBackdropTemplate" mixin="EngraverDragTabMixin">
 				<Size x="76" y="32"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
@@ -70,8 +73,103 @@
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="GameFontNormalSmall"/>
-				<!--<PushedTextOffset x="0" y="0" />-->
 			</Button>
+			<EventButton name="EngraverFilterUpButton" parentKey="filterUpButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
+				<KeyValues>
+					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Increase" type="global"/>
+					<KeyValue key="normalTexture" value="minimal-scrollbar-arrow-top-over" type="string"/>
+					<KeyValue key="overTexture" value="minimal-scrollbar-arrow-top-over" type="string"/>
+					<KeyValue key="downTexture" value="minimal-scrollbar-arrow-top-down" type="string"/>
+					<KeyValue key="mouseDownSoundKitID" value="SOUNDKIT.SCROLLBAR_STEP" type="global"/>
+				</KeyValues>
+				<Size x="17" y="11"/>
+				<Anchors>
+					<Anchor point="BOTTOM" relativeTo="EngraverDragTab" relativePoint="TOP"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="Texture"/>
+						<Texture parentKey="HighlightTexture" atlas="minimal-scrollbar-arrow-top" alphaMode="ADD">
+							<Color r="1.0" g="1.0" b="0.0" a="1.0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick method="OnClick" />
+				</Scripts>
+			</EventButton>
+			<EventButton name="EngraverFilterDownButton" parentKey="filterDownButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
+				<KeyValues>
+					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Decrease" type="global"/>
+					<KeyValue key="normalTexture" value="minimal-scrollbar-arrow-bottom-over" type="string"/>
+					<KeyValue key="overTexture" value="minimal-scrollbar-arrow-bottom-over" type="string"/>
+					<KeyValue key="downTexture" value="minimal-scrollbar-arrow-bottom-down" type="string"/>
+					<KeyValue key="mouseDownSoundKitID" value="SOUNDKIT.SCROLLBAR_STEP" type="global"/>
+				</KeyValues>
+				<Size x="17" y="11"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="EngraverDragTab" relativePoint="BOTTOM"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="Texture"/>
+						<Texture parentKey="HighlightTexture" atlas="minimal-scrollbar-arrow-bottom" alphaMode="ADD">
+							<Color r="1.0" g="1.0" b="0.0" a="1.0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick method="OnClick" />
+				</Scripts>
+			</EventButton>
+			<EventButton name="EngraverFilterRightButton" parentKey="filterRightButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
+				<KeyValues>
+					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Increase" type="global"/>
+					<KeyValue key="normalTexture" value="Minimal_SliderBar_Button_Right" type="string"/>
+					<KeyValue key="overTexture" value="Minimal_SliderBar_Button_Right" type="string"/>
+					<KeyValue key="downTexture" value="Minimal_SliderBar_Button_Right" type="string"/>
+					<KeyValue key="mouseDownSoundKitID" value="SOUNDKIT.SCROLLBAR_STEP" type="global"/>
+				</KeyValues>
+				<Size x="9" y="18"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="EngraverDragTab" relativePoint="RIGHT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="Texture"/>
+						<Texture parentKey="HighlightTexture" atlas="Minimal_SliderBar_Button_Right" alphaMode="ADD">
+							<Color r="1.0" g="1.0" b="0.0" a="1.0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick method="OnClick" />
+				</Scripts>
+			</EventButton>
+			<EventButton name="EngraverFilterLeftButton" parentKey="filterLeftButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
+				<KeyValues>
+					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Decrease" type="global"/>
+					<KeyValue key="normalTexture" value="Minimal_SliderBar_Button_Left" type="string"/>
+					<KeyValue key="overTexture" value="Minimal_SliderBar_Button_Left" type="string"/>
+					<KeyValue key="downTexture" value="Minimal_SliderBar_Button_Left" type="string"/>
+					<KeyValue key="mouseDownSoundKitID" value="SOUNDKIT.SCROLLBAR_STEP" type="global"/>
+				</KeyValues>
+				<Size x="9" y="18"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="EngraverDragTab" relativePoint="LEFT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="Texture"/>
+						<Texture parentKey="HighlightTexture" atlas="Minimal_SliderBar_Button_Left" alphaMode="ADD">
+							<Color r="1.0" g="1.0" b="0.0" a="1.0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick method="OnClick" />
+				</Scripts>
+			</EventButton>
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
