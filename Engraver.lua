@@ -104,6 +104,7 @@ end
 
 function EngraverFrameMixin:ResetCategories()
 	self.categories = nil
+	self.equipmentSlotFrameMap = {}
 	for categoryFrame in self.categoryFramePool:EnumerateActive() do
 		if categoryFrame.TearDownDisplayMode then
 			categoryFrame:TearDownDisplayMode()
