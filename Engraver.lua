@@ -317,6 +317,7 @@ function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton()
 				self.emptyRuneButton.icon:SetTexture(textureName);
 			end
 		end
+		self.emptyRuneButton:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
 	end
 end
 
