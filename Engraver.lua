@@ -213,10 +213,10 @@ end
 
 function EngraverFrameMixin:UpdateFilterButtonsLayout(layoutData)
 	-- visibility
-	UnregisterStateDriver(self.filterRightButton, "visibility", "[combat]hide;show")
-	UnregisterStateDriver(self.filterLeftButton, "visibility", "[combat]hide;show")
-	UnregisterStateDriver(self.filterUpButton, "visibility", "[combat]hide;show")
-	UnregisterStateDriver(self.filterDownButton, "visibility", "[combat]hide;show")
+	UnregisterStateDriver(self.filterRightButton, "visibility")
+	UnregisterStateDriver(self.filterLeftButton, "visibility")
+	UnregisterStateDriver(self.filterUpButton, "visibility")
+	UnregisterStateDriver(self.filterDownButton, "visibility")
 	if layoutData.swapTabDimensions then
 		self.filterRightButton:SetShown(false)
 		self.filterLeftButton:SetShown(false)
@@ -446,6 +446,7 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDire
 				local prevButton = self.activeButton
 				for r, runeButton in ipairs(self.inactiveButtons) do
 					runeButton:SetShown(showInactives)
+					RegisterStateDriver(runeButton, "visibility", "[combat]hide")
 					runeButton:ClearAllPoints()
 					runeButton:SetPoint(layoutDirection.runePoint, prevButton, layoutDirection.runeRelativePoint)
 					prevButton = runeButton
@@ -481,6 +482,7 @@ function EngraverCategoryFramePopUpMenuMixin:TearDownDisplayMode()
 		for r, runeButton in ipairs(self.runeButtons) do
 			runeButton:UnregisterCallback("PostOnEnter", self)
 			runeButton:UnregisterCallback("PostOnLeave", self)
+			UnregisterStateDriver(runeButton, "visibility")
 		end
 	end
 end
