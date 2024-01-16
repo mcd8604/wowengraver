@@ -2,6 +2,7 @@
 	<Script file="Filters.lua"/>
 	<Script file="Engraver.lua"/>
 	<Script file="EngraverOptions.lua"/>
+	<Script file="EngraverMasqueAdapter.lua"/>
 	<CheckButton name="EngraverRuneButtonTemplate" inherits="ActionButtonTemplate,SecureActionButtonTemplate" virtual="true" mixin="EngraverRuneButtonMixin">
 		<Size>
 			<AbsDimension x="40" y="40" />

@@ -526,6 +526,9 @@ function EngraverRuneButtonMixin:OnLoad()
 	self.Border:SetVertexColor(0.0, 1.0, 0.0);
 	Mixin(self, CallbackRegistryMixin);
 	self:SetUndefinedEventsAllowed(true)
+	if Addon.MasqueAdapter then
+		Addon.MasqueAdapter:TryAddRuneButton(self)
+	end
 	self:OnLoad() -- NOTE not an infinite loop because mixing in CallbackRegistryMixin redefines OnLoad
 end
 
