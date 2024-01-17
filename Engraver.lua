@@ -83,23 +83,25 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 end
 	
 function EngraverFrameMixin:LoadCategories()
-	self:ResetCategories()
-	C_Engraving.RefreshRunesList();
-	self.categories = C_Engraving.GetRuneCategories(false, false);
-	if #self.categories > 0 then
-		for c, category in ipairs(self.categories) do
-			local runes = Addon.Filters:GetFilteredRunesForCategory(category, false)
-			if #runes > 0 then
-				local categoryFrame = self.categoryFramePool:Acquire()
-				categoryFrame:Show()
-				self.equipmentSlotFrameMap[category] = categoryFrame
-				local knownRunes = C_Engraving.GetRunesForCategory(category, true);	
-				categoryFrame:SetCategory(category, runes, knownRunes)
-				categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+	if not InCombatLockdown() then
+		self:ResetCategories()
+		C_Engraving.RefreshRunesList();
+		self.categories = C_Engraving.GetRuneCategories(false, false);
+		if #self.categories > 0 then
+			for c, category in ipairs(self.categories) do
+				local runes = Addon.Filters:GetFilteredRunesForCategory(category, false)
+				if #runes > 0 then
+					local categoryFrame = self.categoryFramePool:Acquire()
+					categoryFrame:Show()
+					self.equipmentSlotFrameMap[category] = categoryFrame
+					local knownRunes = C_Engraving.GetRunesForCategory(category, true);	
+					categoryFrame:SetCategory(category, runes, knownRunes)
+					categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+				end
 			end
 		end
+		self:UpdateLayout()
 	end
-	self:UpdateLayout()
 end
 
 function EngraverFrameMixin:ResetCategories()
