@@ -2,6 +2,19 @@ local addonName, Addon = ...
 
 local MasqueAdapter = {}
 
+local originalLoadCategories = EngraverFrameMixin.LoadCategories
+EngraverFrameMixin.LoadCategories = function(...)
+	originalLoadCategories(...)
+	if Addon.MasqueGroups and Addon.MasqueGroups.RuneButtons then
+		for _, categoryFrame in pairs(EngraverFrame.equipmentSlotFrameMap) do
+			for _, runeButton in ipairs(categoryFrame.runeButtons) do
+				Addon.MasqueGroups.RuneButtons:AddButton(runeButton)
+				Addon.MasqueGroups.RuneButtons:ReSkin(runeButton)
+			end
+		end
+	end
+end
+
 EventRegistry:RegisterFrameEventAndCallback("PLAYER_LOGIN", function(event, addonName)
 	if LibStub then
 		local Masque = LibStub("Masque", true)
@@ -18,11 +31,5 @@ EventRegistry:RegisterFrameEventAndCallback("PLAYER_LOGIN", function(event, addo
 		end
 	end
 end, nil)
-
-function MasqueAdapter:TryAddRuneButton(runeButton)
-	if Addon.MasqueGroups and Addon.MasqueGroups.RuneButtons then
-		Addon.MasqueGroups.RuneButtons:AddButton(runeButton)
-	end
-end
 
 Addon.MasqueAdapter = MasqueAdapter
