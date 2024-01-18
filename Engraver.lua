@@ -584,7 +584,9 @@ function EngraverRuneButtonMixin:TryEngrave()
 					ClearCursor()
 					C_Engraving.CastRune(self.skillLineAbilityID);
 					characterSlotButton:Click(); 
-					StaticPopup1Button1:Click(); -- will it always be StaticPopup1?
+					if StaticPopup1.which == "REPLACE_ENCHANT" then
+						StaticPopup1Button1:Click();
+					end
 					ClearCursor()
 				else
 					UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
