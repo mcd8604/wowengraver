@@ -155,7 +155,7 @@ function EngraverFrameMixin:UpdateLayout(...)
 	end
 end
 
-local DragTabLayoutData = {
+Addon.DragTabLayoutData = {
 	{-- Left to Right
 		textRotation		= 90,
 		textOffset			= CreateVector2D(-7, -5),
@@ -197,17 +197,12 @@ local DragTabLayoutData = {
 function EngraverFrameMixin:UpdateDragTabLayout()
 	if self.dragTab then
 		local layoutIndex = EngraverOptions.LayoutDirection+1
-		local layoutData = DragTabLayoutData[layoutIndex]
+		local layoutData = Addon.DragTabLayoutData[layoutIndex]
 		-- dragTab
 		self.dragTab:SetShown(not EngraverOptions.HideDragTab);
 		self.dragTab:ClearAllPoints()
+		self.dragTab:UpdateSizeForLayout(layoutData)
 		self.dragTab:SetPoint(layoutData.point, self, layoutData.relativePoint, layoutData.offset:GetXY())
-		local x, y =  76, 32 -- TODO getsize onload and cache in class var
-		if layoutData.swapTabDimensions then
-			self.dragTab:SetSize(y, x)
-		else
-			self.dragTab:SetSize(x, y)
-		end
 		self:UpdateDragTabText(layoutData)
 		self:UpdateFilterButtonsLayout(layoutData)
 	end
@@ -655,6 +650,17 @@ function EngraverDragTabMixin:OnMouseUp(button)
 	local parent = self:GetParent()
 	if parent and parent.StopMovingOrSizing then
 		parent:StopMovingOrSizing();
+	end
+end
+
+function EngraverDragTabMixin:UpdateSizeForLayout(layoutData)
+	if not self.originalSize then
+		self.originalSize = CreateVector2D(self:GetSize())
+	end
+	if layoutData.swapTabDimensions then
+		self:SetSize(self.originalSize.y, self.originalSize.x)
+	else
+		self:SetSize(self.originalSize.x, self.originalSize.y)
 	end
 end
 
