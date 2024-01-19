@@ -10,13 +10,6 @@ local function OnRuneButtonsGroupCallback(Group, Option, Value)
 	end
 end
 
-local function OnDragTabGroupCallback(Group, Option, Value)
-	if Option == "Disabled" and EngraverFrame.dragTab.NineSlice:CanChangeProtectedState() then
-		EngraverFrame.dragTab.NineSlice:SetShown(Value)
-		UpdateDragTabOffset(Value)
-	end
-end
-
 local originalDragTabOffsets = {}
 local originalDragTabFilterButtonOffsets = {}
 local originalDragTabTextOffsets = {}
@@ -52,6 +45,13 @@ local function UpdateDragTabOffset(isDisabled)
 		layout.textOffset:Add(originalDragTabTextOffsets[i])
 	end
 	EngraverFrame:UpdateDragTabLayout()
+end
+
+local function OnDragTabGroupCallback(Group, Option, Value)
+	if Option == "Disabled" and EngraverFrame.dragTab.NineSlice:CanChangeProtectedState() then
+		EngraverFrame.dragTab.NineSlice:SetShown(Value)
+		UpdateDragTabOffset(Value)
+	end
 end
 
 local originalLoadCategories = EngraverFrameMixin.LoadCategories
