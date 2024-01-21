@@ -187,6 +187,8 @@ StaticPopupDialogs["ENGRAVER_FILTER_DELETION"] = {
 EngraverOptionsFilterListMixin = {} 
 
 function EngraverOptionsFilterListMixin:OnLoad()
+	self.backgroundTexture:SetTextureSliceMargins(20,20,20,20)
+
 	local function Factory(factory, elementData)
 		local function Initializer(button, elementData)
 			elementData:InitFrame(button);
@@ -198,12 +200,13 @@ function EngraverOptionsFilterListMixin:OnLoad()
 	local spacing = 2;
 	local view = CreateScrollBoxListLinearView(pad, pad, pad, pad, spacing);
 	view:SetElementFactory(Factory);
+	self.ScrollBar:ClearPointsOffset()
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.ScrollBox, self.ScrollBar, view);
 
 	local scrollBoxAnchorsWithBar = 
 	{
 		CreateAnchor("TOPLEFT", 0, 0),
-		CreateAnchor("BOTTOMRIGHT", -16, 0);
+		CreateAnchor("BOTTOMRIGHT", -20, 0);
 	};
 	local scrollBoxAnchorsWithoutBar = 
 	{

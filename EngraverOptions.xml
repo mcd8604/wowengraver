@@ -39,13 +39,23 @@
 		</Scripts>
 	</Button>
 	<Frame name="EngraverOptionsFilterEditorTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterEditorMixin" virtual="true">
-		<Size x="280" y="140"/>
+		<Size x="280" y="120"/>
 		<Frames>
 			<Frame name="$parentFilterList" parentKey="filterList" inherits="SettingsCategoryListTemplate" mixin="EngraverOptionsFilterListMixin">
-				<Size x="200" y="140"/>
+				<Size x="230" y="120"/>
 				<Anchors>
-					<Anchor/>
+					<Anchor x="0"/>
 				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="backgroundTexture" atlas="collections-itemborder-uncollected">
+							<Anchors>
+								<Anchor point="TOPLEFT" x="10" y="8"/>
+								<Anchor point="BOTTOMRIGHT" y="-8"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
 				<Scripts>
 					<OnLoad method="OnLoad"/>
 				</Scripts>
@@ -53,7 +63,7 @@
 			<Button name="$parentNewButton" parentKey="NewButton" inherits="UIPanelButtonTemplate" text="New Filter">
 				<Size x="100" y="21"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentFilterList" relativePoint="BOTTOM"/>
+					<Anchor point="TOP" relativeTo="$parentFilterList" relativePoint="BOTTOM" y="-10"/>
 				</Anchors>
 			</Button>
 			<Button name="$parentDeleteButton" parentKey="DeleteButton" inherits="UIPanelButtonTemplate" text="Delete">
@@ -65,7 +75,7 @@
 			<Frame name="$parentEquipmentSlotsFrame" parentKey="equipmentSlotsFrame" mixin="EngraverOptionsFilterEquipmentSlotsMixin">
 				<Size x="40" y="40"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOP" x="-80" y="-10"></Anchor>
+					<Anchor point="TOPLEFT" relativePoint="TOP" x="-80" y="0"></Anchor>
 				</Anchors>
 				<Frames>
 					<Frame name="$parentChestFrame" parentKey="chestFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
