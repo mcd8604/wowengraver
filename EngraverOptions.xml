@@ -11,44 +11,85 @@
 			<OnLoad method="OnLoad"/>
 		</Scripts>
 	</Frame>
-	<Frame name="EngraverOptionsFilterDropDownTemplate" inherits="SettingsDropDownControlTemplate" mixin="EngraverOptionsFilterDropDownMixin" virtual="true">
-		<KeyValues>
-			<KeyValue key="dropDownType" value="Frame" type="string"/>
-			<KeyValue key="dropDownTemplate" value="SettingsSelectionPopoutWithButtonsTemplate" type="string"/>
-		</KeyValues>
-		<Size y="54"/>
-		<Frames>
-			<Button parentKey="NewButton" inherits="UIPanelButtonTemplate">
-				<Size x="100" y="21"/>
-			</Button>
-			<Button parentKey="DeleteButton" inherits="UIPanelButtonTemplate">
-				<Size x="100" y="21"/>
-			</Button>
-		</Frames>
-		<!--<Scripts>
-			<OnLoad method="OnLoad"/>
-		</Scripts>-->
-	</Frame>
-	<Frame name="EngraverOptionsFilterControlTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterControlMixin" virtual="true">
+	<Button name="EngraverOptionsFilterListButtonTemplate" mixin="EngraverOptionsFilterListButtonMixin" virtual="true">
+		<Size x="175" y="20"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Texture">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Label" inherits="GameFontNormal" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="36" y="1"/>
+						<Anchor point="BOTTOMRIGHT" y="1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
+			<OnMouseDown method="OnMouseDown"/>
+			<OnMouseUp method="OnMouseUp"/>
+			<OnClick method="OnClick"/>
+		</Scripts>
+	</Button>
+	<Frame name="EngraverOptionsFilterEditorTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterEditorMixin" virtual="true">
 		<Size x="280" y="140"/>
 		<Frames>
-			<Frame name="$parentChestFrame" parentKey="chestFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+			<Frame name="$parentFilterList" parentKey="filterList" inherits="SettingsCategoryListTemplate" mixin="EngraverOptionsFilterListMixin">
+				<Size x="200" y="140"/>
+				<Anchors>
+					<Anchor/>
+				</Anchors>
+				<Scripts>
+					<OnLoad method="OnLoad"/>
+				</Scripts>
+			</Frame>
+			<Button name="$parentNewButton" parentKey="NewButton" inherits="UIPanelButtonTemplate" text="New Filter">
+				<Size x="100" y="21"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentFilterList" relativePoint="BOTTOM"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentDeleteButton" parentKey="DeleteButton" inherits="UIPanelButtonTemplate" text="Delete">
+				<Size x="100" y="21"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentNewButton" relativePoint="BOTTOM"/>
+				</Anchors>
+			</Button>
+			<Frame name="$parentEquipmentSlotsFrame" parentKey="equipmentSlotsFrame" mixin="EngraverOptionsFilterEquipmentSlotsMixin">
 				<Size x="40" y="40"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOP" x="-80" y="-10"></Anchor>
 				</Anchors>
-			</Frame>
-			<Frame name="$parentHandsFrame" parentKey="handsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentChestFrame" relativePoint="BOTTOMLEFT">
-					</Anchor>
-				</Anchors>
-			</Frame>
-			<Frame name="$parentLegsFrame" parentKey="legsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentHandsFrame" relativePoint="BOTTOMLEFT">
-					</Anchor>
-				</Anchors>
+				<Frames>
+					<Frame name="$parentChestFrame" parentKey="chestFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+						<Size x="40" y="40"/>
+						<Anchors>
+							<Anchor></Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parentHandsFrame" parentKey="handsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentChestFrame" relativePoint="BOTTOMLEFT">
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parentLegsFrame" parentKey="legsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentHandsFrame" relativePoint="BOTTOMLEFT">
+							</Anchor>
+						</Anchors>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad method="OnLoad"/>
+				</Scripts>
 			</Frame>
 		</Frames>
 		<Scripts>
