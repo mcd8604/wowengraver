@@ -85,6 +85,7 @@ end
 function EngraverFrameMixin:LoadCategories()
 	if not InCombatLockdown() then
 		self:ResetCategories()
+		C_Engraving:ClearAllCategoryFilters();
 		C_Engraving.RefreshRunesList();
 		self.categories = C_Engraving.GetRuneCategories(false, false);
 		if #self.categories > 0 then
@@ -563,29 +564,20 @@ function EngraverRuneButtonMixin:OnClick()
 	end
 end
 
--- TODO find this mapping a different way
-local CharacterSlotButtons = {}
-CharacterSlotButtons[INVSLOT_CHEST] = CharacterChestSlot
-CharacterSlotButtons[INVSLOT_LEGS] = CharacterLegsSlot
-CharacterSlotButtons[INVSLOT_HAND] = CharacterHandsSlot
-
 function EngraverRuneButtonMixin:TryEngrave()
 	if self.category and self.skillLineAbilityID and not InCombatLockdown() then
 		if not C_Engraving.IsRuneEquipped(self.skillLineAbilityID) then
-			local characterSlotButton = CharacterSlotButtons[self.category]
-			if characterSlotButton then
-				local itemId, unknown = GetInventoryItemID("player", self.category)
-				if itemId then
-					ClearCursor()
-					C_Engraving.CastRune(self.skillLineAbilityID);
-					characterSlotButton:Click(); 
-					if StaticPopup1.which == "REPLACE_ENCHANT" then
-						StaticPopup1Button1:Click();
-					end
-					ClearCursor()
-				else
-					UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
+			local itemId, unknown = GetInventoryItemID("player", self.category)
+			if itemId then
+				ClearCursor()
+				C_Engraving.CastRune(self.skillLineAbilityID);
+				UseInventoryItem(self.category);
+				if StaticPopup1.which == "REPLACE_ENCHANT" then
+					StaticPopup1Button1:Click();
 				end
+				ClearCursor()
+			else
+				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
 			end
 		end
 	end
