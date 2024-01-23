@@ -34,8 +34,6 @@
 			<OnEnter method="OnEnter"/>
 			<OnLeave method="OnLeave"/>
 			<OnMouseDown method="OnMouseDown"/>
-			<OnMouseUp method="OnMouseUp"/>
-			<OnClick method="OnClick"/>
 		</Scripts>
 	</Button>
 	<Frame name="EngraverOptionsFilterEditorTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterEditorMixin" virtual="true">

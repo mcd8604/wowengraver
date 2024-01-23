@@ -77,6 +77,15 @@ function FiltersMixin:DeleteFilter(index)
 	end
 end
 
+function FiltersMixin:ReorderFilter(fromIndex, toIndex)
+	if fromIndex > 0 then
+		local filters = self:GetFiltersForPlayerClass()
+		if toIndex <= #filters then
+			table.insert(filters, toIndex, table.remove(filters, fromIndex))
+		end
+	end
+end
+
 function FiltersMixin:AnyRunePassesFilter(runes, optionalFilter)
 	if runes == nil or #runes == 0 then
 		return false

@@ -122,8 +122,10 @@ do
 		local newFilterName = strtrim(dialog.editBox:GetText());
 		local index = Addon.Filters:CreateFilter(newFilterName)
 		dialog.data.filterList:LoadFilterData();
-		local elements = dialog.data.filterList.elementList
-		selectionBehavior:SelectElementData(elements[index])
+		local elementData = dialog.data.filterList.dataProvider:Find(index)
+		if elementData then
+			selectionBehavior:SelectElementData(elementData)
+		end
 		dialog:Hide();
 	end
 
@@ -201,7 +203,9 @@ function EngraverOptionsFilterListMixin:OnLoad()
 	local view = CreateScrollBoxListLinearView(pad, pad, pad, pad, spacing);
 	view:SetElementFactory(Factory);
 	self.ScrollBar:ClearPointsOffset()
+	self.ScrollBox.enableDefaultDrag = true
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.ScrollBox, self.ScrollBar, view);
+	self.ScrollBox.dragBehavior:SetReorderable(true)
 
 	local scrollBoxAnchorsWithBar = 
 	{
@@ -226,21 +230,20 @@ function EngraverOptionsFilterListMixin:OnLoad()
 	end;
 	selectionBehavior = ScrollUtil.AddSelectionBehavior(self.ScrollBox);
 	selectionBehavior:RegisterCallback(SelectionBehaviorMixin.Event.OnSelectionChanged, OnSelectionChanged)
-	
-	-- TODO ScrollBoxDragBehavior:SetReorderable(reorderable)
-	
+
 	self:LoadFilterData()
 end
 
 function EngraverOptionsFilterListMixin:LoadFilterData()
-	self.elementList = {};
+	local elementList = {};
 	for i, filter in ipairs(Addon.Filters:GetFiltersForPlayerClass()) do
 		local initializer = CreateFromMixins(ScrollBoxFactoryInitializerMixin);
 		initializer:Init("EngraverOptionsFilterListButtonTemplate");
 		initializer.data = { filterIndex = i, filter = filter };
-		table.insert(self.elementList, initializer);
+		table.insert(elementList, initializer);
 	end
-	self.dataProvider = CreateDataProvider(self.elementList);
+	self.dataProvider = CreateDataProvider(elementList);
+	self.dataProvider:RegisterCallback(DataProviderMixin.Event.OnMove, function(_, _, indexFrom, indexTo) Addon.Filters:ReorderFilter(indexFrom, indexTo); end, self)
 	self.ScrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition);
 	selectionBehavior:SelectFirstElementData(function(data) return true; end);
 end
@@ -273,12 +276,23 @@ function EngraverOptionsFilterListButtonMixin:OnButtonStateChanged()
 end
 
 function EngraverOptionsFilterListButtonMixin:Init(initializer)
+	self.GetElementData = function() return initializer; end
 	local filter = initializer.data.filter;
 	self.Label:SetText(filter.Name);
 	self:UpdateStateInternal(selectionBehavior:IsSelected(self));
 end
 
-function EngraverOptionsFilterListButtonMixin:OnClick(buttonName, down)
+function EngraverOptionsFilterListButtonMixin:OnEnter(buttonName, down)
+	SettingsTooltip:SetOwner(self);
+	Settings.InitTooltip("Drag-and-drop to re-order filters.")--, "Right click for more actions.") 
+	SettingsTooltip:Show();
+end
+
+function EngraverOptionsFilterListButtonMixin:OnLeave()
+	SettingsTooltip:Hide();
+end
+
+function EngraverOptionsFilterListButtonMixin:OnMouseDown()
 	selectionBehavior:Select(self);
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 end
