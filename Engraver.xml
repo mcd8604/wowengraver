@@ -77,7 +77,7 @@
 			</Button>
 			<EventButton name="EngraverFilterUpButton" parentKey="filterUpButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
 				<KeyValues>
-					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Increase" type="global"/>
+					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Decrease" type="global"/>
 					<KeyValue key="normalTexture" value="minimal-scrollbar-arrow-top-over" type="string"/>
 					<KeyValue key="overTexture" value="minimal-scrollbar-arrow-top-over" type="string"/>
 					<KeyValue key="downTexture" value="minimal-scrollbar-arrow-top-down" type="string"/>
@@ -101,7 +101,7 @@
 			</EventButton>
 			<EventButton name="EngraverFilterDownButton" parentKey="filterDownButton" inherits="MinimalScrollBarStepperScripts" mixin="EngraverFilterButtonMixin">
 				<KeyValues>
-					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Decrease" type="global"/>
+					<KeyValue key="direction" value="ScrollControllerMixin.Directions.Increase" type="global"/>
 					<KeyValue key="normalTexture" value="minimal-scrollbar-arrow-bottom-over" type="string"/>
 					<KeyValue key="overTexture" value="minimal-scrollbar-arrow-bottom-over" type="string"/>
 					<KeyValue key="downTexture" value="minimal-scrollbar-arrow-bottom-down" type="string"/>

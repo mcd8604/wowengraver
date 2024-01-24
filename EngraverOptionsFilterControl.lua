@@ -269,6 +269,7 @@ function EngraverOptionsFilterListMixin:OnLoad()
 
 	self:LoadFilterData()
 	EngraverOptionsCallbackRegistry:RegisterCallback("FiltersChanged", self.OnFiltersChanged, self)
+	EngraverOptionsCallbackRegistry:RegisterCallback("CurrentFilter", self.OnCurrentFilterChanged, self)
 	EngraverOptionsCallbackRegistry:RegisterCallback("FilterDeleted", self.OnFilterDeleted, self)
 end
 
@@ -281,7 +282,7 @@ function EngraverOptionsFilterListMixin:LoadFilterData()
 		table.insert(elementList, initializer);
 	end
 	filterListDataProvider = CreateDataProvider(elementList);
-	function dataProviderOnMove(_, _, indexFrom, indexTo) 
+	function dataProviderOnMove(_, _, indexFrom, indexTo)
 		Addon.Filters:ReorderFilter(indexFrom, indexTo);
 		FilterListDataProvider_SelectIndex(indexTo);
 	end
@@ -291,13 +292,21 @@ function EngraverOptionsFilterListMixin:LoadFilterData()
 end
 
 function EngraverOptionsFilterListMixin:OnFiltersChanged()
-	if not InCombatLockdown() then 
-		self:LoadFilterData() 
+	if not InCombatLockdown() then
+		self:LoadFilterData()
+	end
+end
+
+function EngraverOptionsFilterListMixin:OnCurrentFilterChanged()
+	if not InCombatLockdown() then
+		local filterIndex = GetSelectedFilterIndex()
+		self:LoadFilterData()
+		FilterListDataProvider_SelectIndex(filterIndex)
 	end
 end
 
 function EngraverOptionsFilterListMixin:OnFilterDeleted(filterIndex)
-	if not InCombatLockdown() then 
+	if not InCombatLockdown() then
 		local elementData = filterListDataProvider:Find(filterIndex) or filterListDataProvider:Find(filterIndex-1);
 		if elementData then
 			selectionBehavior:SelectElementData(elementData)
@@ -335,6 +344,7 @@ function EngraverOptionsFilterListButtonMixin:Init(initializer)
 	self.GetElementData = function() return initializer; end
 	local filter = initializer.data.filter;
 	self.Label:SetText(filter.Name);
+	self.status:SetShown(EngraverOptions.CurrentFilter == initializer.data.filterIndex)
 	self:UpdateStateInternal(selectionBehavior:IsSelected(self));
 end
 
@@ -363,6 +373,7 @@ function EngraverOptionsFilterListButtonMixin:OnMouseUp(button, isUp)
 		local name = elementData.data.filter.Name
 		local menu = {
 			{ notCheckable = true, text = name, isTitle = true, },
+			{ notCheckable = true, text = "Activate", func = function() Addon.Filters:SetCurrentFilter(elementData.data.filterIndex); end },
 			{ notCheckable = true, text = "Rename", func = function() StaticPopup_Show("ENGRAVER_FILTER_RENAME", name, nil, elementData ); end },
 			{ notCheckable = true, text = "Delete", func = function() StaticPopup_Show("ENGRAVER_FILTER_DELETION", name, nil, elementData ) end }, 
 			{ notCheckable = true, text = "Cancel" },

@@ -22,9 +22,15 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
+				<Texture name="$parentStatus" parentKey="status" file="Interface\FriendsFrame\StatusIcon-Online" hidden="true">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT" x="4" y=""/>
+					</Anchors>
+				</Texture>
 				<FontString parentKey="Label" inherits="GameFontNormal" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="36" y="1"/>
+						<Anchor point="TOPLEFT" x="24" y="1"/>
 						<Anchor point="BOTTOMRIGHT" y="1"/>
 					</Anchors>
 				</FontString>
