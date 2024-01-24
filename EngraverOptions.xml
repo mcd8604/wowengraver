@@ -11,7 +11,7 @@
 			<OnLoad method="OnLoad"/>
 		</Scripts>
 	</Frame>
-	<Button name="EngraverOptionsFilterListButtonTemplate" mixin="EngraverOptionsFilterListButtonMixin" virtual="true">
+	<Button name="EngraverOptionsFilterListButtonTemplate" mixin="EngraverOptionsFilterListButtonMixin" registerForClicks="LeftButtonDown,LeftButtonUp,RightButtonDown,RightButtonUp" virtual="true">
 		<Size x="175" y="20"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -32,26 +32,23 @@
 		</Layers>
 		<Scripts>
 			<OnEnter method="OnEnter"/>
-			<OnLeave method="OnLeave"/>
+			<OnLeave method ="OnLeave"/>
 			<OnMouseDown method="OnMouseDown"/>
+			<OnMouseUp method="OnMouseUp"/>
 		</Scripts>
 	</Button>
+	<Frame name="EngraverFilterListDropDownMenu" inherits="UIDropDownMenuTemplate"/>
 	<Frame name="EngraverOptionsFilterEditorTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterEditorMixin" virtual="true">
 		<Size x="280" y="120"/>
 		<Frames>
 			<Frame name="$parentFilterList" parentKey="filterList" inherits="SettingsCategoryListTemplate" mixin="EngraverOptionsFilterListMixin">
-				<Size x="230" y="120"/>
+				<Size x="220" y="140"/>
 				<Anchors>
-					<Anchor x="0"/>
+					<Anchor x="10" y="10"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture parentKey="backgroundTexture" atlas="collections-itemborder-uncollected">
-							<Anchors>
-								<Anchor point="TOPLEFT" x="10" y="8"/>
-								<Anchor point="BOTTOMRIGHT" y="-8"/>
-							</Anchors>
-						</Texture>
+						<Texture parentKey="backgroundTexture" atlas="collections-itemborder-uncollected" setAllPoints="true"/>
 					</Layer>
 				</Layers>
 				<Scripts>
@@ -61,13 +58,13 @@
 			<Button name="$parentNewButton" parentKey="NewButton" inherits="UIPanelButtonTemplate" text="New Filter">
 				<Size x="100" y="21"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentFilterList" relativePoint="BOTTOM" y="-10"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parentFilterList" relativePoint="BOTTOM"/>
 				</Anchors>
 			</Button>
 			<Button name="$parentDeleteButton" parentKey="DeleteButton" inherits="UIPanelButtonTemplate" text="Delete">
 				<Size x="100" y="21"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentNewButton" relativePoint="BOTTOM"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentFilterList" relativePoint="BOTTOM"/>
 				</Anchors>
 			</Button>
 			<Frame name="$parentEquipmentSlotsFrame" parentKey="equipmentSlotsFrame" mixin="EngraverOptionsFilterEquipmentSlotsMixin">

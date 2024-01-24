@@ -100,7 +100,16 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideTooltip", "Hide Tooltip", Settings.VarType.Boolean), nil, "Hides the tooltip when hovering over a rune button."))
 	end -- HideTooltip
 	do -- HideDragTab
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideDragTab", "Hide Drag Tab", Settings.VarType.Boolean), nil, "Hides the drag tab of the Engraver frame."))
+		local dragTabSetting = AddEngraverOptionsSetting(self, "HideDragTab", "Hide Drag Tab", Settings.VarType.Boolean)
+		local dragTabInitializer = Settings.CreateCheckBoxInitializer(dragTabSetting, nil, "The drag tab allows you to move the Engraver frame via mouse drag.")
+		AddInitializer(self, dragTabInitializer)
+		do -- ShowFilterSelector
+			local setting = AddEngraverOptionsSetting(self, "ShowFilterSelector", "Show Filter Selector", Settings.VarType.Boolean)
+			local initializer = Settings.CreateCheckBoxInitializer(setting, nil, "When enabled, the drag tab will display the currently active filter and allow you to change it.")
+			initializer:SetParentInitializer(dragTabInitializer, function() return not dragTabSetting:GetValue() end)
+			initializer.IsParentInitializerInCurrentSettingsCategory = function() return true; end -- forces indent and small font
+			AddInitializer(self, initializer)
+		end -- ShowFilterSelector
 	end -- HideDragTab
 	do -- EnableRightClickDrag
 		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "EnableRightClickDrag", "Enable Right Click Drag", Settings.VarType.Boolean), nil, "Enables dragging the frame by right-clicking and holding any rune button."))
@@ -112,9 +121,6 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
 		AddInitializer(self, Settings.CreateSliderInitializer(setting, options, tooltip))
 	end	-- UIScale
-	do -- ShowFilterSelector
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "ShowFilterSelector", "Show Filter Selector", Settings.VarType.Boolean), nil, "Shows the filter selector."))
-	end -- ShowFilterSelector
 	AddInitializer(self, CreateSettingsListSectionHeaderInitializer("Filters"));
 	do -- FilterEditor
 		table.insert(self.initializers, Settings.CreateElementInitializer("EngraverOptionsFilterEditorTemplate", { settings = {} } ));

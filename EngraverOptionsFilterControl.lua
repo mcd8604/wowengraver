@@ -9,6 +9,15 @@ local function GetSelectedFilterIndex()
 	end
 end
 
+local filterListDataProvider; -- Initialized in EngraverOptionsFilterListMixin:LoadFilterData
+
+local function FilterListDataProvider_SelectIndex(filterIndex)
+	local elementData = filterListDataProvider and filterListDataProvider:Find(filterIndex)
+	if elementData then
+		selectionBehavior:SelectElementData(elementData)
+	end
+end
+
 -----------------------------
 -- OptionsFilterRuneButton --
 -----------------------------
@@ -17,7 +26,9 @@ EngraverOptionsFilterRuneButtonMixin = CreateFromMixins(EngraverRuneButtonMixin)
 
 function EngraverOptionsFilterRuneButtonMixin:OnClick(button, down)
 	if self.skillLineAbilityID then
-		Addon.Filters:ToggleRune(GetSelectedFilterIndex(), self.skillLineAbilityID, self:GetChecked())
+		local filterIndex = GetSelectedFilterIndex()
+		Addon.Filters:ToggleRune(filterIndex, self.skillLineAbilityID, self:GetChecked())
+		FilterListDataProvider_SelectIndex(filterIndex)
 	end
 end
 
@@ -103,8 +114,8 @@ function EngraverOptionsFilterEditorMixin:OnLoad()
 	end);
 	self.DeleteButton:SetScript("OnClick", function()
 		local elementData = selectionBehavior:GetFirstSelectedElementData()
-		if elementData and elementData.data and elementData.data.filter and elementData.data.filter.Name then
-			StaticPopup_Show("ENGRAVER_FILTER_DELETION", elementData.data.filter.Name, nil, { filterList = self.filterList });
+		if elementData then
+			StaticPopup_Show("ENGRAVER_FILTER_DELETION", elementData.data.filter.Name, nil, elementData);
 		end
 	end);
 end
@@ -118,14 +129,10 @@ function EngraverOptionsFilterEditorMixin:OnSelectedFilterChanged(elementData, s
 end
 
 do
-	local function OnCreateNewFilter(dialog)
+	local function createNewFilter(dialog)
 		local newFilterName = strtrim(dialog.editBox:GetText());
 		local index = Addon.Filters:CreateFilter(newFilterName)
-		dialog.data.filterList:LoadFilterData();
-		local elementData = dialog.data.filterList.dataProvider:Find(index)
-		if elementData then
-			selectionBehavior:SelectElementData(elementData)
-		end
+		FilterListDataProvider_SelectIndex(index)
 		dialog:Hide();
 	end
 
@@ -135,7 +142,7 @@ do
 		button2 = CANCEL,
 		OnAccept = function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-			OnCreateNewFilter(self)
+			createNewFilter(self)
 		end,
 		EditBoxOnTextChanged = function(self)
 			if ( strtrim(self:GetText()) == "" ) then
@@ -145,7 +152,47 @@ do
 			end
 		end,
 		EditBoxOnEnterPressed = function(self)
-			OnCreateNewFilter(self:GetParent())
+			createNewFilter(self:GetParent())
+		end,
+		exclusive = 1,
+		whileDead = 1,
+		hideOnEscape = 1,
+		hasEditBox = 1,
+		maxLetters = 31
+	};
+end
+
+do 
+	local function renameFilter(dialog)
+		if dialog.data.data.filterIndex > 0 then
+			local newFilterName = strtrim(dialog.editBox:GetText());
+			Addon.Filters:RenameFilter(dialog.data.data.filterIndex, newFilterName) 
+			FilterListDataProvider_SelectIndex(dialog.data.data.filterIndex)
+			dialog:Hide();
+		end
+		dialog:Hide();
+	end
+
+	StaticPopupDialogs["ENGRAVER_FILTER_RENAME"] = {
+		text = "Renaming: %s";
+		button1 = OKAY,
+		button2 = CANCEL,
+		OnShow = function(self)
+			self.editBox:SetText(self.data.data.filter.Name)
+		end,
+		OnAccept = function(self)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+			renameFilter(self)
+		end,
+		EditBoxOnTextChanged = function(self)
+			if ( strtrim(self:GetText()) == "" ) then
+				self:GetParent().button1:Disable();
+			else
+				self:GetParent().button1:Enable();
+			end
+		end,
+		EditBoxOnEnterPressed = function(self)
+			renameFilter(self:GetParent())
 		end,
 		exclusive = 1,
 		whileDead = 1,
@@ -161,19 +208,8 @@ StaticPopupDialogs["ENGRAVER_FILTER_DELETION"] = {
 	button2 = CANCEL,
 	OnAccept = function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-		local filterIndex = GetSelectedFilterIndex()
-		if filterIndex > 0 then
-			Addon.Filters:DeleteFilter(filterIndex)
-			-- NOTE if deleting is desired from multiple places in the future, then:
-			--      define/trigger a FilterDeleted event in Filters, register in the editor, and move the code below to the handler
-			self.data.filterList:LoadFilterData();
-			local dataProvider = self.data.filterList.dataProvider
-			if dataProvider then
-				local elementData = dataProvider:Find(filterIndex) or dataProvider:Find(filterIndex-1);
-				if elementData then
-					selectionBehavior:SelectElementData(elementData)
-				end
-			end
+		if self.data.data.filterIndex > 0 then
+			Addon.Filters:DeleteFilter(self.data.data.filterIndex)
 		end
 	end,
 	exclusive = 1,
@@ -198,7 +234,7 @@ function EngraverOptionsFilterListMixin:OnLoad()
 		elementData:Factory(factory, Initializer);
 	end
 
-	local pad = 0;
+	local pad = 10;
 	local spacing = 2;
 	local view = CreateScrollBoxListLinearView(pad, pad, pad, pad, spacing);
 	view:SetElementFactory(Factory);
@@ -209,13 +245,13 @@ function EngraverOptionsFilterListMixin:OnLoad()
 
 	local scrollBoxAnchorsWithBar = 
 	{
-		CreateAnchor("TOPLEFT", 0, 0),
-		CreateAnchor("BOTTOMRIGHT", -20, 0);
+		CreateAnchor("TOPLEFT", 0, -10),
+		CreateAnchor("BOTTOMRIGHT", -20, 10);
 	};
 	local scrollBoxAnchorsWithoutBar = 
 	{
-		scrollBoxAnchorsWithBar[1],
-		CreateAnchor("BOTTOMRIGHT", 0, 0);
+		CreateAnchor("TOPLEFT", 0, -10),
+		CreateAnchor("BOTTOMRIGHT", 0, 10);
 	};
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(self.ScrollBox, self.ScrollBar, scrollBoxAnchorsWithBar, scrollBoxAnchorsWithoutBar);
 	
@@ -232,6 +268,8 @@ function EngraverOptionsFilterListMixin:OnLoad()
 	selectionBehavior:RegisterCallback(SelectionBehaviorMixin.Event.OnSelectionChanged, OnSelectionChanged)
 
 	self:LoadFilterData()
+	EngraverOptionsCallbackRegistry:RegisterCallback("FiltersChanged", self.OnFiltersChanged, self)
+	EngraverOptionsCallbackRegistry:RegisterCallback("FilterDeleted", self.OnFilterDeleted, self)
 end
 
 function EngraverOptionsFilterListMixin:LoadFilterData()
@@ -242,10 +280,29 @@ function EngraverOptionsFilterListMixin:LoadFilterData()
 		initializer.data = { filterIndex = i, filter = filter };
 		table.insert(elementList, initializer);
 	end
-	self.dataProvider = CreateDataProvider(elementList);
-	self.dataProvider:RegisterCallback(DataProviderMixin.Event.OnMove, function(_, _, indexFrom, indexTo) Addon.Filters:ReorderFilter(indexFrom, indexTo); end, self)
-	self.ScrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition);
+	filterListDataProvider = CreateDataProvider(elementList);
+	function dataProviderOnMove(_, _, indexFrom, indexTo) 
+		Addon.Filters:ReorderFilter(indexFrom, indexTo);
+		FilterListDataProvider_SelectIndex(indexTo);
+	end
+	filterListDataProvider:RegisterCallback(DataProviderMixin.Event.OnMove, dataProviderOnMove, self)
+	self.ScrollBox:SetDataProvider(filterListDataProvider, ScrollBoxConstants.RetainScrollPosition);
 	selectionBehavior:SelectFirstElementData(function(data) return true; end);
+end
+
+function EngraverOptionsFilterListMixin:OnFiltersChanged()
+	if not InCombatLockdown() then 
+		self:LoadFilterData() 
+	end
+end
+
+function EngraverOptionsFilterListMixin:OnFilterDeleted(filterIndex)
+	if not InCombatLockdown() then 
+		local elementData = filterListDataProvider:Find(filterIndex) or filterListDataProvider:Find(filterIndex-1);
+		if elementData then
+			selectionBehavior:SelectElementData(elementData)
+		end
+	end 
 end
 
 ----------------------
@@ -260,7 +317,6 @@ function EngraverOptionsFilterListButtonMixin:UpdateStateInternal(selected)
 		self.Texture:SetAtlas("Options_List_Active", TextureKitConstants.UseAtlasSize);
 		self.Texture:Show();
 	else
-		local initializer = self:GetElementData();
 		self.Label:SetFontObject("GameFontNormal");
 		if self.over then
 			self.Texture:SetAtlas("Options_List_Hover", TextureKitConstants.UseAtlasSize);
@@ -283,16 +339,34 @@ function EngraverOptionsFilterListButtonMixin:Init(initializer)
 end
 
 function EngraverOptionsFilterListButtonMixin:OnEnter(buttonName, down)
+	ButtonStateBehaviorMixin.OnEnter(self, buttonName, down)
 	SettingsTooltip:SetOwner(self);
-	Settings.InitTooltip("Drag-and-drop to re-order filters.")--, "Right click for more actions.") 
+	Settings.InitTooltip("Drag-and-drop to re-order filters.", "Right click for more actions.") 
 	SettingsTooltip:Show();
 end
 
-function EngraverOptionsFilterListButtonMixin:OnLeave()
+function EngraverOptionsFilterListButtonMixin:OnLeave(...)
+	ButtonStateBehaviorMixin.OnLeave(self, ...)
 	SettingsTooltip:Hide();
 end
 
-function EngraverOptionsFilterListButtonMixin:OnMouseDown()
+function EngraverOptionsFilterListButtonMixin:OnMouseDown(...)
+	ButtonStateBehaviorMixin.OnMouseDown(self, ...)
 	selectionBehavior:Select(self);
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+end
+
+function EngraverOptionsFilterListButtonMixin:OnMouseUp(button, isUp)
+	ButtonStateBehaviorMixin.OnMouseUp(self, button, isUp)
+	if button == "RightButton" then
+		local elementData = self:GetElementData()
+		local name = elementData.data.filter.Name
+		local menu = {
+			{ notCheckable = true, text = name, isTitle = true, },
+			{ notCheckable = true, text = "Rename", func = function() StaticPopup_Show("ENGRAVER_FILTER_RENAME", name, nil, elementData ); end },
+			{ notCheckable = true, text = "Delete", func = function() StaticPopup_Show("ENGRAVER_FILTER_DELETION", name, nil, elementData ) end }, 
+			{ notCheckable = true, text = "Cancel" },
+		}
+		EasyMenu(menu, EngraverFilterListDropDownMenu, "cursor", nil, nil, "MENU");
+	end
 end

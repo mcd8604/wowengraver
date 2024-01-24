@@ -17,6 +17,7 @@ end
 function FiltersMixin:CreateFilter(filterName)
 	local filters = self:GetFiltersForPlayerClass()	
 	table.insert(filters, { Name = filterName, RuneIDs = {} })
+	EngraverOptionsCallbackRegistry:TriggerEvent("FiltersChanged")
 	return #filters
 end
 
@@ -71,6 +72,8 @@ function FiltersMixin:DeleteFilter(index)
 		local filters = self:GetFiltersForPlayerClass()
 		if filters[index] then
 			local filter =  table.remove(filters, index)
+			EngraverOptionsCallbackRegistry:TriggerEvent("FiltersChanged")
+			EngraverOptionsCallbackRegistry:TriggerEvent("FilterDeleted", index)
 			self:SetCurrentFilter(index, true)
 			return filter
 		end
@@ -82,7 +85,24 @@ function FiltersMixin:ReorderFilter(fromIndex, toIndex)
 		local filters = self:GetFiltersForPlayerClass()
 		if toIndex <= #filters then
 			table.insert(filters, toIndex, table.remove(filters, fromIndex))
+			EngraverOptionsCallbackRegistry:TriggerEvent("FiltersChanged")
+			-- Always keep the CurrentFilter the same after a re-order
+			if EngraverOptions.CurrentFilter > 0 then
+				if EngraverOptions.CurrentFilter == toIndex then
+					self:SetCurrentFilter(fromIndex)
+				elseif EngraverOptions.CurrentFilter == fromIndex then
+					self:SetCurrentFilter(toIndex)
+				end
+			end
 		end
+	end
+end
+
+function FiltersMixin:RenameFilter(filterIndex, newName)
+	local filter = self:GetFilter(filterIndex)
+	if filter then
+		filter.Name = newName
+		EngraverOptionsCallbackRegistry:TriggerEvent("FiltersChanged")
 	end
 end
 
@@ -137,7 +157,7 @@ function FiltersMixin:ToggleRune(filterIndex, runeID, toggleState)
 			else
 				filter.RuneIDs[runeID] = false
 			end
-			EngraverOptionsCallbackRegistry:TriggerEvent("FilterChanged", filterIndex)
+			EngraverOptionsCallbackRegistry:TriggerEvent("FiltersChanged")
 		end
 	end
 end

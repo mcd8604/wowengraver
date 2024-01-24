@@ -78,8 +78,8 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("LayoutDirection", self.UpdateLayout)
 	register("HideDragTab", self.UpdateLayout)
 	register("ShowFilterSelector", self.UpdateLayout)
-	register("CurrentFilter", self.LoadCategories)
-	register("FilterChanged", self.LoadCategories)
+	register("CurrentFilter", self.LoadCategories) -- index stored in EngraverOptions.CurrentFilter changed
+	register("FiltersChanged", self.LoadCategories) -- data inside EngraverFilters changed
 end
 	
 function EngraverFrameMixin:LoadCategories()
@@ -215,21 +215,22 @@ function EngraverFrameMixin:UpdateFilterButtonsLayout(layoutData)
 	UnregisterStateDriver(self.filterLeftButton, "visibility")
 	UnregisterStateDriver(self.filterUpButton, "visibility")
 	UnregisterStateDriver(self.filterDownButton, "visibility")
+	local show = not EngraverOptions.HideDragTab and EngraverOptions.ShowFilterSelector
 	if layoutData.swapTabDimensions then
 		self.filterRightButton:SetShown(false)
 		self.filterLeftButton:SetShown(false)
-		self.filterUpButton:SetShown(EngraverOptions.ShowFilterSelector)
-		self.filterDownButton:SetShown(EngraverOptions.ShowFilterSelector)
-		if EngraverOptions.ShowFilterSelector then
+		self.filterUpButton:SetShown(show)
+		self.filterDownButton:SetShown(show)
+		if show then
 			RegisterStateDriver(self.filterUpButton, "visibility", "[combat]hide;show")
 			RegisterStateDriver(self.filterDownButton, "visibility", "[combat]hide;show")
 		end
 	else
-		self.filterRightButton:SetShown(EngraverOptions.ShowFilterSelector)
-		self.filterLeftButton:SetShown(EngraverOptions.ShowFilterSelector)
+		self.filterRightButton:SetShown(show)
+		self.filterLeftButton:SetShown(show)
 		self.filterUpButton:SetShown(false)
 		self.filterDownButton:SetShown(false)
-		if EngraverOptions.ShowFilterSelector then
+		if show then
 			RegisterStateDriver(self.filterRightButton, "visibility", "[combat]hide;show")
 			RegisterStateDriver(self.filterLeftButton, "visibility", "[combat]hide;show")
 		end
