@@ -574,7 +574,8 @@ function EngraverRuneButtonMixin:TryEngrave()
 				C_Engraving.CastRune(self.skillLineAbilityID);
 				UseInventoryItem(self.category);
 				if StaticPopup1.which == "REPLACE_ENCHANT" then
-					StaticPopup1Button1:Click();
+					ReplaceEnchant()
+					StaticPopup_Hide("REPLACE_ENCHANT")
 				end
 				ClearCursor()
 			else
