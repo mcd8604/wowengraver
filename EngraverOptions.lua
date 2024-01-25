@@ -42,6 +42,7 @@ end
 local DefaultEngraverOptions = {
 	DisplayMode = 1,
 	LayoutDirection = 0,
+	VisibilityMode = 0,
 	HideTooltip = false,
 	HideDragTab = false,
 	EnableRightClickDrag = false,
@@ -73,7 +74,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	self.engraverOptionsSettings = {}
 	self.initializers = {}
 	do -- DisplayMode
-		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "Rune Display Mode";
+		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
@@ -85,7 +86,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- DisplayMode
 	do -- LayoutDirection
-		local variable, name, tooltip = "LayoutDirection", "Layout Direction", "Layout Direction";
+		local variable, name, tooltip = "LayoutDirection", "Layout Direction", "Determines the direction which the runes expand.";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
@@ -96,6 +97,18 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		end
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- LayoutDirection
+	do -- VisibilityMode
+		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "";
+		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
+		local options = function()
+			local container = Settings.CreateControlTextContainer();
+			for i, mode in ipairs(Addon.EngraverVisibilityModes) do
+				container:Add(i-1, mode.text);
+			end
+			return container:GetData();
+		end
+		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
+	end -- VisibilityMode
 	do -- HideTooltip
 		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideTooltip", "Hide Tooltip", Settings.VarType.Boolean), nil, "Hides the tooltip when hovering over a rune button."))
 	end -- HideTooltip

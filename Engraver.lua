@@ -29,6 +29,19 @@ local EngraverLayout = {
 Addon.EngraverLayoutDirections = EngraverLayoutDirections
 Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[EngraverOptions.LayoutDirection+1] end
 
+local EngraverVisibility = {
+	ShowAlways			= 0,
+	HideInCombat		= 1,
+	SyncCharacterPane	= 2,
+}
+local EngraverVisibilityModes = {
+	{ text = "Show Always" },
+	{ text = "Hide in Combat" },
+	--{ text = "Sync with Character Pane" },
+}
+Addon.EngraverVisibilityModes = EngraverVisibilityModes
+--Addon.GetCurrentVisibilityMode = function() return EngraverVisibilityModes[EngraverOptions.VisibilityMode+1] end
+
 -------------------
 -- EngraverFrame --
 -------------------
@@ -76,6 +89,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("UIScale", self.SetScaleAdjustLocation)
 	register("DisplayMode", self.UpdateLayout)
 	register("LayoutDirection", self.UpdateLayout)
+	register("VisibilityMode", self.UpdateVisibilityMode)
 	register("HideDragTab", self.UpdateLayout)
 	register("ShowFilterSelector", self.UpdateLayout)
 	register("CurrentFilter", self.LoadCategories) -- index stored in EngraverOptions.CurrentFilter changed
@@ -272,6 +286,19 @@ function EngraverFrameMixin:SetScaleAdjustLocation(scale)
 	self:ClearAllPoints()
 	self:SetScale(scale)
 	self:SetPoint("TopLeft", self:GetParent(), "BottomLeft", x, y)
+end
+
+function EngraverFrameMixin:UpdateVisibilityMode()
+	UnregisterStateDriver(self, "visibility")  
+	-- TODO unregister hooks if they exist
+	local mode = EngraverOptions.VisibilityMode
+	if mode == EngraverVisibility.ShowAlways then
+		EngraverFrame:Show()
+	elseif mode == EngraverVisibility.HideInCombat then
+		RegisterStateDriver(self, "visibility", "[combat]hide;show")
+	elseif mode == EngraverVisibility.SyncCharacterPane then
+		-- TODO hooks and stuff
+	end
 end
 
 -----------------------
