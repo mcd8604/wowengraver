@@ -371,9 +371,12 @@ function EngraverOptionsFilterListButtonMixin:OnMouseUp(button, isUp)
 	if button == "RightButton" then
 		local elementData = self:GetElementData()
 		local name = elementData.data.filter.Name
+		local isActive = elementData.data.filterIndex == EngraverOptions.CurrentFilter
 		local menu = {
 			{ notCheckable = true, text = name, isTitle = true, },
-			{ notCheckable = true, text = "Activate", func = function() Addon.Filters:SetCurrentFilter(elementData.data.filterIndex); end },
+			isActive 
+				and { notCheckable = true, text = "Deactivate", func = function() Addon.Filters:SetCurrentFilter(0); end }
+				or { notCheckable = true, text = "Activate", func = function() Addon.Filters:SetCurrentFilter(elementData.data.filterIndex); end },
 			{ notCheckable = true, text = "Rename", func = function() StaticPopup_Show("ENGRAVER_FILTER_RENAME", name, nil, elementData ); end },
 			{ notCheckable = true, text = "Delete", func = function() StaticPopup_Show("ENGRAVER_FILTER_DELETION", name, nil, elementData ) end }, 
 			{ notCheckable = true, text = "Cancel" },
