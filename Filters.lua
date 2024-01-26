@@ -127,7 +127,7 @@ function FiltersMixin:RunePassesFilter(rune, optionalFilter)
 		return false
 	end
 	local filter = optionalFilter or self:GetCurrentFilter()
-	return filter == nil or filter.RuneIDs == nil or filter.RuneIDs[rune.skillLineAbilityID] == nil
+	return filter == nil or filter.RuneIDs == nil or filter.RuneIDs[rune.skillLineAbilityID] ~= nil
 end
 
 function FiltersMixin:GetFilteredRunes(runes, optionalFilter)
@@ -153,9 +153,9 @@ function FiltersMixin:ToggleRune(filterIndex, runeID, toggleState)
 		local filter = self:GetFilter(filterIndex)
 		if filter then
 			if toggleState then
-				filter.RuneIDs[runeID] = nil
+				filter.RuneIDs[runeID] = true
 			else
-				filter.RuneIDs[runeID] = false
+				filter.RuneIDs[runeID] = nil
 			end
 			EngraverOptionsCallbackRegistry:TriggerEvent("FiltersChanged")
 		end
