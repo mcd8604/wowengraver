@@ -1,6 +1,29 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 	<Script file="EngraverOptionsFilterControl.lua"/>
 	<Script file="EngraverOptions.lua"/>
+	<Frame name="SettingsListSectionHeaderWithInfoTemplate" inherits="SettingsListSectionHeaderTemplate" mixin="SettingsListSectionHeaderWithInfoMixin" virtual="true">
+		<Frames>
+			<Button name="$parentInfoButton" parentKey="infoButton" inherits="MainHelpPlateButton">
+				<HighlightTexture file="Interface\common\help-i" alphaMode="ADD" hidden="true">
+					<Size x="46" y="46"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a=".2"/>
+				</HighlightTexture>
+				<Scripts>
+					<OnLoad>
+						self.Ring:Hide();
+						self:SetPoint("LEFT", self:GetParent().Title, "RIGHT")
+					</OnLoad>
+					<OnEnter function="SettingsListSectionHeaderInfoButton_OnEnter"/>
+					<OnLeave>
+						SettingsTooltip:Hide()
+					</OnLeave>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
 	<CheckButton name="EngraverOptionsFilterRuneButtonTemplate" mixin="EngraverOptionsFilterRuneButtonMixin" inherits="EngraverRuneButtonTemplate" virtual="true">
 		<Scripts>
 			<OnClick method="OnClick"/>

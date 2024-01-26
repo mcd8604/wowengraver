@@ -125,7 +125,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, dragTabInitializer)
 		do -- ShowFilterSelector
 			local setting = AddEngraverOptionsSetting(self, "ShowFilterSelector", "Show Filter Selector", Settings.VarType.Boolean)
-			local initializer = Settings.CreateCheckBoxInitializer(setting, nil, "When enabled, the drag tab will display the currently active filter and allow you to change it.")
+			local initializer = Settings.CreateCheckBoxInitializer(setting, nil, "When enabled, the drag tab will display the active filter.\nArrow buttons are added to the drag tab for you to change the filter.")
 			initializer:SetParentInitializer(dragTabInitializer, function() return not dragTabSetting:GetValue() end)
 			initializer.IsParentInitializerInCurrentSettingsCategory = function() return true; end -- forces indent and small font
 			AddInitializer(self, initializer)
@@ -141,7 +141,30 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
 		AddInitializer(self, Settings.CreateSliderInitializer(setting, options, tooltip))
 	end	-- UIScale
-	AddInitializer(self, CreateSettingsListSectionHeaderInitializer("Filters"));
+	do -- FiltersHeader
+		local filtersHeaderData = { 
+			name = "Filters", 
+			tooltipSections = {
+				{ 
+					header = "Creating a Filter", 
+					lines = {
+						"Create a new filter and give it an appropriate name.",
+						"Select runes that you want to see when the filter is active, the rest will be hidden."
+					}
+				},
+				{ 
+					header = "Activating a Filter", 
+					lines = {
+						"Only one filter (or none) can be active at a time.",
+						"The active filter is indicated by a green marker in the list below.",
+						"Right-click a filter in the list below to activate or deactivate it.",
+						"You can also use the Filter Selector (the arrow buttons on the drag tab) to change the active one. "
+					}
+				}
+			}
+		}
+		AddInitializer(self, Settings.CreateElementInitializer("SettingsListSectionHeaderWithInfoTemplate", filtersHeaderData));
+	end -- FiltersHeader
 	do -- FilterEditor
 		table.insert(self.initializers, Settings.CreateElementInitializer("EngraverOptionsFilterEditorTemplate", { settings = {} } ));
 	end -- FilterEditor
@@ -184,4 +207,30 @@ function EngraverOptionsFrameMixin:OnRefresh()
 			end
 		end
 	end
+end
+
+---------------------------------------
+-- SettingsListSectionHeaderWithInfo --
+---------------------------------------
+
+SettingsListSectionHeaderWithInfoMixin = CreateFromMixins(SettingsListSectionHeaderMixin)
+
+function SettingsListSectionHeaderWithInfoMixin:Init(initializer)
+	SettingsListSectionHeaderMixin.Init(self, initializer)
+	self.TooltipSections = initializer:GetData().tooltipSections
+end
+
+function SettingsListSectionHeaderInfoButton_OnEnter(self)
+	SettingsTooltip:SetOwner(self, "ANCHOR_RIGHT",-22,-22);
+	local sections = self:GetParent().TooltipSections
+	for i, section in ipairs(sections) do
+		GameTooltip_AddHighlightLine(SettingsTooltip, section.header);
+		for _, line in ipairs(section.lines) do
+			GameTooltip_AddNormalLine(SettingsTooltip, line);
+		end
+		if i < #sections then
+			GameTooltip_AddBlankLinesToTooltip(SettingsTooltip, 1)
+		end
+	end
+	SettingsTooltip:Show();
 end
