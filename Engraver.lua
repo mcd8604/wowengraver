@@ -29,19 +29,6 @@ local EngraverLayout = {
 Addon.EngraverLayoutDirections = EngraverLayoutDirections
 Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[EngraverOptions.LayoutDirection+1] end
 
-local EngraverVisibility = {
-	ShowAlways			= 0,
-	HideInCombat		= 1,
-	SyncCharacterPane	= 2,
-}
-local EngraverVisibilityModes = {
-	{ text = "Show Always" },
-	{ text = "Hide in Combat" },
-	--{ text = "Sync with Character Pane" },
-}
-Addon.EngraverVisibilityModes = EngraverVisibilityModes
---Addon.GetCurrentVisibilityMode = function() return EngraverVisibilityModes[EngraverOptions.VisibilityMode+1] end
-
 -------------------
 -- EngraverFrame --
 -------------------
@@ -288,16 +275,24 @@ function EngraverFrameMixin:SetScaleAdjustLocation(scale)
 	self:SetPoint("TopLeft", self:GetParent(), "BottomLeft", x, y)
 end
 
-function EngraverFrameMixin:UpdateVisibilityMode()
-	UnregisterStateDriver(self, "visibility")  
-	-- TODO unregister hooks if they exist
-	local mode = EngraverOptions.VisibilityMode
-	if mode == EngraverVisibility.ShowAlways then
-		EngraverFrame:Show()
-	elseif mode == EngraverVisibility.HideInCombat then
-		RegisterStateDriver(self, "visibility", "[combat]hide;show")
-	elseif mode == EngraverVisibility.SyncCharacterPane then
-		-- TODO hooks and stuff
+do
+	local function HandleSyncCharacterPane()
+		if EngraverOptions.VisibilityMode == "SyncCharacterPane" then
+			EngraverFrame:SetShown(CharacterFrame:IsShown() and PaperDollFrame:IsShown()) 
+		end 
+	end
+
+	PaperDollFrame:HookScript("OnShow", HandleSyncCharacterPane)
+	PaperDollFrame:HookScript("OnHide", HandleSyncCharacterPane)
+
+	function EngraverFrameMixin:UpdateVisibilityMode()
+		UnregisterStateDriver(self, "visibility")  
+		if EngraverOptions.VisibilityMode == "ShowAlways" then
+			EngraverFrame:Show()
+		elseif EngraverOptions.VisibilityMode == "HideInCombat" then
+			RegisterStateDriver(self, "visibility", "[combat]hide;show")
+		end
+		HandleSyncCharacterPane()
 	end
 end
 

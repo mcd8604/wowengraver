@@ -12,6 +12,24 @@ EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 EngraverOptionsCallbackRegistry:OnLoad()
 EngraverOptionsCallbackRegistry:SetUndefinedEventsAllowed(true)
 
+Addon.EngraverVisibilityModes = {
+	["ShowAlways"] = { text = "Show Always", tooltip = "Engraver will always be visible." },
+	["HideInCombat"] = { text = "Hide in Combat", tooltip = "Show/Hide when combat ends/starts." },
+	["SyncCharacterPane"] = { text = "Sync with Character Pane", tooltip = "Show/Hide when you open/close your Character Pane." },
+}
+
+local DefaultEngraverOptions = {
+	DisplayMode = 1,
+	LayoutDirection = 0,
+	VisibilityMode = "ShowAlways",
+	HideTooltip = false,
+	HideDragTab = false,
+	EnableRightClickDrag = false,
+	UIScale = 1.0,
+	ShowFilterSelector = false,
+	CurrentFilter = 0
+}
+
 EngraverOptionsFrameMixin = {}
 
 function EngraverOptionsFrameMixin:OnLoad()
@@ -39,18 +57,6 @@ function EngraverOptionsFrameMixin:InitSettingsList()
 	self.settingsList:Show();
 end
 
-local DefaultEngraverOptions = {
-	DisplayMode = 1,
-	LayoutDirection = 0,
-	VisibilityMode = 0,
-	HideTooltip = false,
-	HideDragTab = false,
-	EnableRightClickDrag = false,
-	UIScale = 1.0,
-	ShowFilterSelector = false,
-	CurrentFilter = 0
-}
-
 local function AddEngraverOptionsSetting(self, variable, name, varType)
 	local setting = Settings.RegisterAddOnSetting(self.category, name, variable, varType, DefaultEngraverOptions[variable]);
 	self.engraverOptionsSettings[variable] = setting
@@ -74,19 +80,20 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	self.engraverOptionsSettings = {}
 	self.initializers = {}
 	do -- DisplayMode
-		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "";
+		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "How runes buttons are displayed.";
+		local tooltips = { "All runes are always shown.", "Show only each currently engraved rune and show other runes when the cursor is over it." }
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
 			for i, displayMode in ipairs(Addon.EngraverDisplayModes) do
-				container:Add(i-1, displayMode.text);
+				container:Add(i-1, displayMode.text, tooltips[i-1]);
 			end
 			return container:GetData();
 		end
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- DisplayMode
 	do -- LayoutDirection
-		local variable, name, tooltip = "LayoutDirection", "Layout Direction", "Determines the direction which the runes expand.";
+		local variable, name, tooltip = "LayoutDirection", "Layout Direction", "Which direction the runes buttons are layed out.";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
@@ -98,12 +105,12 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- LayoutDirection
 	do -- VisibilityMode
-		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "";
+		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "When the Engraver is shown/hidden.";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
-			for i, mode in ipairs(Addon.EngraverVisibilityModes) do
-				container:Add(i-1, mode.text);
+			for name, mode in pairs(Addon.EngraverVisibilityModes) do
+				container:Add(name, mode.text, mode.tooltip);
 			end
 			return container:GetData();
 		end
