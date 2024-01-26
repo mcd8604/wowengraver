@@ -81,12 +81,12 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	self.initializers = {}
 	do -- DisplayMode
 		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "How runes buttons are displayed.";
-		local tooltips = { "All runes are always shown.", "Show only each currently engraved rune and show other runes when the cursor is over it." }
+		local tooltips = { "All runes are always shown.", "Show only one button for each engravable equipment slot. Move your cursor over any button to see the available runes." }
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
 			for i, displayMode in ipairs(Addon.EngraverDisplayModes) do
-				container:Add(i-1, displayMode.text, tooltips[i-1]);
+				container:Add(i-1, displayMode.text, tooltips[i]);
 			end
 			return container:GetData();
 		end
