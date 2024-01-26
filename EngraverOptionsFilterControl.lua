@@ -57,6 +57,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:OnLoad()
 		[INVSLOT_HAND]	=	self.handsFrame
 	}
 	self:SetupCategoryFrames()
+	EngraverOptionsCallbackRegistry:RegisterCallback("FilterDeleted", self.OnFilterDeleted, self)
 end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:SetupCategoryFrames()
@@ -78,6 +79,8 @@ function EngraverOptionsFilterEquipmentSlotsMixin:SetupCategoryFrame(category, f
 			runeButton:SetEnabled(false)
 			runeButton.Border:SetShown(false)
 			runeButton.icon:SetDesaturated(true)
+			runeButton.icon:SetVertexColor(1.0, 1.0, 1.0)
+			runeButton.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
 		end
 	end
 end
@@ -89,7 +92,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:SetFilter(filter)
 				local passes = Addon.Filters:RunePassesFilter(runeButton, filter)
 				runeButton:SetChecked(passes)
 				runeButton:SetEnabled(true)
-				runeButton.icon:SetDesaturated(false)
+				runeButton.icon:SetDesaturated(not passes)
 			else
 				runeButton:SetChecked(false)
 				runeButton:SetEnabled(false)
@@ -97,6 +100,13 @@ function EngraverOptionsFilterEquipmentSlotsMixin:SetFilter(filter)
 			end
 		end
 	end
+end
+
+function EngraverOptionsFilterEquipmentSlotsMixin:OnFilterDeleted(filterIndex)
+	-- disable rune buttons if no filter is selected
+	if not InCombatLockdown() and not selectionBehavior:HasSelection() then
+		self:SetupCategoryFrames()
+	end 
 end
 
 ------------------
