@@ -79,6 +79,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("VisibilityMode", self.UpdateVisibilityMode)
 	register("HideDragTab", self.UpdateLayout)
 	register("ShowFilterSelector", self.UpdateLayout)
+	register("HideSlotLabels", self.UpdateLayout)
 	register("CurrentFilter", self.LoadCategories) -- index stored in EngraverOptions.CurrentFilter changed
 	register("FiltersChanged", self.LoadCategories) -- data inside EngraverFilters changed
 end
@@ -300,6 +301,13 @@ end
 -- CategoryFrameBase --
 -----------------------
 
+local slotLabelOffsets = {
+	[EngraverLayout.LeftToRight] = CreateVector2D(-8, 0),
+	[EngraverLayout.TopToBottom] = CreateVector2D(0, 8),
+	[EngraverLayout.RightToLeft] = CreateVector2D(8, 0),
+	[EngraverLayout.BottomToTop] = CreateVector2D(0, -8)
+}
+
 function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtonPool = CreateFramePool("Button", self, "EngraverRuneButtonTemplate")
 	self.runeButtons = {}
@@ -307,6 +315,7 @@ end
 
 function EngraverCategoryFrameBaseMixin:SetCategory(category, runes, knownRunes)
 	self.category = category
+	self.slotLabel:SetCategory(category)
 	self:SetRunes(runes, knownRunes)
 	self:LoadEmptyRuneButton()
 end
@@ -361,6 +370,7 @@ function EngraverCategoryFrameBaseMixin:GetRuneButton(skillLineAbilityID)
 end
 
 function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout(layoutDirection)
+	self.slotLabel:UpdateLayout(layoutDirection);
 	self:DetermineActiveAndInactiveButtons()
 	if self.activeButton then
 		local isBroken = GetInventoryItemBroken("player", self.category)
@@ -409,7 +419,11 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl(layoutDirect
 			runeButton:SetShown(true)
 			runeButton:SetHighlighted(false)
 			if r == 1 then
-				runeButton:SetAllPoints()
+				if EngraverOptions.HideSlotLabels then
+					runeButton:SetAllPoints()
+				else
+					runeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, slotLabelOffsets[EngraverOptions.LayoutDirection]:GetXY())
+				end
 			else
 				runeButton:SetPoint(layoutDirection.runePoint, self.runeButtons[r-1], layoutDirection.runeRelativePoint)
 			end
@@ -463,7 +477,12 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDire
 		end
 		if self.activeButton then
 			self.activeButton:SetShown(true)
-			self.activeButton:SetAllPoints()
+			self.activeButton:ClearAllPoints()
+			if EngraverOptions.HideSlotLabels then
+				self.activeButton:SetAllPoints()
+			else
+				self.activeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, slotLabelOffsets[EngraverOptions.LayoutDirection]:GetXY())
+			end
 			if self.inactiveButtons then
 				local prevButton = self.activeButton
 				for r, runeButton in ipairs(self.inactiveButtons) do
@@ -518,7 +537,7 @@ function EngraverCategoryFramePopUpMenuMixin:OnRuneButtonPostLeave()
 end
 
 function EngraverCategoryFramePopUpMenuMixin:IsMouseOverAnyButtons()
-	if self.emptyRuneButton and self.emptyRuneButton:IsMouseOver() then
+	if self.emptyRuneButton and self.emptyRuneButton:IsShown() and self.emptyRuneButton:IsMouseOver() then
 		return true
 	end
 	if self.runeButtons then
@@ -537,6 +556,35 @@ function EngraverCategoryFramePopUpMenuMixin:SetInactiveButtonsShown(isShown)
 			runeButton:SetShown(isShown)
 		end
 	end
+end
+
+---------------
+-- SlotLabel --
+---------------
+
+EngraverSlotLabelMixin = {}
+
+function EngraverSlotLabelMixin:SetCategory(category)
+	self.slotName:SetText(GetItemInventorySlotInfo(category))
+end
+
+function EngraverSlotLabelMixin:UpdateLayout(layoutDirection)
+	self:SetShown(not EngraverOptions.HideSlotLabels)
+	local layoutData = Addon.DragTabLayoutData[EngraverOptions.LayoutDirection+1]
+	if not self.originalSize then
+		self.originalSize = CreateVector2D(self:GetSize())
+	end
+	if layoutData.swapTabDimensions then
+		self:SetSize(self.originalSize.y, self.originalSize.x)
+	else
+		self:SetSize(self.originalSize.x, self.originalSize.y)
+	end
+	self:ClearAllPoints()
+	self:SetPoint(layoutDirection.runePoint, self:GetParent(), layoutDirection.runePoint)
+	self.slotName:ClearAllPoints()
+	local rotation = rad(layoutData.textRotation)
+	self.slotName:SetRotation(rotation)
+	self.slotName:SetPoint("CENTER", self, "CENTER", layoutData.textOffset:GetXY())
 end
 
 ----------------

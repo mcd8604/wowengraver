@@ -24,9 +24,10 @@ local DefaultEngraverOptions = {
 	VisibilityMode = "ShowAlways",
 	HideTooltip = false,
 	HideDragTab = false,
+	ShowFilterSelector = false,
+	HideSlotLabels = false,
 	EnableRightClickDrag = false,
 	UIScale = 1.0,
-	ShowFilterSelector = false,
 	CurrentFilter = 0
 }
 
@@ -131,6 +132,9 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 			AddInitializer(self, initializer)
 		end -- ShowFilterSelector
 	end -- HideDragTab
+	do -- HideSlotLabels
+		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideSlotLabels", "Hide Slot Labels", Settings.VarType.Boolean)))
+	end -- HideSlotLabels
 	do -- EnableRightClickDrag
 		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "EnableRightClickDrag", "Enable Right Click Drag", Settings.VarType.Boolean), nil, "Enables dragging the frame by right-clicking and holding any rune button."))
 	end -- EnableRightClickDrag

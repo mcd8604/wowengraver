@@ -58,6 +58,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:OnLoad()
 	}
 	self:SetupCategoryFrames()
 	EngraverOptionsCallbackRegistry:RegisterCallback("FilterDeleted", self.OnFilterDeleted, self)
+	EngraverOptionsCallbackRegistry:RegisterCallback("HideSlotLabels", self.OnHideSlotLabelsChanged, self)
 end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:SetupCategoryFrames()
@@ -71,6 +72,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:SetupCategoryFrame(category, f
 	local runes = C_Engraving.GetRunesForCategory(category, false);
 	if runes then
 		frame.category = category
+		frame.slotLabel:SetCategory(category)
 		frame:SetRunes(runes, runes)
 		frame:SetDisplayMode(EngraverCategoryFrameShowAllMixin)
 		frame:UpdateCategoryLayout(Addon.EngraverLayoutDirections[1])
@@ -107,6 +109,12 @@ function EngraverOptionsFilterEquipmentSlotsMixin:OnFilterDeleted(filterIndex)
 	if not InCombatLockdown() and not selectionBehavior:HasSelection() then
 		self:SetupCategoryFrames()
 	end 
+end
+
+function EngraverOptionsFilterEquipmentSlotsMixin:OnHideSlotLabelsChanged()
+	if not InCombatLockdown() then
+		self:SetupCategoryFrames()
+	end
 end
 
 ------------------

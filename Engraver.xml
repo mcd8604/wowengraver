@@ -3,6 +3,13 @@
 	<Script file="Engraver.lua"/>
 	<Script file="EngraverOptions.lua"/>
 	<Script file="EngraverMasqueAdapter.lua"/>
+	<Button name="EngraverBackdropTemplate" virtual="true" inherits="TooltipBackdropTemplate">
+		<KeyValues>
+			<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+			<KeyValue key="backdropColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+			<KeyValue key="backdropColorAlpha" value="0.5" type="global"/>
+		</KeyValues>
+	</Button>
 	<CheckButton name="EngraverRuneButtonTemplate" inherits="ActionButtonTemplate,SecureActionButtonTemplate" virtual="true" mixin="EngraverRuneButtonMixin">
 		<Size>
 			<AbsDimension x="40" y="40" />
@@ -24,18 +31,28 @@
 		<Frames>
 			<Button parentKey="emptyRuneButton" inherits="EngraverRuneButtonTemplate" setAllPoints="true" hidden="true">
 			</Button>
+			<Frame parentKey="slotLabel" inherits="EngraverBackdropTemplate" mixin="EngraverSlotLabelMixin" useParentLevel="true" enableMouse="true" >
+				<Size>
+					<AbsDimension x="43" y="26" />
+				</Size>
+				<Anchors>
+					<Anchor />
+				</Anchors>
+				<Layers>
+					<Layer>
+						<FontString parentKey="slotName" setAllPoints="true" font="GameFontNormalSmall">
+							<Size>
+								<AbsDimension x="40" y="40" />
+							</Size>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
 		</Scripts>
 	</Frame>
-	<Button name="EngraverBackdropTemplate" virtual="true" inherits="TooltipBackdropTemplate">
-		<KeyValues>
-			<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
-			<KeyValue key="backdropColor" value="FRIENDS_GRAY_COLOR" type="global"/>
-			<KeyValue key="backdropColorAlpha" value="0.5" type="global"/>
-		</KeyValues>
-	</Button>
 	<Frame name="EngraverFrame" toplevel="true" frameStrata="MEDIUM" enableMouse="true" movable="true" parent="UIParent" hidden="false" inherits="BackdropTemplate" mixin="EngraverFrameMixin">
 		<Size>
 			<AbsDimension x="40" y="40" />
@@ -48,7 +65,7 @@
 			</Anchor>
 		</Anchors>
 		<Frames>
-			<Button name="EngraverDragTab" parentKey="dragTab" inherits="EngraverBackdropTemplate" mixin="EngraverDragTabMixin">
+			<Button name="EngraverDragTab" parentKey="dragTab" inherits="EngraverBackdropTemplate" mixin="EngraverDragTabMixin" useParentLevel="true">
 				<Size x="76" y="32"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
