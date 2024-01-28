@@ -15,10 +15,66 @@ Addon.EngraverDisplayModes = EngraverDisplayModes
 Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[EngraverOptions.DisplayMode+1] end
 
 local EngraverLayoutDirections = {
-	{ text = "Left to Right", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT",	runePoint = "LEFT",		runeRelativePoint = "RIGHT"		},
-	{ text = "Top to Bottom", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT",	runePoint = "TOP",		runeRelativePoint = "BOTTOM"	},
-	{ text = "Right to Left", categoryPoint = "TOPLEFT", categoryRelativePoint = "BOTTOMLEFT",	runePoint = "RIGHT",	runeRelativePoint = "LEFT"		},
-	{ text = "Bottom to Top", categoryPoint = "TOPLEFT", categoryRelativePoint = "TOPRIGHT",	runePoint = "BOTTOM",	runeRelativePoint = "TOP"		}
+	{ 
+		text 					= "Left to Right",
+		categoryPoint			= "TOPLEFT",
+		categoryRelativePoint	= "BOTTOMLEFT",
+		runePoint				= "LEFT",
+		runeRelativePoint		= "RIGHT",
+		textRotation			= 90,
+		slotLabelOffset			= CreateVector2D(-8, 0),
+		textOffset				= CreateVector2D(-7, -5),
+		filterButtonOffset		= CreateVector2D(-3, 0),
+		offset					= CreateVector2D(10, 0),
+		point					= "RIGHT", 
+		relativePoint			= "LEFT",
+		swapTabDimensions		= true	
+	},
+	{ 
+		text					= "Top to Bottom",
+		categoryPoint			= "TOPLEFT",
+		categoryRelativePoint	= "TOPRIGHT",
+		runePoint				= "TOP",
+		runeRelativePoint		= "BOTTOM",
+		textRotation			= 0,
+		slotLabelOffset			= CreateVector2D(0, 8),
+		textOffset				= CreateVector2D(0, 2),
+		filterButtonOffset		= CreateVector2D(0, 2),
+		offset					= CreateVector2D(0, -10),
+		point					= "BOTTOM", 
+		relativePoint			= "TOP",
+		swapTabDimensions		= false
+	},
+	{ 
+		text					= "Right to Left",
+		categoryPoint			= "TOPLEFT",
+		categoryRelativePoint	= "BOTTOMLEFT",
+		runePoint				= "RIGHT",
+		runeRelativePoint		= "LEFT",
+		textRotation			= 270,
+		slotLabelOffset			= CreateVector2D(8, 0),
+		textOffset				= CreateVector2D(7, -5),
+		filterButtonOffset		= CreateVector2D(2, 0),
+		offset					= CreateVector2D(-10, 0),
+		point					= "LEFT",
+		relativePoint			= "RIGHT",
+		swapTabDimensions		= true
+	},
+	{ 
+		text					= "Bottom to Top",
+		categoryPoint			= "TOPLEFT", 
+		categoryRelativePoint	= "TOPRIGHT",
+		runePoint				= "BOTTOM",
+		runeRelativePoint		= "TOP",
+		textRotation			= 0,
+		slotLabelOffset			= CreateVector2D(0, -8),
+		textOffset				= CreateVector2D(0, -2),
+		filterButtonOffset		= CreateVector2D(0, -3),
+		offset					= CreateVector2D(0, 10),
+		point					= "TOP",
+		relativePoint			= "BOTTOM",
+		swapTabDimensions		= false
+	}
 }
 local EngraverLayout = {
 	LeftToRight = 0,
@@ -118,15 +174,6 @@ function EngraverFrameMixin:ResetCategories()
 	self.categoryFramePool:ReleaseAll()
 end
 
-function EngraverFrameMixin:UpdateCategory(equipmentSlot)
-	if self.equipmentSlotFrameMap then
-		local categoryFrame = self.equipmentSlotFrameMap[equipmentSlot]
-		if categoryFrame and categoryFrame.UpdateCategoryLayout then
-			categoryFrame:UpdateCategoryLayout()
-		end
-	end
-end
-
 function EngraverFrameMixin:UpdateLayout(...)
 	if not InCombatLockdown() and self.categories ~= nil then
 		if EngraverOptions.LayoutDirection == EngraverLayout.LeftToRight or EngraverOptions.LayoutDirection == EngraverLayout.RightToLeft then
@@ -154,53 +201,12 @@ function EngraverFrameMixin:UpdateLayout(...)
 				end
 			end
 		end
-		self:UpdateDragTabLayout()
+		self:UpdateDragTabLayout(layoutDirection)
 	end
 end
 
-Addon.DragTabLayoutData = {
-	{-- Left to Right
-		textRotation		= 90,
-		textOffset			= CreateVector2D(-7, -5),
-		filterButtonOffset	= CreateVector2D(-3, 0),
-		offset				= CreateVector2D(10, 0),
-		point				= "RIGHT", 
-		relativePoint		= "LEFT",
-		swapTabDimensions	= true
-	},
-	{-- Top to Bottom
-		textRotation		= 0,
-		textOffset			= CreateVector2D(0, 2),
-		filterButtonOffset	= CreateVector2D(0, 2),
-		offset				= CreateVector2D(0, -10),
-		point				= "BOTTOM", 
-		relativePoint		= "TOP",
-		swapTabDimensions	= false
-	},		
-	{-- Right to Left
-		textRotation		= 270,
-		textOffset			= CreateVector2D(7, -5),
-		filterButtonOffset	= CreateVector2D(2, 0),
-		offset				= CreateVector2D(-10, 0),
-		point				= "LEFT", 
-		relativePoint		= "RIGHT",
-		swapTabDimensions	= true
-	},	
-	{-- Bottom to Top
-		textRotation		= 0,
-		textOffset			= CreateVector2D(0, -2),
-		filterButtonOffset	= CreateVector2D(0, -3),
-		offset				= CreateVector2D(0, 10),
-		point				= "TOP", 
-		relativePoint		= "BOTTOM",
-		swapTabDimensions	= false
-	}	
-}
-
-function EngraverFrameMixin:UpdateDragTabLayout()
+function EngraverFrameMixin:UpdateDragTabLayout(layoutData)
 	if self.dragTab then
-		local layoutIndex = EngraverOptions.LayoutDirection+1
-		local layoutData = Addon.DragTabLayoutData[layoutIndex]
 		-- dragTab
 		self.dragTab:SetShown(not EngraverOptions.HideDragTab);
 		self.dragTab:ClearAllPoints()
@@ -300,13 +306,6 @@ end
 -----------------------
 -- CategoryFrameBase --
 -----------------------
-
-local slotLabelOffsets = {
-	[EngraverLayout.LeftToRight] = CreateVector2D(-8, 0),
-	[EngraverLayout.TopToBottom] = CreateVector2D(0, 8),
-	[EngraverLayout.RightToLeft] = CreateVector2D(8, 0),
-	[EngraverLayout.BottomToTop] = CreateVector2D(0, -8)
-}
 
 function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtonPool = CreateFramePool("Button", self, "EngraverRuneButtonTemplate")
@@ -422,7 +421,7 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl(layoutDirect
 				if EngraverOptions.HideSlotLabels then
 					runeButton:SetAllPoints()
 				else
-					runeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, slotLabelOffsets[EngraverOptions.LayoutDirection]:GetXY())
+					runeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, layoutDirection.slotLabelOffset:GetXY())
 				end
 			else
 				runeButton:SetPoint(layoutDirection.runePoint, self.runeButtons[r-1], layoutDirection.runeRelativePoint)
@@ -481,7 +480,7 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDire
 			if EngraverOptions.HideSlotLabels then
 				self.activeButton:SetAllPoints()
 			else
-				self.activeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, slotLabelOffsets[EngraverOptions.LayoutDirection]:GetXY())
+				self.activeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, layoutDirection.slotLabelOffset:GetXY())
 			end
 			if self.inactiveButtons then
 				local prevButton = self.activeButton
@@ -570,11 +569,10 @@ end
 
 function EngraverSlotLabelMixin:UpdateLayout(layoutDirection)
 	self:SetShown(not EngraverOptions.HideSlotLabels)
-	local layoutData = Addon.DragTabLayoutData[EngraverOptions.LayoutDirection+1]
 	if not self.originalSize then
 		self.originalSize = CreateVector2D(self:GetSize())
 	end
-	if layoutData.swapTabDimensions then
+	if layoutDirection.swapTabDimensions then
 		self:SetSize(self.originalSize.y, self.originalSize.x)
 	else
 		self:SetSize(self.originalSize.x, self.originalSize.y)
@@ -582,9 +580,9 @@ function EngraverSlotLabelMixin:UpdateLayout(layoutDirection)
 	self:ClearAllPoints()
 	self:SetPoint(layoutDirection.runePoint, self:GetParent(), layoutDirection.runePoint)
 	self.slotName:ClearAllPoints()
-	local rotation = rad(layoutData.textRotation)
+	local rotation = rad(layoutDirection.textRotation)
 	self.slotName:SetRotation(rotation)
-	self.slotName:SetPoint("CENTER", self, "CENTER", layoutData.textOffset:GetXY())
+	self.slotName:SetPoint("CENTER", self, "CENTER", layoutDirection.textOffset:GetXY())
 end
 
 ----------------
