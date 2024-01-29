@@ -4,6 +4,7 @@ EngraverFrameMixin = {};
 EngraverCategoryFrameBaseMixin = {};
 EngraverCategoryFrameShowAllMixin = {}
 EngraverCategoryFramePopUpMenuMixin = {}
+EngraverCategoryFrameLinearMixin = {}
 EngraverRuneButtonMixin = {}
 EngraverNoRunesFrameMixin = {};
 
@@ -131,6 +132,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	end
 	register("UIScale", self.SetScaleAdjustLocation)
 	register("DisplayMode", self.UpdateLayout)
+	register("Layout", self.UpdateLayout)
 	register("LayoutDirection", self.UpdateLayout)
 	register("VisibilityMode", self.UpdateVisibilityMode)
 	register("HideDragTab", self.UpdateLayout)
@@ -187,12 +189,19 @@ function EngraverFrameMixin:UpdateLayout(...)
 			local displayMode = Addon.GetCurrentDisplayMode()
 			local prevCategoryFrame = nil
 			for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
+				categoryFrame:ClearAllPoints()
+			end
+			for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
 				if categoryFrame then
 					categoryFrame:SetDisplayMode(displayMode.mixin)
 					if prevCategoryFrame == nil then
 						categoryFrame:SetPoint(layoutDirection.categoryPoint)
 					else
-						categoryFrame:SetPoint(layoutDirection.categoryPoint, prevCategoryFrame, layoutDirection.categoryRelativePoint)
+						if EngraverOptions.Layout == "Linear" then
+							categoryFrame:SetPoint(layoutDirection.runePoint, prevCategoryFrame, layoutDirection.runeRelativePoint)
+						elseif EngraverOptions.Layout == "Grid" then
+							categoryFrame:SetPoint(layoutDirection.categoryPoint, prevCategoryFrame, layoutDirection.categoryRelativePoint)
+						end
 					end
 					if categoryFrame.UpdateCategoryLayout then
 						categoryFrame:UpdateCategoryLayout(layoutDirection)
@@ -378,6 +387,17 @@ function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout(layoutDirection)
 	if self.UpdateCategoryLayoutImpl then
 		self:UpdateCategoryLayoutImpl(layoutDirection) -- implemented by "subclasses"/mixins
 	end
+	-- TODO need to resize self (categoryFrame) - increase either width or height (depending on swapTabDimensions)
+	-- as a sum of the label, activeButton, and inactiveButtons widths
+	local size = 40 * #self.runeButtons
+	if not EngraverOptions.HideSlotLabels then
+		size = size + 20
+	end
+	if layoutDirection.swapTabDimensions then
+		self:SetSize(size, 40)
+	else
+		self:SetSize(40, size)
+	end
 end
 
 function EngraverCategoryFrameBaseMixin:DetermineActiveAndInactiveButtons()
@@ -529,10 +549,12 @@ end
 
 function EngraverCategoryFramePopUpMenuMixin:OnRuneButtonPostEnter()
 	self:SetInactiveButtonsShown(true) 
+	-- TODO update size
 end
 
 function EngraverCategoryFramePopUpMenuMixin:OnRuneButtonPostLeave()
 	self:SetInactiveButtonsShown(self:IsMouseOverAnyButtons())
+	-- TODO update size
 end
 
 function EngraverCategoryFramePopUpMenuMixin:IsMouseOverAnyButtons()

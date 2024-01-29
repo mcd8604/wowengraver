@@ -12,6 +12,11 @@ EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 EngraverOptionsCallbackRegistry:OnLoad()
 EngraverOptionsCallbackRegistry:SetUndefinedEventsAllowed(true)
 
+Addon.EngraverLayouts = {
+	["Grid"] = { text = "Grid", tooltip = "Equipment slots and their runes are arranged in a 2D grid." },
+	["Linear"] = { text = "Linear", tooltip = "Equipment slots and their runes are placed along a single dimension." }
+}
+
 Addon.EngraverVisibilityModes = {
 	["ShowAlways"] = { text = "Show Always", tooltip = "Engraver will always be visible." },
 	["HideInCombat"] = { text = "Hide in Combat", tooltip = "Show/Hide when combat ends/starts." },
@@ -20,6 +25,7 @@ Addon.EngraverVisibilityModes = {
 
 local DefaultEngraverOptions = {
 	DisplayMode = 1,
+	Layout = "Grid",
 	LayoutDirection = 0,
 	VisibilityMode = "ShowAlways",
 	HideTooltip = false,
@@ -80,6 +86,7 @@ end
 function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	self.engraverOptionsSettings = {}
 	self.initializers = {}
+	AddInitializer(self, CreateSettingsListSectionHeaderInitializer("Layout"));
 	do -- DisplayMode
 		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "How runes buttons are displayed.";
 		local tooltips = { "All runes are always shown.", "Show only one button for each engravable equipment slot. Move your cursor over any button to see the available runes." }
@@ -93,6 +100,18 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		end
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- DisplayMode
+	do -- Layout
+		local variable, name, tooltip = "Layout", "Layout", nil;
+		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
+		local options = function()
+			local container = Settings.CreateControlTextContainer();
+			for i, layout in pairs(Addon.EngraverLayouts) do
+				container:Add(i, layout.text, layout.tooltip);
+			end
+			return container:GetData();
+		end
+		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
+	end -- Layout
 	do -- LayoutDirection
 		local variable, name, tooltip = "LayoutDirection", "Layout Direction", "Which direction the runes buttons are layed out.";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
