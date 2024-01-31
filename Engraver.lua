@@ -1,19 +1,5 @@
 local addonName, Addon = ...
 
-EngraverFrameMixin = {};
-EngraverCategoryFrameBaseMixin = {};
-EngraverCategoryFrameShowAllMixin = {}
-EngraverCategoryFramePopUpMenuMixin = {}
-EngraverRuneButtonMixin = {}
-EngraverNoRunesFrameMixin = {};
-
-local EngraverDisplayModes = {
-	{ text = "Show All", mixin = EngraverCategoryFrameShowAllMixin },
-	{ text = "Pop-up Menu", mixin = EngraverCategoryFramePopUpMenuMixin }
-}
-Addon.EngraverDisplayModes = EngraverDisplayModes
-Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[EngraverOptions.DisplayMode+1] end
-
 local EngraverLayoutDirections = {
 	{ 
 		text 					= "Left to Right",
@@ -88,6 +74,8 @@ Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[Eng
 -------------------
 -- EngraverFrame --
 -------------------
+
+EngraverFrameMixin = {};
 
 function EngraverFrameMixin:OnLoad()
 	self.categoryFramePool = CreateFramePool("Frame", self, "EngraverCategoryFrameTemplate",  function(framePool, frame)
@@ -298,6 +286,8 @@ end
 -- CategoryFrameBase --
 -----------------------
 
+EngraverCategoryFrameBaseMixin = {};
+
 function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtonPool = CreateFramePool("Button", self, "EngraverRuneButtonTemplate")
 	self.runeButtons = {}
@@ -366,9 +356,6 @@ function EngraverCategoryFrameBaseMixin:UpdateCategoryLayout(layoutDirection)
 		local isBroken = GetInventoryItemBroken("player", self.category)
 		self.activeButton:SetBlinking(isBroken, 1.0, 0.0, 0.0)
 	end
-	if self.UpdateCategoryLayoutImpl then
-		self:UpdateCategoryLayoutImpl(layoutDirection) -- implemented by "subclasses"/mixins
-	end
 end
 
 function EngraverCategoryFrameBaseMixin:DetermineActiveAndInactiveButtons()
@@ -399,7 +386,10 @@ end
 -- CategoryFrameShowAll --
 --------------------------
 
-function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayoutImpl(layoutDirection)
+EngraverCategoryFrameShowAllMixin = {}
+
+function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayout(layoutDirection)
+	EngraverCategoryFrameBaseMixin.UpdateCategoryLayout(self, layoutDirection)
 	-- update position of each button and highlight the active one
 	if self.runeButtons then
 		for r, runeButton in ipairs(self.runeButtons) do
@@ -445,6 +435,8 @@ end
 -- CategoryFramePopUpMenu --
 ----------------------------
 
+EngraverCategoryFramePopUpMenuMixin = {}
+
 function EngraverCategoryFramePopUpMenuMixin:AreAnyRunesKnown()
 	for r, runeButton in ipairs(self.runeButtons) do
 		if runeButton.isKnown then
@@ -454,7 +446,8 @@ function EngraverCategoryFramePopUpMenuMixin:AreAnyRunesKnown()
 	return false
 end
 
-function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDirection)
+function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayout(layoutDirection)
+	EngraverCategoryFrameBaseMixin.UpdateCategoryLayout(self, layoutDirection)
 	-- update visibility and position of each button
 	if self.emptyRuneButton then
 		self.emptyRuneButton:Hide()
@@ -477,7 +470,6 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayoutImpl(layoutDire
 				local prevButton = self.activeButton
 				for r, runeButton in ipairs(self.inactiveButtons) do
 					runeButton:SetShown(showInactives)
-					--RegisterStateDriver(runeButton, "visibility", "[combat]hide")
 					runeButton:ClearAllPoints()
 					runeButton:SetPoint(layoutDirection.runePoint, prevButton, layoutDirection.runeRelativePoint)
 					prevButton = runeButton
@@ -576,6 +568,8 @@ end
 ----------------
 -- RuneButton --
 ----------------
+
+EngraverRuneButtonMixin = {}
 
 function EngraverRuneButtonMixin:OnLoad()
 	self.Border:SetVertexColor(0.0, 1.0, 0.0);

@@ -12,6 +12,13 @@ EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 EngraverOptionsCallbackRegistry:OnLoad()
 EngraverOptionsCallbackRegistry:SetUndefinedEventsAllowed(true)
 
+local EngraverDisplayModes = {
+	{ text = "Show All", mixin = EngraverCategoryFrameShowAllMixin },
+	{ text = "Pop-up Menu", mixin = EngraverCategoryFramePopUpMenuMixin }
+}
+Addon.EngraverDisplayModes = EngraverDisplayModes
+Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[EngraverOptions.DisplayMode+1] end
+
 local ENGRAVER_SHOW_HIDE = "Show/Hide Engraver" -- TODO localization
 _G.BINDING_NAME_ENGRAVER_SHOW_HIDE = ENGRAVER_SHOW_HIDE
 
