@@ -311,23 +311,42 @@ function EngraverCategoryFrameBaseMixin:SetRunes(runes, knownRunes)
 	end
 end
 
-function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton()
-	if self.emptyRuneButton then
-		-- TODO figure out how to get slotName from slotId using API or maybe a constant somewhere
-		local tempSlotsMap = {
-			[INVSLOT_CHEST] = "CHESTSLOT",
-			[INVSLOT_LEGS] = "LEGSSLOT",
-			[INVSLOT_HAND] = "HANDSSLOT"
-		}
-		if self.category then
-			local slotName = tempSlotsMap[self.category]
-			if slotName then
-				local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
-				self:SetID(id);
-				self.emptyRuneButton.icon:SetTexture(textureName);
+do
+	-- TODO figure out how to get slotName from slotId using API or maybe a constant somewhere
+	local slotNames = {
+		"HEADSLOT",
+		"NECKSLOT",
+		"SHOULDERSLOT",
+		"SHIRTSLOT",
+		"CHESTSLOT",
+		"WAISTSLOT",
+		"LEGSSLOT",
+		"FEETSLOT",
+		"WRISTSLOT",
+		"HANDSSLOT",
+		"FINGER0SLOT",
+		"FINGER1SLOT",
+		"TRINKET0SLOT",
+		"TRINKET1SLOT",
+		"BACKSLOT",
+		"MAINHANDSLOT",
+		"SECONDARYHANDSLOT",
+		"RANGEDSLOT",
+		"TABARDSLOT"
+	}
+	function EngraverCategoryFrameBaseMixin:LoadEmptyRuneButton()
+		if self.emptyRuneButton then
+			if self.category then
+				local slotName = slotNames[self.category]
+				if slotName then
+					print(slotName)
+					local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
+					self:SetID(id);
+					self.emptyRuneButton.icon:SetTexture(textureName);
+				end
 			end
+			self.emptyRuneButton:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
 		end
-		self.emptyRuneButton:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
 	end
 end
 
