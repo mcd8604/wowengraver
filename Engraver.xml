@@ -10,7 +10,7 @@
 			<KeyValue key="backdropColorAlpha" value="0.5" type="global"/>
 		</KeyValues>
 	</Button>
-	<CheckButton name="EngraverRuneButtonTemplate" inherits="ActionButtonTemplate,SecureActionButtonTemplate" virtual="true" mixin="EngraverRuneButtonMixin">
+	<CheckButton name="EngraverRuneButtonTemplate" inherits="ActionButtonTemplate" virtual="true" mixin="EngraverRuneButtonMixin">
 		<Size>
 			<AbsDimension x="40" y="40" />
 		</Size>

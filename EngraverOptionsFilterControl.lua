@@ -106,15 +106,13 @@ end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:OnFilterDeleted(filterIndex)
 	-- disable rune buttons if no filter is selected
-	if not InCombatLockdown() and not selectionBehavior:HasSelection() then
+	if selectionBehavior:HasSelection() then
 		self:SetupCategoryFrames()
 	end 
 end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:OnHideSlotLabelsChanged()
-	if not InCombatLockdown() then
-		self:SetupCategoryFrames()
-	end
+	self:SetupCategoryFrames()
 end
 
 ------------------
@@ -139,10 +137,8 @@ function EngraverOptionsFilterEditorMixin:OnLoad()
 end
 
 function EngraverOptionsFilterEditorMixin:OnSelectedFilterChanged(elementData, selected)
-	if not InCombatLockdown() then 
-		if selected then
-			self.equipmentSlotsFrame:SetFilter(elementData.data.filter)
-		end
+	if selected then
+		self.equipmentSlotsFrame:SetFilter(elementData.data.filter)
 	end
 end
 
@@ -310,26 +306,20 @@ function EngraverOptionsFilterListMixin:LoadFilterData()
 end
 
 function EngraverOptionsFilterListMixin:OnFiltersChanged()
-	if not InCombatLockdown() then
-		self:LoadFilterData()
-	end
+	self:LoadFilterData()
 end
 
 function EngraverOptionsFilterListMixin:OnCurrentFilterChanged()
-	if not InCombatLockdown() then
-		local filterIndex = GetSelectedFilterIndex()
-		self:LoadFilterData()
-		FilterListDataProvider_SelectIndex(filterIndex)
-	end
+	local filterIndex = GetSelectedFilterIndex()
+	self:LoadFilterData()
+	FilterListDataProvider_SelectIndex(filterIndex)
 end
 
 function EngraverOptionsFilterListMixin:OnFilterDeleted(filterIndex)
-	if not InCombatLockdown() then
-		local elementData = filterListDataProvider:Find(filterIndex) or filterListDataProvider:Find(filterIndex-1);
-		if elementData then
-			selectionBehavior:SelectElementData(elementData)
-		end
-	end 
+	local elementData = filterListDataProvider:Find(filterIndex) or filterListDataProvider:Find(filterIndex-1);
+	if elementData then
+		selectionBehavior:SelectElementData(elementData)
+	end
 end
 
 ----------------------

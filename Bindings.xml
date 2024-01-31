@@ -1,0 +1,17 @@
+<Bindings>
+	<Binding name="ENGRAVER_SHOW_HIDE" runOnUp="true" category="Engraver">
+		if EngraverFrame and EngraverOptions then 
+			if EngraverOptions.VisibilityMode == "ToggleKeybind" then
+				if keystate == "down" then
+					EngraverFrame:SetShown(not EngraverFrame:IsShown())
+				end
+			elseif EngraverOptions.VisibilityMode == "HoldKeybind" then
+				if keystate == "down" then
+					EngraverFrame:Show()
+				else
+					EngraverFrame:Hide()
+				end
+			end
+		end
+	</Binding>
+</Bindings>

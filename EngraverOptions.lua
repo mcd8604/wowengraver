@@ -12,10 +12,15 @@ EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 EngraverOptionsCallbackRegistry:OnLoad()
 EngraverOptionsCallbackRegistry:SetUndefinedEventsAllowed(true)
 
+local ENGRAVER_SHOW_HIDE = "Show/Hide Engraver" -- TODO localization
+_G.BINDING_NAME_ENGRAVER_SHOW_HIDE = ENGRAVER_SHOW_HIDE
+
 Addon.EngraverVisibilityModes = {
 	["ShowAlways"] = { text = "Show Always", tooltip = "Engraver will always be visible." },
 	["HideInCombat"] = { text = "Hide in Combat", tooltip = "Show/Hide when combat ends/starts." },
 	["SyncCharacterPane"] = { text = "Sync with Character Pane", tooltip = "Show/Hide when you open/close your Character Pane." },
+	["ToggleKeybind"] = { text = "Toggle Keybind", tooltip = string.format("Toggles visibility when you press the %q keybind.", ENGRAVER_SHOW_HIDE) },
+	["HoldKeybind"] = { text = "Hold Keybind", tooltip = string.format("Shows only when you press and hold the %q keybind.", ENGRAVER_SHOW_HIDE) },
 }
 
 local DefaultEngraverOptions = {
@@ -50,6 +55,7 @@ function EngraverOptionsFrameMixin:InitSettingsList()
 	self.settingsList.Header.DefaultsButton:SetScript("OnClick", function(button, buttonName, down)
 		ShowAppropriateDialog("GAME_SETTINGS_APPLY_DEFAULTS");
 	end);
+	self.settingsList.Header.KeybindsButton = CreateFrame("Button", nil, self.settingsList.Header, "EngraverKeybindsButtonTemplate")
 	self.settingsList.ScrollBox:SetScript("OnMouseWheel", function(scrollBox, delta)
 		if not KeybindListener:OnForwardMouseWheel(delta) then
 			ScrollControllerMixin.OnMouseWheel(scrollBox, delta);
@@ -106,7 +112,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- LayoutDirection
 	do -- VisibilityMode
-		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "When the Engraver is shown/hidden.";
+		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "Choose how and when to show/hide the Engraver.";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
