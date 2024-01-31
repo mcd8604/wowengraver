@@ -339,7 +339,6 @@ do
 			if self.category then
 				local slotName = slotNames[self.category]
 				if slotName then
-					print(slotName)
 					local id, textureName, checkRelic = GetInventorySlotInfo(slotName);
 					self:SetID(id);
 					self.emptyRuneButton.icon:SetTexture(textureName);
