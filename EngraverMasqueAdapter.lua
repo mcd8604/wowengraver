@@ -15,7 +15,7 @@ local originalDragTabFilterButtonOffsets = {}
 local originalDragTabTextOffsets = {}
 
 local function CacheDragTabLayoutData()
-	for i, layout in pairs(Addon.DragTabLayoutData) do
+	for i, layout in pairs(Addon.EngraverLayoutDirections) do
 		originalDragTabOffsets[i] = layout.offset:Clone()
 		originalDragTabFilterButtonOffsets[i] = layout.filterButtonOffset:Clone()
 		originalDragTabTextOffsets[i] = layout.textOffset:Clone()
@@ -38,13 +38,13 @@ local function UpdateDragTabOffset(isDisabled)
 		originalDragTabSize = EngraverFrame.dragTab.originalSize:Clone()
 	end
 	EngraverFrame.dragTab.originalSize = isDisabled and originalDragTabSize or CreateVector2D(76, 22)
-	for i, layout in ipairs(Addon.DragTabLayoutData) do
+	for i, layout in ipairs(Addon.EngraverLayoutDirections) do
 		layout.offset = isDisabled and originalDragTabOffsets[i] or CreateVector2D(0,0)
 		layout.filterButtonOffset = isDisabled and originalDragTabFilterButtonOffsets[i] or CreateVector2D(0,0)
 		layout.textOffset = isDisabled and CreateVector2D(0,0) or deltaTextOffsets[i]:Clone()
 		layout.textOffset:Add(originalDragTabTextOffsets[i])
 	end
-	EngraverFrame:UpdateDragTabLayout()
+	EngraverFrame:UpdateDragTabLayout(Addon.GetCurrentLayoutDirection())
 end
 
 local function OnDragTabGroupCallback(Group, Option, Value)
