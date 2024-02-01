@@ -160,16 +160,27 @@ function EngraverFrameMixin:ResetCategories()
 	self.categoryFramePool:ReleaseAll()
 end
 
+function EngraverFrameMixin:GetNumVisibleCategories()
+	local numCategories = 0
+	for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
+		if #categoryFrame.runeButtons > 0 then
+			numCategories = numCategories + 1
+		end
+	end
+	return numCategories
+end
+
 function EngraverFrameMixin:UpdateLayout(...)
 	self:UpdateVisibilityMode()
 	if self.categories ~= nil then
-		if EngraverOptions.LayoutDirection == EngraverLayout.LeftToRight or EngraverOptions.LayoutDirection == EngraverLayout.RightToLeft then
-			self:SetSize(40, 40 * #self.categories)
+		local layoutDirection = Addon.GetCurrentLayoutDirection()
+		local numCategories = self:GetNumVisibleCategories()
+		if layoutDirection.swapTabDimensions then
+			self:SetSize(40, 40 * numCategories)
 		else
-			self:SetSize(40 * #self.categories, 40)
+			self:SetSize(40 * numCategories, 40)
 		end
 		self:SetScale(EngraverOptions.UIScale or 1.0)
-		local layoutDirection = Addon.GetCurrentLayoutDirection()
 		if self.equipmentSlotFrameMap then
 			local displayMode = Addon.GetCurrentDisplayMode()
 			local prevCategoryFrame = nil
