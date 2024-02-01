@@ -624,10 +624,12 @@ function EngraverRuneButtonMixin:ResetColors()
 	self.SpellHighlightTexture:SetVertexColor(1.0, 1.0, 1.0);
 	if self.isKnown then
 		self.icon:SetVertexColor(1.0, 1.0, 1.0);
+		self.icon:SetDesaturated(false)
 		self.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
 	else
-		self.icon:SetVertexColor(0.2, 0.0, 0.0);
-		self.NormalTexture:SetVertexColor(0.2, 0.0, 0.0);
+		self.icon:SetDesaturated(true)
+		self.icon:SetVertexColor(0.2, 0.2, 0.2);
+		self.NormalTexture:SetVertexColor(0.2, 0.2, 0.2);
 	end
 end
 
