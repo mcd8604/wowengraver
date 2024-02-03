@@ -174,11 +174,11 @@ function EngraverFrameMixin:UpdateLayout(...)
 	self:UpdateVisibilityMode()
 	if self.categories ~= nil then
 		local layoutDirection = Addon.GetCurrentLayoutDirection()
-		local numCategories = self:GetNumVisibleCategories()
+		local sizeMultiplier = max(1, self:GetNumVisibleCategories())
 		if layoutDirection.swapTabDimensions then
-			self:SetSize(40, 40 * numCategories)
+			self:SetSize(40, 40 * sizeMultiplier)
 		else
-			self:SetSize(40 * numCategories, 40)
+			self:SetSize(40 * sizeMultiplier, 40)
 		end
 		self:SetScale(EngraverOptions.UIScale or 1.0)
 		if self.equipmentSlotFrameMap then
