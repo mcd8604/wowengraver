@@ -547,12 +547,12 @@ function EngraverCategoryFramePopUpMenuMixin:OnRuneButtonPostLeave()
 end
 
 function EngraverCategoryFramePopUpMenuMixin:IsMouseOverAnyButtons()
-	if self.emptyRuneButton and self.emptyRuneButton:IsShown() and self.emptyRuneButton:IsMouseOver() then
+	if self.emptyRuneButton and self.emptyRuneButton:IsShown() and self.emptyRuneButton:IsMouseMotionFocus() then
 		return true
 	end
 	if self.runeButtons then
 		for r, runeButton in ipairs(self.runeButtons) do
-			if runeButton:IsMouseOver() then
+			if runeButton:IsMouseMotionFocus() then
 				return true
 			end
 		end
