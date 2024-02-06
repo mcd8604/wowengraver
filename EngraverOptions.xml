@@ -42,6 +42,7 @@
 		</Scripts>
 	</CheckButton>
 	<Frame name="EngraverOptionsFilterCategoryFrameTemplate" mixin="EngraverOptionsFilterCategoryFrameMixin" inherits="EngraverCategoryFrameTemplate" virtual="true">
+		<Size x="40" y="40"/>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
 		</Scripts>
@@ -80,10 +81,10 @@
 	</Button>
 	<Frame name="EngraverFilterListDropDownMenu" inherits="UIDropDownMenuTemplate"/>
 	<Frame name="EngraverOptionsFilterEditorTemplate" inherits="SettingsListElementTemplate" mixin="EngraverOptionsFilterEditorMixin" virtual="true">
-		<Size x="280" y="120"/>
+		<Size x="280" y="280"/>
 		<Frames>
 			<Frame name="$parentFilterList" parentKey="filterList" inherits="SettingsCategoryListTemplate" mixin="EngraverOptionsFilterListMixin">
-				<Size x="220" y="140"/>
+				<Size x="220" y="270"/>
 				<Anchors>
 					<Anchor x="10" y="10"/>
 				</Anchors>
@@ -113,26 +114,6 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOP" x="-80" y="0"></Anchor>
 				</Anchors>
-				<Frames>
-					<Frame name="$parentChestFrame" parentKey="chestFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
-						<Size x="40" y="40"/>
-						<Anchors>
-							<Anchor></Anchor>
-						</Anchors>
-					</Frame>
-					<Frame name="$parentHandsFrame" parentKey="handsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentChestFrame" relativePoint="BOTTOMLEFT">
-							</Anchor>
-						</Anchors>
-					</Frame>
-					<Frame name="$parentLegsFrame" parentKey="legsFrame" inherits="EngraverOptionsFilterCategoryFrameTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentHandsFrame" relativePoint="BOTTOMLEFT">
-							</Anchor>
-						</Anchors>
-					</Frame>
-				</Frames>
 				<Scripts>
 					<OnLoad method="OnLoad"/>
 				</Scripts>
