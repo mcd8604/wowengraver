@@ -183,7 +183,9 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateElementInitializer("SettingsListSectionHeaderWithInfoTemplate", filtersHeaderData));
 	end -- FiltersHeader
 	do -- FilterEditor
-		table.insert(self.initializers, Settings.CreateElementInitializer("EngraverOptionsFilterEditorTemplate", { settings = {} } ));
+		local initializer = CreateFromMixins(SettingsListElementInitializer);
+		initializer:Init("EngraverOptionsFilterEditorTemplate", { settings = {} } );
+		table.insert(self.initializers, initializer);
 	end -- FilterEditor
 end
 
