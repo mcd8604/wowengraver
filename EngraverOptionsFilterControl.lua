@@ -116,7 +116,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:OnFilterDeleted(filterIndex)
 end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:OnHideSlotLabelsChanged()
-	self:SetupCategoryFrames()
+	--self:SetupCategoryFrames()
 end
 
 ------------------
