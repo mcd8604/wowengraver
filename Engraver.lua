@@ -124,6 +124,7 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("HideDragTab", self.UpdateLayout)
 	register("ShowFilterSelector", self.UpdateLayout)
 	register("HideSlotLabels", self.UpdateLayout)
+	register("HideUndiscoveredRunes", self.LoadCategories)
 	register("CurrentFilter", self.LoadCategories) -- index stored in EngraverOptions.CurrentFilter changed
 	register("FiltersChanged", self.LoadCategories) -- data inside EngraverFilters changed
 end
@@ -132,10 +133,10 @@ function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
 	C_Engraving:ClearAllCategoryFilters();
 	C_Engraving.RefreshRunesList();
-	self.categories = C_Engraving.GetRuneCategories(false, false);
+	self.categories = C_Engraving.GetRuneCategories(false, EngraverOptions.HideUndiscoveredRunes or false);
 	if #self.categories > 0 then
 		for c, category in ipairs(self.categories) do
-			local runes = Addon.Filters:GetFilteredRunesForCategory(category, false)
+			local runes = Addon.Filters:GetFilteredRunesForCategory(category, EngraverOptions.HideUndiscoveredRunes or false)
 			if #runes > 0 then
 				local categoryFrame = self.categoryFramePool:Acquire()
 				categoryFrame:Show()

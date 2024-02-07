@@ -34,6 +34,7 @@ local DefaultEngraverOptions = {
 	DisplayMode = 1,
 	LayoutDirection = 0,
 	VisibilityMode = "ShowAlways",
+	HideUndiscoveredRunes = false,
 	HideTooltip = false,
 	HideDragTab = false,
 	ShowFilterSelector = false,
@@ -130,6 +131,9 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		end
 		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
 	end -- VisibilityMode
+	do -- HideUndiscoveredRunes
+		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideUndiscoveredRunes", "Hide Undiscovered Runes", Settings.VarType.Boolean), nil, "Spoiler safety - hides any runes that have not been discovered yet. They will still be hidden even if they pass the active filter."))
+	end -- HideUndiscoveredRunes
 	do -- HideTooltip
 		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideTooltip", "Hide Tooltip", Settings.VarType.Boolean), nil, "Hides the tooltip when hovering over a rune button."))
 	end -- HideTooltip
