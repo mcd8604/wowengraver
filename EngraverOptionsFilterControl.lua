@@ -125,6 +125,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:OnHideSlotLabelsChanged()
 	for _, frame in pairs(self.categoryFrames) do
 		UpdateCategoryFrame(frame)
 	end
+	self:SetFilter(Addon.Filters:GetFilter(GetSelectedFilterIndex()))
 end
 
 ------------------
