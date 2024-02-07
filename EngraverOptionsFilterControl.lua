@@ -56,6 +56,18 @@ function EngraverOptionsFilterEquipmentSlotsMixin:OnLoad()
 	EngraverOptionsCallbackRegistry:RegisterCallback("HideSlotLabels", self.OnHideSlotLabelsChanged, self)
 end
 
+local function UpdateCategoryFrame(frame) 
+	frame:UpdateCategoryLayout(Addon.EngraverLayoutDirections[1])
+	for r, runeButton in ipairs(frame.runeButtons) do
+		runeButton:SetBlinking(false)
+		runeButton:SetEnabled(false)
+		runeButton.Border:SetShown(false)
+		runeButton.icon:SetDesaturated(true)
+		runeButton.icon:SetVertexColor(1.0, 1.0, 1.0)
+		runeButton.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
+	end
+end
+
 function EngraverOptionsFilterEquipmentSlotsMixin:SetupCategoryFrames()
 	local categories = C_Engraving.GetRuneCategories(false, false);
 	self.categoryFrames = {}
@@ -74,15 +86,7 @@ function EngraverOptionsFilterEquipmentSlotsMixin:SetupCategoryFrames()
 				frame.slotLabel:SetCategory(category)
 				frame:SetRunes(runes, runes)
 				frame:SetDisplayMode(EngraverCategoryFrameShowAllMixin)
-				frame:UpdateCategoryLayout(Addon.EngraverLayoutDirections[1])
-				for r, runeButton in ipairs(frame.runeButtons) do
-					runeButton:SetBlinking(false)
-					runeButton:SetEnabled(false)
-					runeButton.Border:SetShown(false)
-					runeButton.icon:SetDesaturated(true)
-					runeButton.icon:SetVertexColor(1.0, 1.0, 1.0)
-					runeButton.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
-				end
+				UpdateCategoryFrame(frame)
 				self.categoryFrames[category] = frame
 				prevFrame = frame
 			end
@@ -109,14 +113,18 @@ function EngraverOptionsFilterEquipmentSlotsMixin:SetFilter(filter)
 end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:OnFilterDeleted(filterIndex)
-	-- disable rune buttons if no filter is selected
 	if selectionBehavior:HasSelection() then
-		self:SetupCategoryFrames()
+		for _, frame in pairs(self.categoryFrames) do
+			UpdateCategoryFrame(frame)
+		end
 	end 
+	self:SetFilter(Addon.Filters:GetFilter(GetSelectedFilterIndex()))
 end
 
 function EngraverOptionsFilterEquipmentSlotsMixin:OnHideSlotLabelsChanged()
-	--self:SetupCategoryFrames()
+	for _, frame in pairs(self.categoryFrames) do
+		UpdateCategoryFrame(frame)
+	end
 end
 
 ------------------
