@@ -7,6 +7,12 @@ SlashCmdList.ENGRAVER = function(msg, editBox)
 	Settings.OpenToCategory(localAddonName);
 end
 
+SLASH_ENGRAVER_RESET_POSITION1 = "/engraver_reset_position"
+SlashCmdList.ENGRAVER_RESET_POSITION = function(msg, editBox)
+	EngraverFrame:ClearAllPoints(); 
+	EngraverFrame:SetPoint("CENTER", UIParent, "CENTER");
+end
+
 EngraverOptions = {} -- SavedVariable
 EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 EngraverOptionsCallbackRegistry:OnLoad()
