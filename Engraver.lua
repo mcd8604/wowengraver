@@ -358,7 +358,7 @@ do
 					self.emptyRuneButton.icon:SetTexture(textureName);
 				end
 			end
-			self.emptyRuneButton:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
+			self.emptyRuneButton:RegisterForClicks("AnyUp", "AnyDown")
 		end
 	end
 end
@@ -616,7 +616,7 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	self.tooltipName = rune.name;
 	self.skillLineAbilityID = rune.skillLineAbilityID;
 	self.isKnown = isKnown;
-	self:RegisterForClicks("LeftButtonUp", "RightButtonDown", "RightButtonUp")
+	self:RegisterForClicks("AnyUp", "AnyDown")
 	if self.icon then
 		self.icon:SetAllPoints()
 	end
@@ -638,14 +638,14 @@ end
 
 function EngraverRuneButtonMixin:OnClick()
 	local buttonClicked = GetMouseButtonClicked();
-	if buttonClicked == "LeftButton" then
-		self:TryEngrave()
-	elseif buttonClicked  == "RightButton" and EngraverOptions.EnableRightClickDrag then
-		if IsKeyDown(buttonClicked) then
+	if IsKeyDown(buttonClicked) then
+		if buttonClicked == "LeftButton"  then
+			self:TryEngrave()
+		elseif buttonClicked  == "RightButton" and EngraverOptions.EnableRightClickDrag then
 			EngraverFrame:StartMoving()
-		else
-			EngraverFrame:StopMovingOrSizing()
 		end
+	else
+		EngraverFrame:StopMovingOrSizing()
 	end
 end
 
