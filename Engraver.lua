@@ -179,7 +179,8 @@ function EngraverFrameMixin:UpdateLayout(...)
 		if self.equipmentSlotFrameMap then
 			local displayMode = Addon.GetCurrentDisplayMode()
 			local prevCategoryFrame = nil
-			for category, categoryFrame in pairs(self.equipmentSlotFrameMap) do
+			for c, category in ipairs(self.categories) do
+				local categoryFrame = self.equipmentSlotFrameMap[category]
 				if categoryFrame then
 					categoryFrame:ClearAllPoints()
 					categoryFrame:SetDisplayMode(displayMode.mixin)
