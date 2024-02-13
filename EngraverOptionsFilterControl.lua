@@ -65,6 +65,7 @@ local function UpdateCategoryFrame(frame)
 		runeButton.icon:SetDesaturated(true)
 		runeButton.icon:SetVertexColor(1.0, 1.0, 1.0)
 		runeButton.NormalTexture:SetVertexColor(1.0, 1.0, 1.0);
+		runeButton:RegisterForClicks("LeftButtonDown","RightButtonDown")
 	end
 end
 
