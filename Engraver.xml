@@ -2,6 +2,7 @@
 	<Script file="Filters.lua"/>
 	<Script file="Engraver.lua"/>
 	<Script file="EngraverOptions.lua"/>
+	<Script file="ActionBarSpellPushRemover.lua"/>
 	<Script file="EngraverMasqueAdapter.lua"/>
 	<Button name="EngraverBackdropTemplate" virtual="true" inherits="TooltipBackdropTemplate">
 		<KeyValues>
