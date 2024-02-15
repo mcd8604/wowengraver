@@ -19,14 +19,17 @@ function ActionBarSpellPushRemover:OnActionBarSlotChanged(slot)
 	end
 end
 
+function ActionBarSpellPushRemover:SetActive(isActive)
+	if isActive then
+		EventRegistry:RegisterFrameEventAndCallback("SPELL_PUSHED_TO_ACTIONBAR", ActionBarSpellPushRemover.OnSpellPushedToActionBar, ActionBarSpellPushRemover);
+		EventRegistry:RegisterFrameEventAndCallback("ACTIONBAR_SLOT_CHANGED", ActionBarSpellPushRemover.OnActionBarSlotChanged, ActionBarSpellPushRemover);
+	else
+		EventRegistry:UnregisterFrameEventAndCallback("SPELL_PUSHED_TO_ACTIONBAR", ActionBarSpellPushRemover);
+		EventRegistry:UnregisterFrameEventAndCallback("ACTIONBAR_SLOT_CHANGED", ActionBarSpellPushRemover);
+	end
+end
+
 EventRegistry:RegisterFrameEventAndCallback("PLAYER_ENTERING_WORLD", function(event, ...)
-	EngraverOptionsCallbackRegistry:RegisterCallback("AutoSpellBarRemoval", function(_, newValue)
-		if newValue then
-			EventRegistry:RegisterFrameEventAndCallback("SPELL_PUSHED_TO_ACTIONBAR", ActionBarSpellPushRemover.OnSpellPushedToActionBar, ActionBarSpellPushRemover);
-			EventRegistry:RegisterFrameEventAndCallback("ACTIONBAR_SLOT_CHANGED", ActionBarSpellPushRemover.OnActionBarSlotChanged, ActionBarSpellPushRemover);
-		else
-			EventRegistry:UnregisterFrameEventAndCallback("SPELL_PUSHED_TO_ACTIONBAR", ActionBarSpellPushRemover);
-			EventRegistry:UnregisterFrameEventAndCallback("ACTIONBAR_SLOT_CHANGED", ActionBarSpellPushRemover);
-		end
-	end)
+	EngraverOptionsCallbackRegistry:RegisterCallback("AutoSpellBarRemoval", function(_, newValue) ActionBarSpellPushRemover:SetActive(newValue) end)
+	ActionBarSpellPushRemover:SetActive(EngraverOptions.AutoSpellBarRemoval)
 end)
