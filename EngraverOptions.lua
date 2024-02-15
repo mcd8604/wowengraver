@@ -165,7 +165,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	do -- UIScale
 		local variable, name, tooltip = "UIScale", "UI Scale", "Adjusts the scale of the Engraver's user interface frame.";
 		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
-		local options = Settings.CreateSliderOptions(0.01, 2.5, 0.00) -- minValue, maxValue, step 
+		local options = Settings.CreateSliderOptions(0.01, 2.5, 0.01) -- minValue, maxValue, step 
 		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
 		AddInitializer(self, Settings.CreateSliderInitializer(setting, options, tooltip))
 	end	-- UIScale
