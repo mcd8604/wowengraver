@@ -47,7 +47,7 @@ local DefaultEngraverOptions = {
 	HideSlotLabels = false,
 	EnableRightClickDrag = false,
 	UIScale = 1.0,
-	AutoSpellBarRemoval = false,
+	PreventSpellPlacement = false,
 	CurrentFilter = 0
 }
 
@@ -169,9 +169,9 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage);
 		AddInitializer(self, Settings.CreateSliderInitializer(setting, options, tooltip))
 	end	-- UIScale
-	do -- AutoSpellBarRemoval
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "AutoSpellBarRemoval", "Auto Spell Bar Removal", Settings.VarType.Boolean), nil, "When a rune is engraved, the spell is sometimes placed on your action bars.\nEnabling this will automatically remove those spells after they're placed."))
-	end -- AutoSpellBarRemoval
+	do -- PreventSpellPlacement
+		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "PreventSpellPlacement", "Prevent Spell Placement", Settings.VarType.Boolean), nil, "This will prevent spells from automatically animating and flying-in to a slot on your action bars."))
+	end -- PreventSpellPlacement
 	do -- FiltersHeader
 		local filtersHeaderData = { 
 			name = "Filters", 
