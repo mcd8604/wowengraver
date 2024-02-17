@@ -26,7 +26,11 @@ Addon.EngraverDisplayModes = EngraverDisplayModes
 Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[EngraverOptions.DisplayMode+1] end
 
 local ENGRAVER_SHOW_HIDE = "Show/Hide Engraver" -- TODO localization
+local ENGRAVER_NEXT_FILTER = "Activate Next Filter" -- TODO localization
+local ENGRAVER_PREV_FILTER = "Activate Previous Filter" -- TODO localization
 _G.BINDING_NAME_ENGRAVER_SHOW_HIDE = ENGRAVER_SHOW_HIDE
+_G.BINDING_NAME_ENGRAVER_NEXT_FILTER = ENGRAVER_NEXT_FILTER
+_G.BINDING_NAME_ENGRAVER_PREV_FILTER = ENGRAVER_PREV_FILTER
 
 Addon.EngraverVisibilityModes = {
 	["ShowAlways"] = { text = "Show Always", tooltip = "Engraver will always be visible." },

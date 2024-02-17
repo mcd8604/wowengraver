@@ -59,8 +59,16 @@ function FiltersMixin:SetCurrentFilterNext()
 	self:SetCurrentFilter((EngraverOptions.CurrentFilter+1), false)
 end
 
+function EngraverFilters_SetCurrentFilterNext() 
+	Addon.Filters:SetCurrentFilterNext() 
+end
+
 function FiltersMixin:SetCurrentFilterPrev()
 	self:SetCurrentFilter((EngraverOptions.CurrentFilter-1), false)
+end
+
+function EngraverFilters_SetCurrentFilterPrev() 
+	Addon.Filters:SetCurrentFilterPrev() 
 end
 
 function FiltersMixin:DeleteCurrentFilter()
