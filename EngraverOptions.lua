@@ -38,6 +38,7 @@ Addon.EngraverVisibilityModes = {
 	["SyncCharacterPane"] = { text = "Sync with Character Pane", tooltip = "Show/Hide when you open/close your Character Pane." },
 	["ToggleKeybind"] = { text = "Toggle Keybind", tooltip = string.format("Toggles visibility when you press the %q keybind.", ENGRAVER_SHOW_HIDE) },
 	["HoldKeybind"] = { text = "Hold Keybind", tooltip = string.format("Shows only when you press and hold the %q keybind.", ENGRAVER_SHOW_HIDE) },
+	["ShowOnMouseOver"] = { text = "Show On MouseOver", tooltip = "Hides the Engraver and only shows when you hold the cursor over it." },
 }
 
 local DefaultEngraverOptions = {
