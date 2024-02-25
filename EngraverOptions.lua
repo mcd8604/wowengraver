@@ -14,6 +14,7 @@ SlashCmdList.ENGRAVER_RESET_POSITION = function(msg, editBox)
 end
 
 EngraverOptions = {} -- SavedVariable
+EngraverSharedOptions = {} -- SavedVariable
 EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)
 EngraverOptionsCallbackRegistry:OnLoad()
 EngraverOptionsCallbackRegistry:SetUndefinedEventsAllowed(true)
@@ -23,7 +24,7 @@ local EngraverDisplayModes = {
 	{ text = "Pop-up Menu", mixin = EngraverCategoryFramePopUpMenuMixin }
 }
 Addon.EngraverDisplayModes = EngraverDisplayModes
-Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[EngraverOptions.DisplayMode+1] end
+Addon.GetCurrentDisplayMode = function() return EngraverDisplayModes[Addon:GetOptions().DisplayMode+1] end
 
 local ENGRAVER_SHOW_HIDE = "Show/Hide Engraver" -- TODO localization
 local ENGRAVER_NEXT_FILTER = "Activate Next Filter" -- TODO localization
@@ -42,6 +43,11 @@ Addon.EngraverVisibilityModes = {
 }
 
 local DefaultEngraverOptions = {
+	CurrentFilter = 0,
+	UseCharacterSpecificSettings = false
+}
+
+local DefaultSettings = {
 	DisplayMode = 1,
 	LayoutDirection = 0,
 	VisibilityMode = "ShowAlways",
@@ -52,13 +58,21 @@ local DefaultEngraverOptions = {
 	HideSlotLabels = false,
 	EnableRightClickDrag = false,
 	UIScale = 1.0,
-	PreventSpellPlacement = false,
-	CurrentFilter = 0
+	PreventSpellPlacement = false
 }
+
+function Addon:GetOptions()
+	return EngraverOptions.UseCharacterSpecificSettings and EngraverOptions or EngraverSharedOptions
+end
+
+------------------
+-- OptionsFrame --
+------------------
 
 EngraverOptionsFrameMixin = {}
 
 function EngraverOptionsFrameMixin:OnLoad()
+	self.isSettingDefaults = false
 	self:RegisterEvent("ADDON_LOADED")
 	self.name = localAddonName
 	self.category, self.layout = Settings.RegisterCanvasLayoutCategory(self, localAddonName, localAddonName);
@@ -69,11 +83,26 @@ function EngraverOptionsFrameMixin:OnLoad()
 	self.settingsList:Display(self.initializers);
 end
 
+StaticPopupDialogs["ENGRAVER_SETTINGS_APPLY_DEFAULTS"] = {
+	text = "\Your %s settings will be reset.\nThis cannot be undone.\nThis does not affect filters.",
+	button1 = OKAY,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		self.data.optionsFrame:ChangeMultipleSettings(function()
+			SettingsPanel:SetCurrentCategorySettingsToDefaults();
+		end)
+	end,
+	exclusive = 1,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = 1
+};
+
 function EngraverOptionsFrameMixin:InitSettingsList()
 	self.settingsList.Header.Title:SetText(localAddonName);	
 	self.settingsList.Header.DefaultsButton.Text:SetText(SETTINGS_DEFAULTS);
 	self.settingsList.Header.DefaultsButton:SetScript("OnClick", function(button, buttonName, down)
-		ShowAppropriateDialog("GAME_SETTINGS_APPLY_DEFAULTS");
+		StaticPopup_Show("ENGRAVER_SETTINGS_APPLY_DEFAULTS", EngraverOptions.UseCharacterSpecificSettings and "character's" or "shared", nil, { optionsFrame = self } )
 	end);
 	self.settingsList.Header.KeybindsButton = CreateFrame("Button", nil, self.settingsList.Header, "EngraverKeybindsButtonTemplate")
 	self.settingsList.ScrollBox:SetScript("OnMouseWheel", function(scrollBox, delta)
@@ -84,12 +113,23 @@ function EngraverOptionsFrameMixin:InitSettingsList()
 	self.settingsList:Show();
 end
 
+function EngraverOptionsFrameMixin:ChangeMultipleSettings(changeFunction)
+	self.isChangingMultipleSettings = true
+	if changeFunction then 
+		changeFunction()
+	end
+	self.isChangingMultipleSettings = false
+	EngraverOptionsCallbackRegistry:TriggerEvent("OnMultipleSettingsChanged")
+end
+
 local function AddEngraverOptionsSetting(self, variable, name, varType)
-	local setting = Settings.RegisterAddOnSetting(self.category, name, variable, varType, DefaultEngraverOptions[variable]);
+	local setting = Settings.RegisterAddOnSetting(self.category, name, variable, varType, DefaultSettings[variable]);
 	self.engraverOptionsSettings[variable] = setting
-	Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...)
-		EngraverOptions[variable] = newValue;
-		EngraverOptionsCallbackRegistry:TriggerEvent(variable, newValue)
+	Settings.SetOnValueChangedCallback(variable, function (engraverOptionsFrame, setting, newValue, ...)
+		Addon:GetOptions()[variable] = newValue;
+		if not self.isChangingMultipleSettings then
+			EngraverOptionsCallbackRegistry:TriggerEvent(variable, newValue)
+		end
 	end, self)
 	return setting
 end
@@ -106,6 +146,25 @@ end
 function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	self.engraverOptionsSettings = {}
 	self.initializers = {}
+	do -- UseCharacterSpecificSettings
+		local variable, name, varType = "UseCharacterSpecificSettings", "Character Specific Settings", Settings.VarType.Boolean;
+		local tooltip = "If checked, settings specific to this character are used.\nIf unchecked, shared settings are used.\n(Changing this does not delete any settings)."
+		self.characterSpecificSettingsSetting = Settings.RegisterAddOnSetting(self.category, name, variable, varType);
+		AddInitializer(self, Settings.CreateControlInitializer("EngraverCharacterSpecificControlTemplate", self.characterSpecificSettingsSetting, { optionsFrame = self }, tooltip))
+		Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...)
+			EngraverOptions[variable] = newValue;
+			self:ChangeMultipleSettings(function()
+				for variable, setting in pairs(self.engraverOptionsSettings) do
+					if setting.SetValue then
+						setting:SetValue(Addon:GetOptions()[variable])
+					end
+				end
+			end)
+		end, self)
+	end -- UseCharacterSpecificSettings
+	do -- SettingsHeader
+		AddInitializer(self, CreateSettingsListSectionHeaderInitializer("Settings"));
+	end -- SettingsHeader
 	do -- DisplayMode
 		local variable, name, tooltip = "DisplayMode", "Rune Display Mode", "How runes buttons are displayed.";
 		local tooltips = { "All runes are always shown.", "Show only one button for each engravable equipment slot. Move your cursor over any button to see the available runes." }
@@ -214,36 +273,47 @@ function EngraverOptionsFrameMixin:OnEvent(event, ...)
 	end
 end
 
+local function SetMissingOptionsToDefault(options, defaults)
+	for k, v in pairs(defaults) do
+		if options[k] == nil then
+			options[k] = v
+		end
+	end
+end
+
+-- removes extraneous/deprecated data
+local function SanitizeOptionsData(options, predicate)
+	local keysToDelete = {}
+	for k, v in pairs(options) do
+		if predicate(k) then
+			table.insert(keysToDelete, k)
+		end
+	end
+	for i, k in ipairs(keysToDelete) do
+		options[k] = nil
+	end
+end
+
 function EngraverOptionsFrameMixin:HandleAddonLoaded(addonName)
 	if addonName == localAddonName then
-		self:SetOptionsToDefault(false)
-	end
-end
-
-function EngraverOptionsFrameMixin:OnDefault()
-	EngraverOptions = {}
-	self:SetOptionsToDefault(true)
-end
-
-function EngraverOptionsFrameMixin:SetOptionsToDefault(force)
-	EngraverOptions = EngraverOptions or {}
-	for k, v in pairs(DefaultEngraverOptions) do
-		if force or EngraverOptions[k] == nil then
-			if type(v) == "table" then 
-				-- TODO recursive deep copy?
-			end
-			EngraverOptions[k] = v
-		end
-	end
-end
-
-function EngraverOptionsFrameMixin:OnRefresh()
-	if self.engraverOptionsSettings then
-		for variable, setting in pairs(self.engraverOptionsSettings) do
-			if setting.SetValue then
-				setting:SetValue(EngraverOptions[variable])
+		-- If UseCharacterSpecificSettings isn't set and character settings exist but shared settings do not, then auto-copy to the shared.
+		-- This is for users updating from a version that didn't have shared settings implemented (so it doesn't appear that all their settings were wiped, even though they weren't).
+		if EngraverOptions.UseCharacterSpecificSettings == nil and not TableIsEmpty(EngraverOptions) then
+			if TableIsEmpty(EngraverSharedOptions) then
+				MergeTable(EngraverSharedOptions, EngraverOptions) -- auto-copy to the shared settings
+			else
+				EngraverOptions.UseCharacterSpecificSettings = true -- auto-set character-specific flag
 			end
 		end
+		-- Ensure any missing settings are set with default values
+		SetMissingOptionsToDefault(EngraverOptions, DefaultEngraverOptions)
+		SetMissingOptionsToDefault(EngraverOptions, DefaultSettings)
+		SetMissingOptionsToDefault(EngraverSharedOptions, DefaultSettings)
+		-- Sanitize
+		SanitizeOptionsData(EngraverOptions, function(k) return DefaultEngraverOptions[k] == nil and DefaultSettings[k] == nil; end)
+		SanitizeOptionsData(EngraverSharedOptions, function(k) return DefaultSettings[k] == nil; end)
+		-- Init characterSpecificSettingsSetting manually instead of via a default value (it purposely has no default because it should never be changed when setting defaults).
+		self.characterSpecificSettingsSetting:SetValue(EngraverOptions.UseCharacterSpecificSettings)
 	end
 end
 
@@ -272,3 +342,65 @@ function SettingsListSectionHeaderInfoButton_OnEnter(self)
 	end
 	SettingsTooltip:Show();
 end
+
+------------------------------
+-- CharacterSpecificControl --
+------------------------------
+
+EngraverCharacterSpecificControlMixin = CreateFromMixins(SettingsCheckBoxControlMixin)
+
+function EngraverCharacterSpecificControlMixin:OnLoad()
+	SettingsCheckBoxControlMixin.OnLoad(self)
+	self.copyText:SetPoint("LEFT", self.CheckBox, "RIGHT", 40, 0)
+	self.copyCharacterButton:SetPoint("BOTTOMLEFT", self.copyText, "RIGHT")
+	self.copyCharacterButton:SetScript("OnClick", function() 
+		StaticPopup_Show("ENGRAVER_COPY_CHARACTER_SETTINGS", nil, nil, { optionsFrame = self.optionsFrame } )
+	end)
+	self.copySharedButton:SetPoint("TOPLEFT", self.copyText, "RIGHT")
+	self.copySharedButton:SetScript("OnClick", function() 
+		StaticPopup_Show("ENGRAVER_COPY_SHARED_SETTINGS", nil , nil, { optionsFrame = self.optionsFrame } )
+	end)
+end
+
+function EngraverCharacterSpecificControlMixin:Init(initializer)
+	SettingsCheckBoxControlMixin.Init(self, initializer)
+	self.optionsFrame = initializer:GetData().options.optionsFrame
+end
+
+StaticPopupDialogs["ENGRAVER_COPY_CHARACTER_SETTINGS"] = {
+	text = "The shared settings will be overwritten.\nThis cannot be undone.\nThis does not affect filters.",
+	button1 = OKAY,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		self.data.optionsFrame:ChangeMultipleSettings(function()
+			for k, _ in pairs(DefaultSettings) do
+				local value = EngraverOptions[k]
+				EngraverSharedOptions[k] = value
+				self.data.optionsFrame.engraverOptionsSettings[k]:SetValue(value)
+			end
+		end)
+	end,
+	exclusive = 1,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["ENGRAVER_COPY_SHARED_SETTINGS"] = {
+	text = "Overwrite this character's settings?\nThis cannot be undone.\nThis does not affect filters.",
+	button1 = OKAY,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		self.data.optionsFrame:ChangeMultipleSettings(function()
+			for k, _ in pairs(DefaultSettings) do
+				local value = EngraverSharedOptions[k]
+				EngraverOptions[k] = value
+				self.data.optionsFrame.engraverOptionsSettings[k]:SetValue(value)
+			end
+		end)
+	end,
+	exclusive = 1,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = 1
+};

@@ -36,6 +36,24 @@
 			</Button>
 		</Frames>
 	</Frame>
+	<Frame name="EngraverCharacterSpecificControlTemplate" inherits="SettingsCheckBoxControlTemplate" mixin="EngraverCharacterSpecificControlMixin" virtual="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentCopyText" parentKey="copyText" inherits="GameFontNormal" justifyH="LEFT" wordwrap="false" text="Copy Settings"/>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentCopyCharacterButton" parentKey="copyCharacterButton" inherits="UIPanelButtonTemplate" text="From Character To Shared">
+				<Size x="200" y="21"/>
+			</Button>
+			<Button name="$parentCopySharedButton" parentKey="copySharedButton" inherits="UIPanelButtonTemplate" text="From Shared To Character">
+				<Size x="200" y="21"/>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
 	<CheckButton name="EngraverOptionsFilterRuneButtonTemplate" mixin="EngraverOptionsFilterRuneButtonMixin" inherits="EngraverRuneButtonTemplate" virtual="true">
 		<Scripts>
 			<OnClick method="OnClick"/>
