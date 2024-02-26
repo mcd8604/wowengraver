@@ -69,7 +69,7 @@ local EngraverLayout = {
 	BottomToTop = 3,
 }
 Addon.EngraverLayoutDirections = EngraverLayoutDirections
-Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[EngraverOptions.LayoutDirection+1] end
+Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[Addon:GetOptions().LayoutDirection+1] end
 
 -------------------
 -- EngraverFrame --
@@ -146,16 +146,20 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 	register("HideUndiscoveredRunes", self.LoadCategories)
 	register("CurrentFilter", self.LoadCategories) -- index stored in EngraverOptions.CurrentFilter changed
 	register("FiltersChanged", self.LoadCategories) -- data inside EngraverFilters changed
+	register("OnMultipleSettingsChanged", function() 
+		self:SetScaleAdjustLocation(Addon:GetOptions().UIScale or 1.0)
+		self:LoadCategories() 
+	end)
 end
 	
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
 	C_Engraving:ClearAllCategoryFilters();
 	C_Engraving.RefreshRunesList();
-	self.categories = C_Engraving.GetRuneCategories(false, EngraverOptions.HideUndiscoveredRunes or false);
+	self.categories = C_Engraving.GetRuneCategories(false, Addon:GetOptions().HideUndiscoveredRunes or false);
 	if #self.categories > 0 then
 		for c, category in ipairs(self.categories) do
-			local runes = Addon.Filters:GetFilteredRunesForCategory(category, EngraverOptions.HideUndiscoveredRunes or false)
+			local runes = Addon.Filters:GetFilteredRunesForCategory(category, Addon:GetOptions().HideUndiscoveredRunes or false)
 			if #runes > 0 then
 				local categoryFrame = self.categoryFramePool:Acquire()
 				categoryFrame:Show()
@@ -194,7 +198,7 @@ function EngraverFrameMixin:UpdateLayout(...)
 	self:UpdateVisibilityMode()
 	if self.categories ~= nil then
 		local layoutDirection = Addon.GetCurrentLayoutDirection()
-		self:SetScale(EngraverOptions.UIScale or 1.0)
+		self:SetScale(Addon:GetOptions().UIScale or 1.0)
 		if self.equipmentSlotFrameMap then
 			local displayMode = Addon.GetCurrentDisplayMode()
 			local prevCategoryFrame = nil
@@ -229,7 +233,7 @@ end
 function EngraverFrameMixin:UpdateDragTabLayout(layoutData)
 	if self.dragTab then
 		-- dragTab
-		self.dragTab:SetShown(not EngraverOptions.HideDragTab);
+		self.dragTab:SetShown(not Addon:GetOptions().HideDragTab);
 		self.dragTab:ClearAllPoints()
 		self.dragTab:UpdateSizeForLayout(layoutData)
 		self.dragTab:SetPoint(layoutData.point, self, layoutData.relativePoint, layoutData.offset:GetXY())
@@ -240,7 +244,7 @@ end
 
 function EngraverFrameMixin:UpdateFilterButtonsLayout(layoutData)
 	-- visibility
-	local show = not EngraverOptions.HideDragTab and EngraverOptions.ShowFilterSelector
+	local show = not Addon:GetOptions().HideDragTab and Addon:GetOptions().ShowFilterSelector
 	if layoutData.swapTabDimensions then
 		self.filterRightButton:SetShown(false)
 		self.filterLeftButton:SetShown(false)
@@ -270,7 +274,7 @@ function EngraverFrameMixin:UpdateDragTabText(layoutData)
 		local rotation = rad(layoutData.textRotation)
 		self.dragTab.Text:SetRotation(rotation)
 		local tabText = "Engraver"
-		if EngraverOptions.ShowFilterSelector then
+		if Addon:GetOptions().ShowFilterSelector then
 			local filter = Addon.Filters:GetCurrentFilter()
 			if filter then
 				tabText = filter.Name
@@ -301,7 +305,7 @@ do
 	end
 
 	function EngraverFrameMixin:UpdateVisibilityModeAlpha()
-		if EngraverOptions.VisibilityMode == "ShowOnMouseOver" then
+		if Addon:GetOptions().VisibilityMode == "ShowOnMouseOver" then
 			local alpha = isMouseOverAnyChildren(self) and 1.0 or 0.0
 			self:SetAlpha(alpha)
 		else
@@ -310,7 +314,7 @@ do
 	end
 
 	local function HandleSyncCharacterPane()
-		if EngraverOptions.VisibilityMode == "SyncCharacterPane" then
+		if Addon:GetOptions().VisibilityMode == "SyncCharacterPane" then
 			EngraverFrame:SetShown(CharacterFrame:IsShown() and PaperDollFrame:IsShown()) 
 		end 
 	end
@@ -321,11 +325,11 @@ do
 	function EngraverFrameMixin:UpdateVisibilityMode()
 		if not InCombatLockdown() then
 			UnregisterStateDriver(self, "visibility")  
-			if EngraverOptions.VisibilityMode == "ShowAlways" then
+			if Addon:GetOptions().VisibilityMode == "ShowAlways" then
 				self:Show()
-			elseif EngraverOptions.VisibilityMode == "HideInCombat" then
+			elseif Addon:GetOptions().VisibilityMode == "HideInCombat" then
 				RegisterStateDriver(self, "visibility", "[combat]hide;show")
-			elseif EngraverOptions.VisibilityMode == "HoldKeybind" then
+			elseif Addon:GetOptions().VisibilityMode == "HoldKeybind" then
 				self:Hide()
 			end
 			HandleSyncCharacterPane()
@@ -483,7 +487,7 @@ function EngraverCategoryFrameShowAllMixin:UpdateCategoryLayout(layoutDirection)
 			runeButton:SetShown(true)
 			runeButton:SetHighlighted(false)
 			if r == 1 then
-				if EngraverOptions.HideSlotLabels then
+				if Addon:GetOptions().HideSlotLabels then
 					runeButton:SetAllPoints()
 				else
 					runeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, layoutDirection.slotLabelOffset:GetXY())
@@ -545,7 +549,7 @@ function EngraverCategoryFramePopUpMenuMixin:UpdateCategoryLayout(layoutDirectio
 		if self.activeButton then
 			self.activeButton:SetShown(true)
 			self.activeButton:ClearAllPoints()
-			if EngraverOptions.HideSlotLabels then
+			if Addon:GetOptions().HideSlotLabels then
 				self.activeButton:SetAllPoints()
 			else
 				self.activeButton:SetPoint(layoutDirection.runePoint, self.slotLabel, layoutDirection.runeRelativePoint, layoutDirection.slotLabelOffset:GetXY())
@@ -618,7 +622,7 @@ function EngraverSlotLabelMixin:SetCategory(category)
 end
 
 function EngraverSlotLabelMixin:UpdateLayout(layoutDirection)
-	self:SetShown(not EngraverOptions.HideSlotLabels)
+	self:SetShown(not Addon:GetOptions().HideSlotLabels)
 	if not self.originalSize then
 		self.originalSize = CreateVector2D(self:GetSize())
 	end
@@ -679,7 +683,7 @@ function EngraverRuneButtonMixin:OnClick()
 	if IsKeyDown(buttonClicked) then
 		if buttonClicked == "LeftButton"  then
 			self:TryEngrave()
-		elseif buttonClicked  == "RightButton" and EngraverOptions.EnableRightClickDrag then
+		elseif buttonClicked  == "RightButton" and Addon:GetOptions().EnableRightClickDrag then
 			EngraverFrame:StartMoving()
 		end
 	else
@@ -728,7 +732,7 @@ function EngraverRuneButtonMixin:SetBlinking(isBlinking, r, g, b)
 end
 
 function EngraverRuneButtonMixin:OnEnter()
-	if self.skillLineAbilityID and EngraverOptions.HideTooltip ~= true then
+	if self.skillLineAbilityID and Addon:GetOptions().HideTooltip ~= true then
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 		GameTooltip:SetEngravingRune(self.skillLineAbilityID);
 		self.showingTooltip = true;

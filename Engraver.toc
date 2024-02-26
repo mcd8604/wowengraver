@@ -5,7 +5,7 @@
 ## Version: @project-version@
 ## X-Curse-Project-ID: 947701
 ## SavedVariablesPerCharacter: EngraverOptions
-## SavedVariables: EngraverFilters
+## SavedVariables: EngraverFilters, EngraverSharedOptions
 
 Engraver.xml
 EngraverOptions.xml
