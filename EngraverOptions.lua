@@ -301,8 +301,6 @@ function EngraverOptionsFrameMixin:HandleAddonLoaded(addonName)
 		if EngraverOptions.UseCharacterSpecificSettings == nil and not TableIsEmpty(EngraverOptions) then
 			if TableIsEmpty(EngraverSharedOptions) then
 				MergeTable(EngraverSharedOptions, EngraverOptions) -- auto-copy to the shared settings
-			else
-				EngraverOptions.UseCharacterSpecificSettings = true -- auto-set character-specific flag
 			end
 		end
 		-- Ensure any missing settings are set with default values
