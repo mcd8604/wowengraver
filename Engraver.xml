@@ -20,6 +20,7 @@
 			<OnEnter method="OnEnter"/>
 			<OnLeave method="OnLeave"/>
 			<OnLoad method="OnLoad"/>
+			<OnEvent method="OnEvent"/>
 		</Scripts>
 		<Layers>
 			<Layer level="BORDER"/>

@@ -652,11 +652,26 @@ function EngraverRuneButtonMixin:OnLoad()
 	self:OnLoad() -- NOTE not an infinite loop because mixing in CallbackRegistryMixin redefines OnLoad
 end
 
+function EngraverRuneButtonMixin:OnEvent(event, ...)	
+	if ( event == "ACTIONBAR_UPDATE_COOLDOWN" ) then
+		ActionButton_UpdateCooldown(self);
+	end
+end
+
 function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	self.category = category
 	self.icon:SetTexture(rune.iconTexture);
 	self.tooltipName = rune.name;
 	self.skillLineAbilityID = rune.skillLineAbilityID;
+	self.spellID = 1
+	if rune.learnedAbilitySpellIDs and #rune.learnedAbilitySpellIDs > 0 then
+		self.spellID = rune.learnedAbilitySpellIDs[1]
+	end
+	if self.spellID then
+		self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN");
+	else
+		self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN");
+	end
 	self.isKnown = isKnown;
 	self:RegisterForClicks("AnyUp", "AnyDown")
 	if self.icon then
