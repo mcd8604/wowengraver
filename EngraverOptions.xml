@@ -8,7 +8,7 @@
 				self:SetPoint("RIGHT", self:GetParent().DefaultsButton, "LEFT")
 			</OnLoad>
 			<OnClick>
-				SettingsPanel:OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)
+				Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)
 				SettingsPanel.SearchBox:SetText("Engraver")
 			</OnClick>
 		</Scripts>
