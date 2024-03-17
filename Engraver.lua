@@ -654,7 +654,10 @@ end
 
 function EngraverRuneButtonMixin:OnEvent(event, ...)	
 	if ( event == "ACTIONBAR_UPDATE_COOLDOWN" ) then
-		ActionButton_UpdateCooldown(self);
+		local start, duration, enable, modRate = GetSpellCooldown(self.spellID);
+		if duration > 1.5 then
+			ActionButton_UpdateCooldown(self);
+		end
 	end
 end
 
