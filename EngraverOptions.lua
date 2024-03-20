@@ -1,18 +1,6 @@
 local localAddonName, Addon = ...
 local EngraverDisplayModes = Addon.EngraverDisplayModes 
 
--- Slash Commands
-SLASH_ENGRAVER1, SLASH_ENGRAVER2, SLASH_ENGRAVER3, SLASH_ENGRAVER4, SLASH_ENGRAVER5, SLASH_ENGRAVER6, SLASH_ENGRAVER7 = "/en", "/eng", "/eg", "/re", "/engrave", "/engraver", "/engraving"
-SlashCmdList.ENGRAVER = function(msg, editBox)
-	Settings.OpenToCategory(localAddonName);
-end
-
-SLASH_ENGRAVER_RESET_POSITION1 = "/engraver_reset_position"
-SlashCmdList.ENGRAVER_RESET_POSITION = function(msg, editBox)
-	EngraverFrame:ClearAllPoints(); 
-	EngraverFrame:SetPoint("CENTER", UIParent, "CENTER");
-end
-
 EngraverOptions = {} -- SavedVariable
 EngraverSharedOptions = {} -- SavedVariable
 EngraverOptionsCallbackRegistry = CreateFromMixins(CallbackRegistryMixin)

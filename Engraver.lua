@@ -1,5 +1,27 @@
 local addonName, Addon = ...
 
+function Addon:TryEngrave(category, skillLineAbilityID)
+	if category and skillLineAbilityID then
+		if not C_Engraving.IsRuneEquipped(skillLineAbilityID) then
+			local itemId, _ = GetInventoryItemID("player", category)
+			if itemId then
+				ClearCursor()
+				C_Engraving.CastRune(skillLineAbilityID);
+				UseInventoryItem(category);
+				if StaticPopup1.which == "REPLACE_ENCHANT" then
+					ReplaceEnchant()
+					StaticPopup_Hide("REPLACE_ENCHANT")
+				end
+				ClearCursor()
+				return true
+			else
+				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
+			end
+		end
+	end
+	return false
+end
+
 local EngraverLayoutDirections = {
 	{ 
 		text 					= "Left to Right",
@@ -336,6 +358,24 @@ do
 			self:UpdateVisibilityModeAlpha()
 		end
 	end
+end
+
+function EngraverFrameMixin:FindRuneButton(nameOrID)
+	if nameOrID ~= nil and strlen(nameOrID) > 0 then
+		for category, categoryFrame in pairs(EngraverFrame.equipmentSlotFrameMap) do
+			for r, runeButton in ipairs(categoryFrame.runeButtons) do
+				if runeButton.tooltipName == nameOrID then
+					return runeButton
+				else 
+					local parsedID = tonumber(nameOrID)
+					if runeButton.spellID == parsedID or runeButton.skillLineAbilityID == parsedID then
+						return runeButton
+					end
+				end
+			end
+		end
+	end
+	return nil
 end
 
 -----------------------
@@ -700,32 +740,12 @@ function EngraverRuneButtonMixin:OnClick()
 	local buttonClicked = GetMouseButtonClicked();
 	if IsKeyDown(buttonClicked) then
 		if buttonClicked == "LeftButton"  then
-			self:TryEngrave()
+			Addon:TryEngrave(self.category, self.skillLineAbilityID)
 		elseif buttonClicked  == "RightButton" and Addon:GetOptions().EnableRightClickDrag then
 			EngraverFrame:StartMoving()
 		end
 	else
 		EngraverFrame:StopMovingOrSizing()
-	end
-end
-
-function EngraverRuneButtonMixin:TryEngrave()
-	if self.category and self.skillLineAbilityID then
-		if not C_Engraving.IsRuneEquipped(self.skillLineAbilityID) then
-			local itemId, unknown = GetInventoryItemID("player", self.category)
-			if itemId then
-				ClearCursor()
-				C_Engraving.CastRune(self.skillLineAbilityID);
-				UseInventoryItem(self.category);
-				if StaticPopup1.which == "REPLACE_ENCHANT" then
-					ReplaceEnchant()
-					StaticPopup_Hide("REPLACE_ENCHANT")
-				end
-				ClearCursor()
-			else
-				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
-			end
-		end
 	end
 end
 
