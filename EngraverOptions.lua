@@ -126,9 +126,18 @@ local function AddInitializer(self, initializer)
 	if initializer then	
 		table.insert(self.initializers, initializer);
 		if initializer.GetName then
-			initializer:AddSearchTags(initializer:GetName():gmatch("%S+"))
+			local name = initializer:GetName()
+			if name then
+				initializer:AddSearchTags(name:gmatch("%S+"))
+			end
 		end
 	end
+end
+
+local function CreateInitializer(self, frameTemplate, data)
+	local initializer = CreateFromMixins(SettingsListElementInitializer);
+	initializer:Init(frameTemplate, data);
+	AddInitializer(self, initializer)
 end
 
 function EngraverOptionsFrameMixin:CreateSettingsInitializers()
@@ -249,10 +258,27 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateElementInitializer("SettingsListSectionHeaderWithInfoTemplate", filtersHeaderData));
 	end -- FiltersHeader
 	do -- FilterEditor
-		local initializer = CreateFromMixins(SettingsListElementInitializer);
-		initializer:Init("EngraverOptionsFilterEditorTemplate", { settings = {} } );
-		table.insert(self.initializers, initializer);
+		CreateInitializer(self, "EngraverOptionsFilterEditorTemplate", { settings = {} } );
 	end -- FilterEditor
+	do -- InformationHeader
+		AddInitializer(self, CreateSettingsListSectionHeaderInitializer("Information"));
+	end -- InformationHeader
+	do -- Discord
+		CreateInitializer(self, "SettingsSelectableTextTemplate", 
+		{
+			name = "Community Discord",
+			tooltip = "If you have any questions, suggestions, or comments please post in the Community Discord.",
+			text = "https://discord.gg/87aFTrq6ea"
+		})
+	end -- Discord
+	do -- Github
+		CreateInitializer(self, "SettingsSelectableTextTemplate", 
+		{
+			name = "Github",
+			tooltip = "If encounter a bug please check if your issue is already posted. If it isn't then go ahead and open a new issue.",
+			text = "https://github.com/mcd8604/wowengraver/issues?q="
+		})
+	end -- Github
 end
 
 function EngraverOptionsFrameMixin:OnEvent(event, ...)
@@ -327,6 +353,29 @@ function SettingsListSectionHeaderInfoButton_OnEnter(self)
 		end
 	end
 	SettingsTooltip:Show();
+end
+
+----------------------------
+-- SettingsSelectableText --
+----------------------------
+
+SettingsSelectableTextMixin = CreateFromMixins(SettingsListElementMixin)
+
+function SettingsSelectableTextMixin:Init(initializer)
+	SettingsListElementMixin.Init(self, initializer)
+	local text = initializer:GetData().text;
+	self.editBox:SetText(text)
+	self.editBox:SetScript("OnTextChanged", function(_, userInput)
+		if userInput then
+			self.editBox:SetText(text)
+			self.editBox:HighlightText()
+		end
+	end)
+end
+
+function SettingsSelectableTextMixin:OnLoad()
+	SettingsListElementMixin.OnLoad(self)
+	self.editBox:SetPoint("LEFT", self, "CENTER", -80, 0);
 end
 
 ------------------------------

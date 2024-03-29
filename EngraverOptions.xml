@@ -36,6 +36,25 @@
 			</Button>
 		</Frames>
 	</Frame>
+	<Frame name="SettingsSelectableTextTemplate" inherits="SettingsListElementTemplate" mixin="SettingsSelectableTextMixin" virtual="true">
+		<Size x="280" y="26"/>
+		<Frames>
+			<EditBox parentKey="editBox" name="$parentEditBox" autoFocus="false" enableKeyboard="false" font="ChatFontNormal">
+				<Size x="400" y="21" />
+				<Scripts>
+					<OnEditFocusGained>
+						self:HighlightText()
+					</OnEditFocusGained>
+					<OnEditFocusLost>
+						self:HighlightText(0, 0)
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
 	<Frame name="EngraverCharacterSpecificControlTemplate" inherits="SettingsCheckBoxControlTemplate" mixin="EngraverCharacterSpecificControlMixin" virtual="true">
 		<Layers>
 			<Layer level="OVERLAY">
