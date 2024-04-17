@@ -333,6 +333,12 @@ do
 		else
 			self:SetAlpha(1.0)
 		end
+		-- Hide all the rune button cooldown frames if EngraverFrame is pseudo-hidden from VisibilityMode.ShowOnMouseOver (otherwise, bling animation will still show)
+		for c, categoryFrame in pairs(self.equipmentSlotFrameMap) do
+			for r, runeButton in ipairs(categoryFrame.runeButtons) do
+				runeButton:UpdateCooldownShown()
+			end
+		end
 	end
 
 	local function HandleSyncCharacterPane()
@@ -694,6 +700,7 @@ end
 
 function EngraverRuneButtonMixin:OnEvent(event, ...)	
 	if ( event == "ACTIONBAR_UPDATE_COOLDOWN" ) then
+		self:UpdateCooldownShown()
 		local start, duration, enable, modRate = GetSpellCooldown(self.spellID);
 		if duration > 1.5 then
 			ActionButton_UpdateCooldown(self);
@@ -715,12 +722,18 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 	else
 		self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN");
 	end
+	self:UpdateCooldownShown()
 	self.isKnown = isKnown;
 	self:RegisterForClicks("AnyUp", "AnyDown")
 	if self.icon then
 		self.icon:SetAllPoints()
 	end
 	self:ResetColors()
+end
+
+function EngraverRuneButtonMixin:UpdateCooldownShown()
+	-- Hide the cooldown frame if EngraverFrame is pseudo-hidden from VisibilityMode.ShowOnMouseOver (otherwise, bling animation will still show)
+	self.cooldown:SetShown(EngraverFrame:GetAlpha() > 0)
 end
 
 function EngraverRuneButtonMixin:ResetColors()
