@@ -335,9 +335,11 @@ do
 			self:SetAlpha(1.0)
 		end
 		-- Hide all the rune button cooldown frames if EngraverFrame is pseudo-hidden from VisibilityMode.ShowOnMouseOver (otherwise, bling animation will still show)
-		for c, categoryFrame in pairs(self.equipmentSlotFrameMap) do
-			for r, runeButton in ipairs(categoryFrame.runeButtons) do
-				runeButton:UpdateCooldownShown()
+		if self.equipmentSlotFrameMap then
+			for c, categoryFrame in pairs(self.equipmentSlotFrameMap) do
+				for r, runeButton in ipairs(categoryFrame.runeButtons) do
+					runeButton:UpdateCooldownShown()
+				end
 			end
 		end
 	end
