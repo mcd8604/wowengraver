@@ -217,6 +217,7 @@ function EngraverFrameMixin:GetNumVisibleCategories()
 end
 
 function EngraverFrameMixin:UpdateLayout(...)
+	EngraverFrame:StopMovingOrSizing()
 	self:UpdateVisibilityMode()
 	if self.categories ~= nil then
 		local layoutDirection = Addon.GetCurrentLayoutDirection()
