@@ -20,5 +20,5 @@ end
 
 EventRegistry:RegisterFrameEventAndCallback("PLAYER_ENTERING_WORLD", function(event, ...)
 	EngraverOptionsCallbackRegistry:RegisterCallback("PreventSpellPlacement", function(_, newValue) ActionBarSpellPushRemover:SetActive(newValue) end)
-	ActionBarSpellPushRemover:SetActive(EngraverOptions.PreventSpellPlacement)
+	ActionBarSpellPushRemover:SetActive(Addon:GetOptions().PreventSpellPlacement)
 end)

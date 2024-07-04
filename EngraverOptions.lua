@@ -213,7 +213,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 			local setting = AddEngraverOptionsSetting(self, "ShowFilterSelector", "Show Filter Selector", Settings.VarType.Boolean)
 			local initializer = Settings.CreateCheckBoxInitializer(setting, nil, "When enabled, the drag tab will display the active filter.\nArrow buttons are added to the drag tab for you to change the filter.")
 			initializer:SetParentInitializer(dragTabInitializer, function() return not dragTabSetting:GetValue() end)
-			initializer.IsParentInitializerInCurrentSettingsCategory = function() return true; end -- forces indent and small font
+			initializer.IsParentInitializerInLayout = function() return true; end -- forces indent and small font
 			AddInitializer(self, initializer)
 		end -- ShowFilterSelector
 	end -- HideDragTab

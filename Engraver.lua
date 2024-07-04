@@ -1,13 +1,14 @@
 local addonName, Addon = ...
 
-function Addon:TryEngrave(category, skillLineAbilityID)
-	if category and skillLineAbilityID then
-		if not C_Engraving.IsRuneEquipped(skillLineAbilityID) then
+function Addon:TryEngrave(equipmentSlot, skillLineAbilityID)
+	if equipmentSlot and skillLineAbilityID then
+		local equippedRune = C_Engraving.GetRuneForEquipmentSlot(equipmentSlot)
+		if (not equippedRune or equippedRune.skillLineAbilityID ~= skillLineAbilityID) then
 			local itemId, _ = GetInventoryItemID("player", category)
 			if itemId then
 				ClearCursor()
 				C_Engraving.CastRune(skillLineAbilityID);
-				UseInventoryItem(category);
+				UseInventoryItem(equipmentSlot);
 				if StaticPopup1.which == "REPLACE_ENCHANT" then
 					ReplaceEnchant()
 					StaticPopup_Hide("REPLACE_ENCHANT")
@@ -173,22 +174,46 @@ function EngraverFrameMixin:RegisterOptionChangedCallbacks()
 		self:LoadCategories() 
 	end)
 end
+
+-- NOTE hardcoded map of inventory type (category) to slot ids
+Addon.CategoryToSlotId = {
+	{1},
+	{2},
+	{3},
+	{4},
+	{5},
+	{6},
+	{7},
+	{8},
+	{9},
+	{10},
+	{11, 12},
+	{13, 14},
+	{16, 17},
+	{17},
+	{16},
+	{15}
+}
 	
 function EngraverFrameMixin:LoadCategories()
 	self:ResetCategories()
 	C_Engraving:ClearAllCategoryFilters();
 	C_Engraving.RefreshRunesList();
 	self.categories = C_Engraving.GetRuneCategories(false, Addon:GetOptions().HideUndiscoveredRunes or false);
+	self.slots = {}
 	if #self.categories > 0 then
 		for c, category in ipairs(self.categories) do
 			local runes = Addon.Filters:GetFilteredRunesForCategory(category, Addon:GetOptions().HideUndiscoveredRunes or false)
 			if #runes > 0 then
-				local categoryFrame = self.categoryFramePool:Acquire()
-				categoryFrame:Show()
-				self.equipmentSlotFrameMap[category] = categoryFrame
-				local knownRunes = C_Engraving.GetRunesForCategory(category, true);	
-				categoryFrame:SetCategory(category, runes, knownRunes)
-				categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+				for _, slot in ipairs(Addon.CategoryToSlotId[category]) do
+					table.insert(self.slots, slot)
+					local categoryFrame = self.categoryFramePool:Acquire()
+					categoryFrame:Show()
+					self.equipmentSlotFrameMap[slot] = categoryFrame
+					local knownRunes = C_Engraving.GetRunesForCategory(category, true);
+					categoryFrame:SetCategory(category, runes, knownRunes, slot)
+					categoryFrame:SetDisplayMode(Addon.GetCurrentDisplayMode().mixin)
+				end
 			end
 		end
 	end
@@ -225,8 +250,8 @@ function EngraverFrameMixin:UpdateLayout(...)
 		if self.equipmentSlotFrameMap then
 			local displayMode = Addon.GetCurrentDisplayMode()
 			local prevCategoryFrame = nil
-			for c, category in ipairs(self.categories) do
-				local categoryFrame = self.equipmentSlotFrameMap[category]
+			for c, slot in ipairs(self.slots) do
+				local categoryFrame = self.equipmentSlotFrameMap[slot]
 				if categoryFrame then
 					categoryFrame:ClearAllPoints()
 					categoryFrame:SetDisplayMode(displayMode.mixin)
@@ -398,8 +423,9 @@ function EngraverCategoryFrameBaseMixin:OnLoad()
 	self.runeButtons = {}
 end
 
-function EngraverCategoryFrameBaseMixin:SetCategory(category, runes, knownRunes)
+function EngraverCategoryFrameBaseMixin:SetCategory(category, runes, knownRunes, slot)
 	self.category = category
+	self.slotId = slot
 	self.slotLabel:SetCategory(category)
 	self:SetRunes(runes, knownRunes)
 	self:LoadEmptyRuneButton()
@@ -412,7 +438,7 @@ function EngraverCategoryFrameBaseMixin:SetRunes(runes, knownRunes)
 		local runeButton = self.runeButtonPool:Acquire()
 		self.runeButtons[r] = runeButton
 		local isKnown = self:IsRuneKnown(rune, knownRunes)
-		runeButton:SetRune(rune, self.category, isKnown)
+		runeButton:SetRune(rune, self.category, isKnown, self.slotId)
 	end
 end
 
@@ -485,8 +511,12 @@ function EngraverCategoryFrameBaseMixin:DetermineActiveAndInactiveButtons()
 	self.activeButton = nil
 	self.inactiveButtons = {}
 	if self.runeButtons then
+		local equippedRune = nil
+		if (self.slotId) then
+			equippedRune = C_Engraving.GetRuneForEquipmentSlot(self.slotId)
+		end
 		for r, runeButton in ipairs(self.runeButtons) do
-			if C_Engraving.IsRuneEquipped(runeButton.skillLineAbilityID) then
+			if (equippedRune and equippedRune.skillLineAbilityID == runeButton.skillLineAbilityID) then
 				self.activeButton = runeButton
 			else
 				table.insert(self.inactiveButtons, runeButton)
@@ -711,7 +741,7 @@ function EngraverRuneButtonMixin:OnEvent(event, ...)
 	end
 end
 
-function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
+function EngraverRuneButtonMixin:SetRune(rune, category, isKnown, slot)
 	self.category = category
 	self.icon:SetTexture(rune.iconTexture);
 	self.tooltipName = rune.name;
@@ -732,6 +762,7 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown)
 		self.icon:SetAllPoints()
 	end
 	self:ResetColors()
+	self.slotId = slot
 end
 
 function EngraverRuneButtonMixin:UpdateCooldownShown()
@@ -756,7 +787,7 @@ function EngraverRuneButtonMixin:OnClick()
 	local buttonClicked = GetMouseButtonClicked();
 	if IsKeyDown(buttonClicked) then
 		if buttonClicked == "LeftButton"  then
-			Addon:TryEngrave(self.category, self.skillLineAbilityID)
+			Addon:TryEngrave(self.slotId, self.skillLineAbilityID)
 		elseif buttonClicked  == "RightButton" and Addon:GetOptions().EnableRightClickDrag then
 			EngraverFrame:StartMoving()
 		end
