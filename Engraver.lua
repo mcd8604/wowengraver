@@ -4,7 +4,7 @@ function Addon:TryEngrave(equipmentSlot, skillLineAbilityID)
 	if equipmentSlot and skillLineAbilityID then
 		local equippedRune = C_Engraving.GetRuneForEquipmentSlot(equipmentSlot)
 		if (not equippedRune or equippedRune.skillLineAbilityID ~= skillLineAbilityID) then
-			local itemId, _ = GetInventoryItemID("player", category)
+			local itemId, _ = GetInventoryItemID("player", equipmentSlot)
 			if itemId then
 				ClearCursor()
 				C_Engraving.CastRune(skillLineAbilityID);
