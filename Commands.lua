@@ -40,7 +40,7 @@ SlashCmdList.ENGRAVE = function(msg, editBox)
 		SendSystemMessage("(Engraver) Rune not found for: "..msg)
 		return
 	end
-	Addon:TryEngrave(category, rune.skillLineAbilityID)
+	Addon:TryEngrave(Addon.CategoryToSlotId[category][1], rune.skillLineAbilityID)
 end
 
 SLASH_ENGRAVER_RESET_POSITION1 = "/engraver_reset_position"
