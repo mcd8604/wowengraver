@@ -50,7 +50,6 @@ SlashCmdList.ENGRAVESLOT = function(msg, editBox)
 		SendSystemMessage(UsageMessage)
 		return
 	end
-	local args = {}
 	msg = string.gsub(msg, "%s+", " ")
 	local i, j = string.find(msg, "%s")
 	if i == nil then
