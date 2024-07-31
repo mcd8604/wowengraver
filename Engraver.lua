@@ -16,7 +16,7 @@ function Addon:TryEngrave(equipmentSlot, skillLineAbilityID)
 				ClearCursor()
 				return true
 			else
-				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, equipment slot is empty!")
+				UIErrorsFrame:AddExternalErrorMessage("Cannot engrave rune, no item found for slot: "..equipmentSlot)
 			end
 		end
 	end

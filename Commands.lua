@@ -43,6 +43,30 @@ SlashCmdList.ENGRAVE = function(msg, editBox)
 	Addon:TryEngrave(Addon.CategoryToSlotId[category][1], rune.skillLineAbilityID)
 end
 
+SLASH_ENGRAVESLOT1 = "/engraveslot"
+SlashCmdList.ENGRAVESLOT = function(msg, editBox)
+	local UsageMessage = "(Engraver) Usage: /engraveslot slotNumber rune"
+	if msg == nil or strlen(msg) <= 0 then
+		SendSystemMessage(UsageMessage)
+		return
+	end
+	local args = {}
+	msg = string.gsub(msg, "%s+", " ")
+	local i, j = string.find(msg, "%s")
+	if i == nil then
+		SendSystemMessage(UsageMessage)
+		return
+	end
+	local slot = string.sub(msg, 1, i)
+	local runeString = string.sub(msg, j+1)
+	local category, rune = FindRune(runeString)
+	if rune == nil then
+		SendSystemMessage("(Engraver) Rune not found for: "..runeString)
+		return
+	end
+	Addon:TryEngrave(slot, rune.skillLineAbilityID)
+end
+
 SLASH_ENGRAVER_RESET_POSITION1 = "/engraver_reset_position"
 SlashCmdList.ENGRAVER_RESET_POSITION = function(msg, editBox)
 	EngraverFrame:ClearAllPoints(); 
