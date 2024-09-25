@@ -111,7 +111,7 @@ function EngraverOptionsFrameMixin:ChangeMultipleSettings(changeFunction)
 end
 
 local function AddEngraverOptionsSetting(self, variable, name, varType)
-	local setting = Settings.RegisterAddOnSetting(self.category, name, variable, varType, DefaultSettings[variable]);
+	local setting = Settings.RegisterAddOnSetting(self.category, variable, variable, EngraverSharedOptions, varType, name, DefaultSettings[variable]);
 	self.engraverOptionsSettings[variable] = setting
 	Settings.SetOnValueChangedCallback(variable, function (engraverOptionsFrame, setting, newValue, ...)
 		Addon:GetOptions()[variable] = newValue;
@@ -146,7 +146,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	do -- UseCharacterSpecificSettings
 		local variable, name, varType = "UseCharacterSpecificSettings", "Character Specific Settings", Settings.VarType.Boolean;
 		local tooltip = "If checked, settings specific to this character are used.\nIf unchecked, shared settings are used.\n(Changing this does not delete any settings)."
-		self.characterSpecificSettingsSetting = Settings.RegisterAddOnSetting(self.category, name, variable, varType);
+		self.characterSpecificSettingsSetting = Settings.RegisterAddOnSetting(self.category, variable, variable, EngraverSharedOptions, varType, name, DefaultEngraverOptions.UseCharacterSpecificSettings);
 		AddInitializer(self, Settings.CreateControlInitializer("EngraverCharacterSpecificControlTemplate", self.characterSpecificSettingsSetting, { optionsFrame = self }, tooltip))
 		Settings.SetOnValueChangedCallback(variable, function (_, _, newValue, ...)
 			EngraverOptions[variable] = newValue;
@@ -173,7 +173,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 			end
 			return container:GetData();
 		end
-		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
+		AddInitializer(self, Settings.CreateDropdownInitializer(setting, options, tooltip))
 	end -- DisplayMode
 	do -- LayoutDirection
 		local variable, name, tooltip = "LayoutDirection", "Layout Direction", "Which direction the runes buttons are layed out.";
@@ -185,7 +185,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 			end
 			return container:GetData();
 		end
-		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
+		AddInitializer(self, Settings.CreateDropdownInitializer(setting, options, tooltip))
 	end -- LayoutDirection
 	do -- VisibilityMode
 		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "Choose how and when to show/hide the Engraver.";
@@ -197,31 +197,31 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 			end
 			return container:GetData();
 		end
-		AddInitializer(self, Settings.CreateDropDownInitializer(setting, options, tooltip))
+		AddInitializer(self, Settings.CreateDropdownInitializer(setting, options, tooltip))
 	end -- VisibilityMode
 	do -- HideUndiscoveredRunes
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideUndiscoveredRunes", "Hide Undiscovered Runes", Settings.VarType.Boolean), nil, "Spoiler safety - hides any runes that have not been discovered yet. They will still be hidden even if they pass the active filter."))
+		AddInitializer(self, Settings.CreateCheckboxInitializer(AddEngraverOptionsSetting(self, "HideUndiscoveredRunes", "Hide Undiscovered Runes", Settings.VarType.Boolean), nil, "Spoiler safety - hides any runes that have not been discovered yet. They will still be hidden even if they pass the active filter."))
 	end -- HideUndiscoveredRunes
 	do -- HideTooltip
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideTooltip", "Hide Tooltip", Settings.VarType.Boolean), nil, "Hides the tooltip when hovering over a rune button."))
+		AddInitializer(self, Settings.CreateCheckboxInitializer(AddEngraverOptionsSetting(self, "HideTooltip", "Hide Tooltip", Settings.VarType.Boolean), nil, "Hides the tooltip when hovering over a rune button."))
 	end -- HideTooltip
 	do -- HideDragTab
 		local dragTabSetting = AddEngraverOptionsSetting(self, "HideDragTab", "Hide Drag Tab", Settings.VarType.Boolean)
-		local dragTabInitializer = Settings.CreateCheckBoxInitializer(dragTabSetting, nil, "The drag tab allows you to move the Engraver frame via mouse drag.")
+		local dragTabInitializer = Settings.CreateCheckboxInitializer(dragTabSetting, nil, "The drag tab allows you to move the Engraver frame via mouse drag.")
 		AddInitializer(self, dragTabInitializer)
 		do -- ShowFilterSelector
 			local setting = AddEngraverOptionsSetting(self, "ShowFilterSelector", "Show Filter Selector", Settings.VarType.Boolean)
-			local initializer = Settings.CreateCheckBoxInitializer(setting, nil, "When enabled, the drag tab will display the active filter.\nArrow buttons are added to the drag tab for you to change the filter.")
+			local initializer = Settings.CreateCheckboxInitializer(setting, nil, "When enabled, the drag tab will display the active filter.\nArrow buttons are added to the drag tab for you to change the filter.")
 			initializer:SetParentInitializer(dragTabInitializer, function() return not dragTabSetting:GetValue() end)
 			initializer.IsParentInitializerInLayout = function() return true; end -- forces indent and small font
 			AddInitializer(self, initializer)
 		end -- ShowFilterSelector
 	end -- HideDragTab
 	do -- HideSlotLabels
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "HideSlotLabels", "Hide Slot Labels", Settings.VarType.Boolean)))
+		AddInitializer(self, Settings.CreateCheckboxInitializer(AddEngraverOptionsSetting(self, "HideSlotLabels", "Hide Slot Labels", Settings.VarType.Boolean)))
 	end -- HideSlotLabels
 	do -- EnableRightClickDrag
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "EnableRightClickDrag", "Enable Right Click Drag", Settings.VarType.Boolean), nil, "Enables dragging the frame by right-clicking and holding any rune button."))
+		AddInitializer(self, Settings.CreateCheckboxInitializer(AddEngraverOptionsSetting(self, "EnableRightClickDrag", "Enable Right Click Drag", Settings.VarType.Boolean), nil, "Enables dragging the frame by right-clicking and holding any rune button."))
 	end -- EnableRightClickDrag
 	do -- UIScale
 		local variable, name, tooltip = "UIScale", "UI Scale", "Adjusts the scale of the Engraver's user interface frame.";
@@ -231,7 +231,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		AddInitializer(self, Settings.CreateSliderInitializer(setting, options, tooltip))
 	end	-- UIScale
 	do -- PreventSpellPlacement
-		AddInitializer(self, Settings.CreateCheckBoxInitializer(AddEngraverOptionsSetting(self, "PreventSpellPlacement", "Prevent Spell Placement", Settings.VarType.Boolean), nil, "This will prevent spells from automatically animating and flying-in to a slot on your action bars."))
+		AddInitializer(self, Settings.CreateCheckboxInitializer(AddEngraverOptionsSetting(self, "PreventSpellPlacement", "Prevent Spell Placement", Settings.VarType.Boolean), nil, "This will prevent spells from automatically animating and flying-in to a slot on your action bars."))
 	end -- PreventSpellPlacement
 	do -- FiltersHeader
 		local filtersHeaderData = { 
@@ -382,10 +382,10 @@ end
 -- CharacterSpecificControl --
 ------------------------------
 
-EngraverCharacterSpecificControlMixin = CreateFromMixins(SettingsCheckBoxControlMixin)
+EngraverCharacterSpecificControlMixin = CreateFromMixins(SettingsCheckboxControlMixin)
 
 function EngraverCharacterSpecificControlMixin:OnLoad()
-	SettingsCheckBoxControlMixin.OnLoad(self)
+	SettingsCheckboxControlMixin.OnLoad(self)
 	self.copyText:SetPoint("LEFT", self.CheckBox, "RIGHT", 40, 0)
 	self.copyCharacterButton:SetPoint("BOTTOMLEFT", self.copyText, "RIGHT")
 	self.copyCharacterButton:SetScript("OnClick", function() 
@@ -398,7 +398,7 @@ function EngraverCharacterSpecificControlMixin:OnLoad()
 end
 
 function EngraverCharacterSpecificControlMixin:Init(initializer)
-	SettingsCheckBoxControlMixin.Init(self, initializer)
+	SettingsCheckboxControlMixin.Init(self, initializer)
 	self.optionsFrame = initializer:GetData().options.optionsFrame
 end
 
