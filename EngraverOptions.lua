@@ -189,7 +189,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 	end -- LayoutDirection
 	do -- VisibilityMode
 		local variable, name, tooltip = "VisibilityMode", "Visibility Mode", "Choose how and when to show/hide the Engraver.";
-		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.Number)
+		local setting = AddEngraverOptionsSetting(self, variable, name, Settings.VarType.String)
 		local options = function()
 			local container = Settings.CreateControlTextContainer();
 			for name, mode in pairs(Addon.EngraverVisibilityModes) do
