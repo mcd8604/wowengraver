@@ -396,14 +396,18 @@ function EngraverOptionsFilterListButtonMixin:OnMouseUp(button, isUp)
 		local name = elementData.data.filter.Name
 		local isActive = elementData.data.filterIndex == EngraverOptions.CurrentFilter
 		local menu = {
-			{ notCheckable = true, text = name, isTitle = true, },
 			isActive 
-				and { notCheckable = true, text = "Deactivate", func = function() Addon.Filters:SetCurrentFilter(0); end }
-				or { notCheckable = true, text = "Activate", func = function() Addon.Filters:SetCurrentFilter(elementData.data.filterIndex); end },
-			{ notCheckable = true, text = "Rename", func = function() StaticPopup_Show("ENGRAVER_FILTER_RENAME", name, nil, elementData ); end },
-			{ notCheckable = true, text = "Delete", func = function() StaticPopup_Show("ENGRAVER_FILTER_DELETION", name, nil, elementData ) end }, 
-			{ notCheckable = true, text = "Cancel" },
+				and { text = "Deactivate", func = function() Addon.Filters:SetCurrentFilter(0); end }
+				or { text = "Activate", func = function() Addon.Filters:SetCurrentFilter(elementData.data.filterIndex); end },
+			{ text = "Rename", func = function() StaticPopup_Show("ENGRAVER_FILTER_RENAME", name, nil, elementData ); end },
+			{ text = "Delete", func = function() StaticPopup_Show("ENGRAVER_FILTER_DELETION", name, nil, elementData ) end }
 		}
-		EasyMenu(menu, EngraverFilterListDropDownMenu, "cursor", nil, nil, "MENU");
+		MenuUtil.CreateContextMenu(nil, function(owner, rootDescription)
+			rootDescription:SetTag("MENU_ENGRAVER_FILTER", menu);
+			rootDescription:CreateTitle():AddInitializer(function(frame, description, menu) frame.fontString:SetText(name); end);
+			for index, tbl in ipairs(menu) do
+				rootDescription:CreateButton(tbl.text, tbl.func);
+			end
+		end);
 	end
 end
