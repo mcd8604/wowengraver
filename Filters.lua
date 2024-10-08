@@ -27,6 +27,17 @@ function FiltersMixin:GetFilter(index)
 	end
 end
 
+function FiltersMixin:FindFilterIndex(name)
+	if name then
+		for f, filter in ipairs(self:GetFiltersForPlayerClass()) do
+			if filter.Name == name then
+				return f
+			end
+		end
+	end
+	return 0;
+end
+
 function FiltersMixin:GetCurrentFilter()
 	if EngraverOptions.CurrentFilter > 0 then
 		return self:GetFilter(EngraverOptions.CurrentFilter)

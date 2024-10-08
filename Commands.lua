@@ -71,3 +71,18 @@ SlashCmdList.ENGRAVER_RESET_POSITION = function(msg, editBox)
 	EngraverFrame:ClearAllPoints(); 
 	EngraverFrame:SetPoint("CENTER", UIParent, "CENTER");
 end
+
+SLASH_ENGRAVER_FILTER1, SLASH_ENGRAVER_FILTER2 = "/engraver_filter", "/ef"
+SlashCmdList.ENGRAVER_FILTER = function(msg, editBox)
+	if msg == nil or strlen(msg) <= 0 then
+		Addon.Filters:SetCurrentFilter(0)
+	else
+		local filterIndex = Addon.Filters:FindFilterIndex(msg)
+		if filterIndex > 0 then
+			Addon.Filters:SetCurrentFilter(filterIndex)
+		else
+			SendSystemMessage("(Engraver) Filter not found for: "..msg)
+			return
+		end
+	end
+end
