@@ -1,4 +1,4 @@
-## Interface: 11505
+## Interface: 11506
 ## Title: Engraver
 ## Notes: One-click rune engraving for Season of Discovery.
 ## Author: Nastiku
