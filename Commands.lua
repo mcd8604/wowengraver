@@ -1,3 +1,7 @@
+if not C_Engraving:IsEngravingEnabled() then
+	return
+end
+
 local localAddonName, Addon = ...
 
 SLASH_ENGRAVER1, SLASH_ENGRAVER2, SLASH_ENGRAVER3, SLASH_ENGRAVER4, SLASH_ENGRAVER5, SLASH_ENGRAVER6 = "/en", "/eng", "/eg", "/re", "/engraver", "/engraving"

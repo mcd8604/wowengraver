@@ -101,14 +101,18 @@ Addon.GetCurrentLayoutDirection = function() return EngraverLayoutDirections[Add
 EngraverFrameMixin = {};
 
 function EngraverFrameMixin:OnLoad()
-	self:LoadCategoryPool()
-	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("RUNE_UPDATED");
-	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
-	self:RegisterEvent("UPDATE_INVENTORY_ALERTS");
-	self:RegisterEvent("NEW_RECIPE_LEARNED");
-	self:RegisterEvent("PLAYER_REGEN_ENABLED");
-	self:RegisterForDrag("RightButton")
+	if C_Engraving:IsEngravingEnabled() then
+		self:LoadCategoryPool()
+		self:RegisterEvent("PLAYER_ENTERING_WORLD");
+		self:RegisterEvent("RUNE_UPDATED");
+		self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
+		self:RegisterEvent("UPDATE_INVENTORY_ALERTS");
+		self:RegisterEvent("NEW_RECIPE_LEARNED");
+		self:RegisterEvent("PLAYER_REGEN_ENABLED");
+		self:RegisterForDrag("RightButton")
+	else
+		EngraverFrame:SetShown(false) 
+	end
 end
 
 local function HookMouseOver_UpdateVisibilityModeAlpha(mouseOverFrame, engraverFrame)

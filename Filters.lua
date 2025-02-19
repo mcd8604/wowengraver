@@ -1,3 +1,7 @@
+if not C_Engraving:IsEngravingEnabled() then
+	return
+end
+
 local _, Addon = ...
 
 EngraverFilters = {} -- SavedVariable

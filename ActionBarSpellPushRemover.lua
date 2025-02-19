@@ -1,3 +1,7 @@
+if not C_Engraving:IsEngravingEnabled() then
+	return
+end
+
 local addonName, Addon = ...
 
 local ActionBarSpellPushRemover = {
