@@ -1,24 +1,30 @@
 <Bindings>
 	<Binding name="ENGRAVER_SHOW_HIDE" runOnUp="true" category="Engraver">
-		if EngraverFrame and EngraverOptions then 
-			local options = EngraverOptions.UseCharacterSpecificSettings and EngraverOptions or EngraverSharedOptions
-			if options.VisibilityMode == "ToggleKeybind" then
-				if keystate == "down" then
-					EngraverFrame:SetShown(not EngraverFrame:IsShown())
-				end
-			elseif options.VisibilityMode == "HoldKeybind" then
-				if keystate == "down" then
-					EngraverFrame:Show()
-				else
-					EngraverFrame:Hide()
+		if C_Engraving:IsEngravingEnabled() then
+			if EngraverFrame and EngraverOptions then 
+				local options = EngraverOptions.UseCharacterSpecificSettings and EngraverOptions or EngraverSharedOptions
+				if options.VisibilityMode == "ToggleKeybind" then
+					if keystate == "down" then
+						EngraverFrame:SetShown(not EngraverFrame:IsShown())
+					end
+				elseif options.VisibilityMode == "HoldKeybind" then
+					if keystate == "down" then
+						EngraverFrame:Show()
+					else
+						EngraverFrame:Hide()
+					end
 				end
 			end
 		end
 	</Binding>
 	<Binding name="ENGRAVER_NEXT_FILTER" category="Engraver">
-		EngraverFilters_SetCurrentFilterNext()
+		if C_Engraving:IsEngravingEnabled() then
+			EngraverFilters_SetCurrentFilterNext()
+		end
 	</Binding>
 	<Binding name="ENGRAVER_PREV_FILTER" category="Engraver">
-		EngraverFilters_SetCurrentFilterPrev()
+		if C_Engraving:IsEngravingEnabled() then
+			EngraverFilters_SetCurrentFilterPrev()
+		end
 	</Binding>
 </Bindings>
