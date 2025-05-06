@@ -730,6 +730,7 @@ EngraverRuneButtonMixin = {}
 
 function EngraverRuneButtonMixin:OnLoad()
 	self.Border:SetVertexColor(0.0, 1.0, 0.0);
+	self:UpdateUsable();
 	Mixin(self, CallbackRegistryMixin);
 	self:SetUndefinedEventsAllowed(true)
 	self:OnLoad() -- NOTE not an infinite loop because mixing in CallbackRegistryMixin redefines OnLoad
@@ -742,6 +743,20 @@ function EngraverRuneButtonMixin:OnEvent(event, ...)
 		if duration > 1.5 then
 			ActionButton_UpdateCooldown(self);
 		end
+	elseif ( event == "ACTIONBAR_UPDATE_USABLE" ) then
+		self:UpdateUsable()
+	end
+end
+
+function EngraverRuneButtonMixin:UpdateUsable()
+	local name = GetSpellInfo(self.spellID);
+	local isUsable, notEnoughMana = IsUsableSpell(self.spellID)
+	if ( isUsable ) then
+		self.icon:SetVertexColor(1.0, 1.0, 1.0);
+	elseif ( notEnoughMana ) then
+		self.icon:SetVertexColor(0.5, 0.5, 1.0);
+	else
+		self.icon:SetVertexColor(0.4, 0.4, 0.4);
 	end
 end
 
@@ -756,8 +771,10 @@ function EngraverRuneButtonMixin:SetRune(rune, category, isKnown, slot)
 	end
 	if self.spellID then
 		self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN");
+		self:RegisterEvent("ACTIONBAR_UPDATE_USABLE")
 	else
 		self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN");
+		self:UnregisterEvent("ACTIONBAR_UPDATE_USABLE")
 	end
 	self:UpdateCooldownShown()
 	self.isKnown = isKnown;
