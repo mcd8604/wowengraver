@@ -159,7 +159,7 @@ end
 
 do
 	local function createNewFilter(dialog)
-		local newFilterName = strtrim(dialog.editBox:GetText());
+		local newFilterName = strtrim(dialog:GetEditBox():GetText());
 		local index = Addon.Filters:CreateFilter(newFilterName)
 		FilterListDataProvider_SelectIndex(index)
 		dialog:Hide();
@@ -175,9 +175,9 @@ do
 		end,
 		EditBoxOnTextChanged = function(self)
 			if ( strtrim(self:GetText()) == "" ) then
-				self:GetParent().button1:Disable();
+				self:GetParent():GetButton1():Disable();
 			else
-				self:GetParent().button1:Enable();
+				self:GetParent():GetButton1():Enable();
 			end
 		end,
 		EditBoxOnEnterPressed = function(self)
@@ -194,7 +194,7 @@ end
 do 
 	local function renameFilter(dialog)
 		if dialog.data.data.filterIndex > 0 then
-			local newFilterName = strtrim(dialog.editBox:GetText());
+			local newFilterName = strtrim(dialog:GetEditBox():GetText());
 			Addon.Filters:RenameFilter(dialog.data.data.filterIndex, newFilterName) 
 			FilterListDataProvider_SelectIndex(dialog.data.data.filterIndex)
 			dialog:Hide();
@@ -207,7 +207,7 @@ do
 		button1 = OKAY,
 		button2 = CANCEL,
 		OnShow = function(self)
-			self.editBox:SetText(self.data.data.filter.Name)
+			self:GetEditBox():SetText(self.data.data.filter.Name)
 		end,
 		OnAccept = function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
@@ -215,9 +215,9 @@ do
 		end,
 		EditBoxOnTextChanged = function(self)
 			if ( strtrim(self:GetText()) == "" ) then
-				self:GetParent().button1:Disable();
+				self:GetParent():GetButton1():Disable();
 			else
-				self:GetParent().button1:Enable();
+				self:GetParent():GetButton1():Enable();
 			end
 		end,
 		EditBoxOnEnterPressed = function(self)
