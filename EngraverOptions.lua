@@ -65,8 +65,8 @@ function EngraverOptionsFrameMixin:OnLoad()
 		self:RegisterEvent("ADDON_LOADED")
 		self.name = localAddonName
 		self.category, self.layout = Settings.RegisterCanvasLayoutCategory(self, localAddonName, localAddonName);
-		self.category.ID = localAddonName
-		Settings.RegisterAddOnCategory(self.category);
+		Addon.CategoryID = self.category:GetID()
+		Settings.RegisterAddOnCategory(self.category)
 		self:InitSettingsList()
 		self:CreateSettingsInitializers()
 		self.settingsList:Display(self.initializers);

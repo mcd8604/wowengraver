@@ -844,7 +844,7 @@ EngraverDragTabMixin = {}
 
 function EngraverDragTabMixin:OnMouseDown(button)
 	if button == "RightButton" then
-		Settings.OpenToCategory(addonName);
+		Settings.OpenToCategory(Addon.CategoryID);
 	elseif button == "LeftButton" then
 		local parent = self:GetParent()
 		if parent and parent.StartMoving then
