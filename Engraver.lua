@@ -785,6 +785,7 @@ function EngraverRuneButtonMixin:ResetColors()
 		self.icon:SetVertexColor(0.2, 0.2, 0.2);
 		self.NormalTexture:SetVertexColor(0.2, 0.2, 0.2);
 	end
+	self.Arrow:SetShown(false)
 end
 
 function EngraverRuneButtonMixin:OnClick()
