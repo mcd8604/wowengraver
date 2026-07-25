@@ -138,8 +138,6 @@ function EngraverFrameMixin:OnEvent(event, ...)
 		local isInitialLogin, isReloadingUi = ...
         if isInitialLogin or isReloadingUi then
 			self:Initialize()
-		else
-			self:Update()
         end
 	elseif (event == "RUNE_UPDATED") then
 		self:UpdateLayout()
