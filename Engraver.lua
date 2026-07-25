@@ -134,8 +134,13 @@ function EngraverFrameMixin:LoadCategoryPool()
 end
 
 function EngraverFrameMixin:OnEvent(event, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then
-		self:Initialize()
+	if (event == "PLAYER_ENTERING_WORLD") then 
+		local isInitialLogin, isReloadingUi = ...
+        if isInitialLogin or isReloadingUi then
+			self:Initialize()
+		else
+			self:Update()
+        end
 	elseif (event == "RUNE_UPDATED") then
 		self:UpdateLayout()
 	elseif (event == "NEW_RECIPE_LEARNED") then
