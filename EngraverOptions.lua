@@ -270,7 +270,7 @@ function EngraverOptionsFrameMixin:CreateSettingsInitializers()
 		{
 			name = "Community Discord",
 			tooltip = "If you have any questions, suggestions, or comments please post in the Community Discord.",
-			text = "https://discord.gg/QgDbJe5Nma"
+			text = "https://discord.gg/xwkZnnKfsC"
 		})
 	end -- Discord
 	do -- Github
